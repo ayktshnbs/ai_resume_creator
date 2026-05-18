@@ -28,7 +28,7 @@ export type EducationItem = {
   endDate: string;
 };
 
-export type ResumeReferenceKind = "image" | "pdf" | "text" | "json" | "file";
+export type ResumeReferenceKind = "image" | "pdf" | "text" | "json" | "other";
 
 export type ResumeReference = {
   id: string;

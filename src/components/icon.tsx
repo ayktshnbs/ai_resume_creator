@@ -23,7 +23,27 @@ const iconMap = {
   work: "work"
 } as const;
 
-export type IconName = keyof typeof iconMap;
+export type IconName = 
+  | "add"
+  | "analytics"
+  | "arrowRight"
+  | "close"
+  | "dashboard"
+  | "delete"
+  | "document"
+  | "edit"
+  | "palette"
+  | "photo"
+  | "person"
+  | "resume"
+  | "settings"
+  | "sparkle"
+  | "subject"
+  | "template"
+  | "upload"
+  | "user"
+  | "visibility"
+  | "work";
 
 export function Icon({
   className = "",
@@ -34,7 +54,7 @@ export function Icon({
 }) {
   return (
     <span aria-hidden="true" className={`material-symbols-outlined notranslate ${className}`} style={{ display: 'inline-block' }} {...props}>
-      {iconMap[name]}
+      {iconMap[name as keyof typeof iconMap]}
     </span>
   );
 }

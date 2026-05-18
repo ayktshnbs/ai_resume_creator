@@ -418,7 +418,7 @@ export default function ResumeBuilderPage() {
                 onClick={() => setShowApiConfig(true)}
                 type="button"
               >
-                <Icon className="h-4 w-4" name="settings" />
+                <Icon className="h-4 w-4" name="sparkle" />
                 AI Configuration
               </button>
               <button

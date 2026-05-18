@@ -1,0 +1,1390 @@
+"use client";
+
+import Link from "next/link";
+import type { DragEvent, ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { AppShell } from "@/components/app-sidebar";
+import { Icon, type IconName } from "@/components/icon";
+import {
+  clearResumeData,
+  createId,
+  loadApiKey,
+  loadResumeData,
+  loadSelectedTemplate,
+  saveApiKey,
+  saveResumeData
+} from "@/lib/resume-storage";
+import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
+
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { ResumePDF } from "@/components/resume-pdf";
+
+type AiState = {
+  full: boolean;
+  summary: boolean;
+  bullets: Record<string, boolean>;
+  error: string;
+};
+
+type ResumeHelperAction = "improve_summary" | "improve_bullet" | "suggest_skills" | "generate_cover_letter" | "analyze_resume";
+
+type ResumeAnalysis = {
+  score: number;
+  strengths: string[];
+  gaps: string[];
+  recommendations: string[];
+  summary: string;
+};
+
+type HelperState = {
+  action: ResumeHelperAction | null;
+  error: string;
+  resultText: string;
+  skills: string[];
+  analysis: ResumeAnalysis | null;
+};
+
+const initialAiState: AiState = {
+  full: false,
+  summary: false,
+  bullets: {},
+  error: ""
+};
+
+const initialHelperState: HelperState = {
+  action: null,
+  error: "",
+  resultText: "",
+  skills: [],
+  analysis: null
+};
+
+export default function ResumeBuilderPage() {
+  const [resume, setResume] = useState<ResumeData>(emptyResumeData);
+  const [template, setTemplate] = useState<SelectedTemplate>({ name: "Modern Minimalist", layout: "single", accent: "primary" });
+  const [skillDraft, setSkillDraft] = useState("");
+  const [shareMessage, setShareMessage] = useState("");
+  const [referenceMessage, setReferenceMessage] = useState("");
+  const [ai, setAi] = useState<AiState>(initialAiState);
+  const [helper, setHelper] = useState<HelperState>(initialHelperState);
+  const [loaded, setLoaded] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [showApiConfig, setShowApiConfig] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setResume(loadResumeData());
+    setTemplate(loadSelectedTemplate());
+    setApiKey(loadApiKey());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) {
+      saveResumeData(resume);
+    }
+  }, [loaded, resume]);
+
+  const fullName = `${resume.firstName} ${resume.lastName}`.trim();
+
+  function updateResume<K extends keyof ResumeData>(key: K, value: ResumeData[K]) {
+    setResume((current) => ({ ...current, [key]: value }));
+  }
+
+  function addExperience() {
+    const item: ExperienceItem = {
+      id: createId("exp"),
+      role: "",
+      company: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+      current: false,
+      bullets: [""]
+    };
+
+    setResume((current) => ({ ...current, experiences: [...current.experiences, item] }));
+  }
+
+  function updateExperience(id: string, patch: Partial<ExperienceItem>) {
+    setResume((current) => ({
+      ...current,
+      experiences: current.experiences.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    }));
+  }
+
+  function deleteExperience(id: string) {
+    setResume((current) => ({
+      ...current,
+      experiences: current.experiences.filter((item) => item.id !== id)
+    }));
+  }
+
+  function addBullet(experienceId: string) {
+    setResume((current) => ({
+      ...current,
+      experiences: current.experiences.map((item) =>
+        item.id === experienceId ? { ...item, bullets: [...item.bullets, ""] } : item
+      )
+    }));
+  }
+
+  function updateBullet(experienceId: string, bulletIndex: number, value: string) {
+    setResume((current) => ({
+      ...current,
+      experiences: current.experiences.map((item) =>
+        item.id === experienceId
+          ? { ...item, bullets: item.bullets.map((bullet, index) => (index === bulletIndex ? value : bullet)) }
+          : item
+      )
+    }));
+  }
+
+  function deleteBullet(experienceId: string, bulletIndex: number) {
+    setResume((current) => ({
+      ...current,
+      experiences: current.experiences.map((item) =>
+        item.id === experienceId ? { ...item, bullets: item.bullets.filter((_, index) => index !== bulletIndex) } : item
+      )
+    }));
+  }
+
+  function addEducation() {
+    const item: EducationItem = {
+      id: createId("edu"),
+      school: "",
+      degree: "",
+      location: "",
+      startDate: "",
+      endDate: ""
+    };
+
+    setResume((current) => ({ ...current, education: [...current.education, item] }));
+  }
+
+  function updateEducation(id: string, patch: Partial<EducationItem>) {
+    setResume((current) => ({
+      ...current,
+      education: current.education.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    }));
+  }
+
+  function deleteEducation(id: string) {
+    setResume((current) => ({
+      ...current,
+      education: current.education.filter((item) => item.id !== id)
+    }));
+  }
+
+  function addSkill() {
+    const skill = skillDraft.trim();
+
+    if (!skill || resume.skills.includes(skill)) {
+      return;
+    }
+
+    setResume((current) => ({ ...current, skills: [...current.skills, skill] }));
+    setSkillDraft("");
+  }
+
+  function removeSkill(skill: string) {
+    setResume((current) => ({ ...current, skills: current.skills.filter((item) => item !== skill) }));
+  }
+
+  function removeReference(id: string) {
+    setResume((current) => ({ ...current, references: current.references.filter((item) => item.id !== id) }));
+  }
+
+  function clearResume() {
+    if (!window.confirm("Clear this resume and remove the local autosave?")) {
+      return;
+    }
+
+    clearResumeData();
+    setResume(emptyResumeData);
+    setSkillDraft("");
+    setReferenceMessage("");
+    setHelper(initialHelperState);
+  }
+
+  async function shareResume() {
+    const url = `${window.location.origin}/resume`;
+
+    try {
+      await window.navigator.clipboard.writeText(url);
+      setShareMessage("Temporary preview URL copied. Public sharing will require login/backend.");
+    } catch {
+      window.alert("Sharing requires login/backend. For now, use this local preview URL: " + url);
+    }
+  }
+
+  async function handleReferenceUpload(files: FileList | null) {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    const importedReferences: ResumeReference[] = [];
+    let importedResume: Partial<ResumeData> | null = null;
+    setReferenceMessage("");
+
+    for (const file of Array.from(files)) {
+      const kind = getReferenceKind(file);
+      const addedAt = new Date().toISOString();
+
+      if (kind === "json" || kind === "text") {
+        const text = await file.text();
+        const reference: ResumeReference = {
+          id: createId("ref"),
+          name: file.name,
+          kind,
+          mimeType: file.type || "text/plain",
+          size: file.size,
+          addedAt,
+          text
+        };
+
+        if (kind === "json") {
+          const parsed = parseImportedResume(text);
+          if (parsed) {
+            importedResume = { ...(importedResume ?? {}), ...parsed };
+            reference.imported = true;
+          }
+        }
+
+        importedReferences.push(reference);
+        continue;
+      }
+
+      const dataUrl = await readFileAsDataUrl(file);
+      importedReferences.push({
+        id: createId("ref"),
+        name: file.name,
+        kind,
+        mimeType: file.type || "application/octet-stream",
+        size: file.size,
+        addedAt,
+        dataUrl
+      });
+    }
+
+    if (importedReferences.length > 0) {
+      setResume((current) => ({
+        ...mergeImportedResume(current, importedResume),
+        references: [...current.references, ...importedReferences]
+      }));
+      setReferenceMessage(
+        importedResume
+          ? "Uploaded files were attached and the JSON resume file was used to populate the form."
+          : "Uploaded files were attached to this draft."
+      );
+    }
+  }
+
+  async function runHelperAction(action: ResumeHelperAction, text = "") {
+    setHelper((current) => ({ ...current, action, error: "", resultText: "", skills: [], analysis: null }));
+
+    try {
+      const response = await fetch("/api/ai/resume-helper", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          resumeData: resume,
+          text,
+          targetRole: resume.title
+        })
+      });
+
+      const data = (await response.json()) as {
+        analysis?: ResumeAnalysis;
+        error?: string;
+        resultText?: string;
+        skills?: string[];
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI request failed.");
+      }
+
+      setHelper((current) => ({
+        ...current,
+        action: null,
+        error: "",
+        resultText: data.resultText || "",
+        skills: data.skills || [],
+        analysis: data.analysis || null
+      }));
+
+      return data;
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setHelper((current) => ({ ...current, action: null, error: message }));
+      return null;
+    }
+  }
+
+  async function improveSummary() {
+    if (!resume.summary.trim()) {
+      setAi((current) => ({ ...current, error: "Add a summary draft first." }));
+      return;
+    }
+
+    setAi((current) => ({ ...current, summary: true, error: "" }));
+
+    try {
+      const data = await runHelperAction("improve_summary", resume.summary);
+      if (data?.resultText) {
+        updateResume("summary", data.resultText);
+      }
+    } finally {
+      setAi((current) => ({ ...current, summary: false }));
+    }
+  }
+
+  async function improveBullet(experienceId: string, bulletIndex: number, text: string) {
+    if (!text.trim()) {
+      setAi((current) => ({ ...current, error: "Add bullet text before improving it." }));
+      return;
+    }
+
+    const key = `${experienceId}-${bulletIndex}`;
+    setAi((current) => ({ ...current, bullets: { ...current.bullets, [key]: true }, error: "" }));
+
+    try {
+      const data = await runHelperAction("improve_bullet", text);
+      if (data?.resultText) {
+        updateBullet(experienceId, bulletIndex, data.resultText);
+      }
+    } finally {
+      setAi((current) => {
+        const nextBullets = { ...current.bullets };
+        delete nextBullets[key];
+        return { ...current, bullets: nextBullets };
+      });
+    }
+  }
+
+  function addSuggestedSkills() {
+    if (helper.skills.length === 0) {
+      return;
+    }
+
+    setResume((current) => ({
+      ...current,
+      skills: Array.from(new Set([...current.skills, ...helper.skills]))
+    }));
+  }
+
+  async function improveFullResume() {
+    setAi((current) => ({ ...current, full: true, error: "" }));
+
+    try {
+      const response = await fetch("/api/ai/improve-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "full_resume", resumeData: resume, text: "", targetRole: resume.title })
+      });
+      const data = (await response.json()) as { resumeData?: ResumeData; improvedText?: string; error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI request failed.");
+      }
+
+      if (data.resumeData) {
+        setResume(data.resumeData);
+      } else if (data.improvedText) {
+        updateResume("summary", data.improvedText);
+      }
+    } catch (error) {
+      setAi((current) => ({ ...current, error: getErrorMessage(error) }));
+    } finally {
+      setAi((current) => ({ ...current, full: false }));
+    }
+  }
+
+  return (
+    <AppShell active="resume" fullHeight>
+      <div className="flex h-full flex-col overflow-hidden bg-background md:flex-row">
+        <section className="h-full w-full overflow-y-auto border-r border-outline/30 bg-surface p-4 md:w-1/2 md:p-8 lg:w-5/12">
+          <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-normal text-ink">New Resume</h1>
+              <p className="mt-1 text-sm text-muted">Autosaves locally. Sign in later to sync across devices.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                className="rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink"
+                onClick={() => setShowApiConfig(true)}
+                type="button"
+              >
+                <Icon className="h-4 w-4" name="settings" />
+                AI Configuration
+              </button>
+              <button
+                className="primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
+                disabled={ai.full}
+                onClick={improveFullResume}
+                type="button"
+              >
+                <Icon name="sparkle" />
+                {ai.full ? "Optimizing..." : "AI-Powered Optimization"}
+              </button>
+            </div>
+          </header>
+
+          {showApiConfig && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm">
+              <div className="soft-card w-full max-w-lg rounded-2xl p-6 shadow-panel">
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-ink">AI Configuration</h2>
+                  <button onClick={() => setShowApiConfig(false)} type="button">
+                    <Icon name="close" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-primary/5 p-4">
+                    <p className="text-sm leading-6 text-primary">
+                      <strong>Demo Mode:</strong> By default, we use our own demo AI with mock responses. To use real AI, connect your own OpenAI API key. We never store your key on our servers.
+                    </p>
+                  </div>
+                  <label>
+                    <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">OpenAI API Key</span>
+                    <input
+                      className="field"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setApiKey(val);
+                        saveApiKey(val);
+                      }}
+                      placeholder="sk-..."
+                      type="password"
+                      value={apiKey}
+                    />
+                  </label>
+                  <p className="text-xs text-muted">
+                    Your key is saved locally in your browser. Get your key from the <a className="text-primary hover:underline" href="https://platform.openai.com/api-keys" rel="noreferrer" target="_blank">OpenAI Dashboard</a>.
+                  </p>
+                  <button
+                    className="flex w-full justify-center rounded-xl bg-ink py-3 font-bold text-white"
+                    onClick={() => setShowApiConfig(false)}
+                    type="button"
+                  >
+                    Close Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {ai.error && <p className="mb-5 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm font-semibold text-error">{ai.error}</p>}
+          {referenceMessage && <p className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary">{referenceMessage}</p>}
+
+          <div className="space-y-5">
+            <AiHelperPanel
+              helper={helper}
+              isAnalyzing={helper.action === "analyze_resume"}
+              isGeneratingCover={helper.action === "generate_cover_letter"}
+              isSuggestingSkills={helper.action === "suggest_skills"}
+              onAnalyze={() => void runHelperAction("analyze_resume")}
+              onGenerateCover={() => void runHelperAction("generate_cover_letter")}
+              onSuggestSkills={() => void runHelperAction("suggest_skills")}
+              onAddSuggestedSkills={addSuggestedSkills}
+            />
+
+            <FormSection icon="person" title="Profile Details">
+              <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row">
+                <div className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-dashed border-outline/70 bg-surface-soft">
+                  {resume.photoUrl ? (
+                    <img
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                      src={resume.photoUrl}
+                      style={{
+                        objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%`,
+                        transform: `scale(${(resume.photoScale ?? 100) / 100})`
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted">
+                      <Icon name="person" />
+                    </div>
+                  )}
+                  <input
+                    accept="image/*"
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        try {
+                          const dataUrl = await readFileAsDataUrl(file);
+                          setResume(prev => ({
+                            ...prev,
+                            photoUrl: dataUrl,
+                            photoX: 50,
+                            photoY: 50,
+                            photoScale: 100
+                          }));
+                        } catch (err) {
+                          setAi(prev => ({ ...prev, error: "Failed to load image." }));
+                        }
+                      }
+                    }}
+                    type="file"
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-ink">Profile Photo</p>
+                  <p className="text-xs text-muted">Upload a professional headshot.</p>
+                  {resume.photoUrl && (
+                    <div className="mt-3 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <PhotoSlider
+                          label="Position X"
+                          max={100}
+                          min={0}
+                          onChange={(v) => updateResume("photoX", v)}
+                          value={resume.photoX ?? 50}
+                        />
+                        <PhotoSlider
+                          label="Position Y"
+                          max={100}
+                          min={0}
+                          onChange={(v) => updateResume("photoY", v)}
+                          value={resume.photoY ?? 50}
+                        />
+                        <PhotoSlider
+                          label="Zoom"
+                          max={200}
+                          min={50}
+                          onChange={(v) => updateResume("photoScale", v)}
+                          value={resume.photoScale ?? 100}
+                        />
+                        <div className="flex items-end">
+                          <button
+                            className="text-xs font-bold text-error hover:underline"
+                            onClick={() => {
+                              updateResume("photoUrl", undefined);
+                              updateResume("photoX", undefined);
+                              updateResume("photoY", undefined);
+                              updateResume("photoScale", undefined);
+                            }}
+                            type="button"
+                          >
+                            Remove Photo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="First Name" onChange={(value) => updateResume("firstName", value)} value={resume.firstName} />
+                <Field label="Last Name" onChange={(value) => updateResume("lastName", value)} value={resume.lastName} />
+                <Field className="md:col-span-2" label="Executive Title" onChange={(value) => updateResume("title", value)} value={resume.title} />
+                <Field label="Professional Email" onChange={(value) => updateResume("email", value)} type="email" value={resume.email} />
+                <Field label="Contact Number" onChange={(value) => updateResume("phone", value)} value={resume.phone} />
+                <Field label="Current Location" onChange={(value) => updateResume("location", value)} value={resume.location} />
+                <Field label="Professional Portfolio / LinkedIn" onChange={(value) => updateResume("website", value)} value={resume.website} />
+              </div>
+            </FormSection>
+
+            <FormSection icon="subject" title="Executive Summary">
+              <textarea
+                className="field min-h-32 resize-none"
+                onChange={(event) => updateResume("summary", event.target.value)}
+                placeholder="Draft your professional summary. Use AI to refine it for maximum impact."
+                value={resume.summary}
+              />
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <p className="text-xs font-medium text-muted">A compelling summary captures recruiter attention in seconds.</p>
+                <button
+                  className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
+                  disabled={ai.summary || !resume.summary.trim()}
+                  onClick={improveSummary}
+                  type="button"
+                >
+                  <Icon className="h-4 w-4" name="sparkle" />
+                  {ai.summary ? "Refining..." : "AI-Refine Summary"}
+                </button>
+              </div>
+            </FormSection>
+
+            <FormSection icon="work" title="Professional History">
+              <div className="space-y-4">
+                {resume.experiences.length === 0 && <EmptyHint text="Add your professional roles to showcase your career trajectory." />}
+                {resume.experiences.map((experience) => (
+                  <ExperienceEditor
+                    experience={experience}
+                    isImproving={(index) => Boolean(ai.bullets[`${experience.id}-${index}`])}
+                    key={experience.id}
+                    onAddBullet={() => addBullet(experience.id)}
+                    onDelete={() => deleteExperience(experience.id)}
+                    onDeleteBullet={(index) => deleteBullet(experience.id, index)}
+                    onImproveBullet={(index, text) => improveBullet(experience.id, index, text)}
+                    onUpdate={(patch) => updateExperience(experience.id, patch)}
+                    onUpdateBullet={(index, value) => updateBullet(experience.id, index, value)}
+                  />
+                ))}
+                <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-bold text-primary hover:bg-primary/5" onClick={addExperience} type="button">
+                  <Icon name="add" />
+                  Add Professional Role
+                </button>
+              </div>
+            </FormSection>
+
+            <FormSection icon="document" title="Academic Credentials">
+              <div className="space-y-4">
+                {resume.education.length === 0 && <EmptyHint text="Highlight your academic achievements and certifications." />}
+                {resume.education.map((education) => (
+                  <EducationEditor
+                    education={education}
+                    key={education.id}
+                    onDelete={() => deleteEducation(education.id)}
+                    onUpdate={(patch) => updateEducation(education.id, patch)}
+                  />
+                ))}
+                <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-bold text-primary hover:bg-primary/5" onClick={addEducation} type="button">
+                  <Icon name="add" />
+                  Add Academic Degree
+                </button>
+              </div>
+            </FormSection>
+
+            <FormSection icon="sparkle" title="Core Competencies">
+              <div className="flex gap-2">
+                <input
+                  className="field"
+                  onChange={(event) => setSkillDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addSkill();
+                    }
+                  }}
+                  placeholder="e.g., Strategic Leadership, React.js, Data Analysis"
+                  value={skillDraft}
+                />
+                <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-60" disabled={!skillDraft.trim()} onClick={addSkill} type="button">
+                  Add Competency
+                </button>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {resume.skills.length === 0 && <p className="text-sm text-muted">Defined competencies demonstrate your specialized expertise.</p>}
+                {resume.skills.map((skill) => (
+                  <button className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary" key={skill} onClick={() => removeSkill(skill)} type="button">
+                    {skill} ×
+                  </button>
+                ))}
+              </div>
+            </FormSection>
+
+            <FormSection icon="upload" title="Reference Materials">
+              <p className="text-sm leading-6 text-muted">
+                Securely attach supporting documents to assist the AI in tailoring your content.
+              </p>
+              <label
+                className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-outline/70 bg-surface-soft px-5 py-6 text-center"
+                onDragOver={(event: DragEvent<HTMLLabelElement>) => event.preventDefault()}
+                onDrop={(event: DragEvent<HTMLLabelElement>) => {
+                  event.preventDefault();
+                  void handleReferenceUpload(event.dataTransfer.files);
+                }}
+              >
+                <Icon className="text-primary" name="upload" />
+                <span className="mt-3 text-sm font-bold text-ink">Upload supporting documentation</span>
+                <span className="mt-1 text-xs text-muted">PDF, TXT, or JSON formats</span>
+                <input
+                  accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.txt,.md,.json,image/*,application/pdf,text/plain,application/json"
+                  className="hidden"
+                  multiple
+                  onChange={(event) => {
+                    void handleReferenceUpload(event.currentTarget.files);
+                    event.currentTarget.value = "";
+                  }}
+                  type="file"
+                />
+              </label>
+              <div className="mt-4 grid gap-3">
+                {resume.references.length > 0 &&
+                  resume.references.map((reference) => (
+                    <ReferenceCard key={reference.id} onDelete={() => removeReference(reference.id)} reference={reference} />
+                  ))
+                }
+              </div>
+            </FormSection>
+          </div>
+        </section>
+
+        <section className="hidden h-full flex-1 flex-col bg-surface-soft p-6 md:flex lg:p-8">
+          <div className="glass-panel z-10 mx-auto mb-6 flex w-full max-w-4xl items-center justify-between rounded-2xl px-5 py-3 shadow-ambient">
+            <Link className="flex items-center gap-2 text-sm font-bold text-muted hover:text-primary" href="/templates">
+              <Icon name="palette" />
+              {template.name}
+            </Link>
+            <div className="flex gap-3">
+              <button className="rounded-xl border border-outline/50 bg-white px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
+                Share
+              </button>
+              {isClient ? (
+                <PDFDownloadLink
+                  document={<ResumePDF data={resume} template={template} />}
+                  fileName={`${resume.firstName || "Resume"}_${resume.lastName || ""}.pdf`}
+                >
+                  {({ loading }) => (
+                    <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50" disabled={loading} type="button">
+                      {loading ? "Preparing..." : "Export PDF"}
+                    </button>
+                  )}
+                </PDFDownloadLink>
+              ) : (
+                <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white opacity-50" disabled type="button">
+                  Export PDF
+                </button>
+              )}
+            </div>
+          </div>
+          {shareMessage && <p className="mx-auto mb-4 w-full max-w-4xl rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">{shareMessage}</p>}
+          <div className="flex-1 overflow-y-auto">
+            <ResumeDocument fullName={fullName} resume={resume} template={template} />
+          </div>
+        </section>
+
+        <Link className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white shadow-panel md:hidden" href="/templates">
+          <Icon name="visibility" />
+        </Link>
+      </div>
+    </AppShell>
+  );
+}
+
+function PhotoSlider({ label, max, min, onChange, value }: { label: string; max: number; min: number; onChange: (v: number) => void; value: number }) {
+  return (
+    <div>
+      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted">{label}</span>
+      <input
+        className="h-1 w-full cursor-pointer appearance-none rounded-lg bg-outline/50 accent-primary"
+        max={max}
+        min={min}
+        onChange={(e) => onChange(parseInt(e.target.value))}
+        type="range"
+        value={value}
+      />
+    </div>
+  );
+}
+
+function FormSection({ children, icon, title }: { children: ReactNode; icon: IconName; title: string }) {
+  return (
+    <section className="soft-card rounded-2xl p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-ink">
+        <Icon className="text-primary" name={icon} />
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function Field({
+  className = "",
+  label,
+  onChange,
+  type = "text",
+  value
+}: {
+  className?: string;
+  label: string;
+  onChange: (value: string) => void;
+  type?: string;
+  value: string;
+}) {
+  return (
+    <label className={className}>
+      <span className="mb-2 block font-label text-xs font-bold uppercase tracking-[0.08em] text-muted">{label}</span>
+      <input className="field" onChange={(event) => onChange(event.target.value)} type={type} value={value} />
+    </label>
+  );
+}
+
+function ExperienceEditor({
+  experience,
+  isImproving,
+  onAddBullet,
+  onDelete,
+  onDeleteBullet,
+  onImproveBullet,
+  onUpdate,
+  onUpdateBullet
+}: {
+  experience: ExperienceItem;
+  isImproving: (index: number) => boolean;
+  onAddBullet: () => void;
+  onDelete: () => void;
+  onDeleteBullet: (index: number) => void;
+  onImproveBullet: (index: number, text: string) => void;
+  onUpdate: (patch: Partial<ExperienceItem>) => void;
+  onUpdateBullet: (index: number, value: string) => void;
+}) {
+  return (
+    <div className="rounded-xl border border-outline/40 bg-white p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="font-bold text-ink">Experience Item</h3>
+        <button className="flex items-center gap-1 text-sm font-bold text-error" onClick={onDelete} type="button">
+          <Icon className="h-4 w-4" name="delete" />
+          Delete
+        </button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Role Title" onChange={(value) => onUpdate({ role: value })} value={experience.role} />
+        <Field label="Company" onChange={(value) => onUpdate({ company: value })} value={experience.company} />
+        <Field label="Location" onChange={(value) => onUpdate({ location: value })} value={experience.location} />
+        <Field label="Start Date" onChange={(value) => onUpdate({ startDate: value })} value={experience.startDate} />
+        <Field label="End Date" onChange={(value) => onUpdate({ endDate: value })} value={experience.endDate} />
+        <label className="flex items-center gap-2 pt-7 text-sm font-semibold text-muted">
+          <input checked={experience.current} onChange={(event) => onUpdate({ current: event.target.checked, endDate: event.target.checked ? "" : experience.endDate })} type="checkbox" />
+          Current role
+        </label>
+      </div>
+      <div className="mt-4 space-y-3">
+        <p className="font-label text-xs font-bold uppercase tracking-[0.08em] text-muted">Bullet Points</p>
+        {experience.bullets.map((bullet, index) => (
+          <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]" key={`${experience.id}-${index}`}>
+            <input className="field" onChange={(event) => onUpdateBullet(index, event.target.value)} placeholder="Led, built, improved, reduced..." value={bullet} />
+            <button
+              className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
+              disabled={isImproving(index) || !bullet.trim()}
+              onClick={() => onImproveBullet(index, bullet)}
+              type="button"
+            >
+              {isImproving(index) ? "Refining..." : "AI-Refine Achievement"}
+            </button>
+            <button className="rounded-xl border border-outline/70 bg-white px-3 py-2 text-sm font-bold text-ink" onClick={() => onDeleteBullet(index)} type="button">
+              Delete
+            </button>
+          </div>
+        ))}
+        <button className="rounded-xl border border-outline/70 bg-surface-soft px-3 py-2 text-sm font-bold text-ink" onClick={onAddBullet} type="button">
+          Add Bullet
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EducationEditor({ education, onDelete, onUpdate }: { education: EducationItem; onDelete: () => void; onUpdate: (patch: Partial<EducationItem>) => void }) {
+  return (
+    <div className="rounded-xl border border-outline/40 bg-white p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="font-bold text-ink">Education Item</h3>
+        <button className="flex items-center gap-1 text-sm font-bold text-error" onClick={onDelete} type="button">
+          <Icon className="h-4 w-4" name="delete" />
+          Delete
+        </button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="School" onChange={(value) => onUpdate({ school: value })} value={education.school} />
+        <Field label="Degree" onChange={(value) => onUpdate({ degree: value })} value={education.degree} />
+        <Field label="Location" onChange={(value) => onUpdate({ location: value })} value={education.location} />
+        <Field label="Start Date" onChange={(value) => onUpdate({ startDate: value })} value={education.startDate} />
+        <Field label="End Date" onChange={(value) => onUpdate({ endDate: value })} value={education.endDate} />
+      </div>
+    </div>
+  );
+}
+
+function ResumeDocument({ fullName, resume, template }: { fullName: string; resume: ResumeData; template: SelectedTemplate }) {
+  const contact = [resume.email, resume.phone, resume.location, resume.website].filter(Boolean);
+  const accentClass = getAccentClass(template.accent);
+  const twoColumn = template.layout === "twoColumn";
+  const compact = template.layout === "compact";
+  const isClassic = template.layout === "classic";
+
+  return (
+    <article className={`document-paper print-area mx-auto rounded-sm bg-white p-12 shadow-panel ${isClassic ? "font-serif" : "font-sans"}`}>
+      {twoColumn ? (
+        <div className="grid grid-cols-[0.34fr_1fr] gap-8">
+          <aside className="border-r border-outline/40 pr-6">
+            {resume.photoUrl && (
+              <div className="mb-6 h-32 w-32 overflow-hidden rounded-2xl border border-outline/30 bg-surface-soft">
+                <img
+                  alt={fullName}
+                  className="h-full w-full object-cover"
+                  src={resume.photoUrl}
+                  style={{
+                    objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%`,
+                    transform: `scale(${(resume.photoScale ?? 100) / 100})`
+                  }}
+                />
+              </div>
+            )}
+            <h2 className="text-3xl font-extrabold leading-tight tracking-normal text-ink">{fullName || "Your Name"}</h2>
+            <p className={`mt-2 text-base font-bold ${accentClass}`}>{resume.title || "Professional Title"}</p>
+            <div className="mt-6 space-y-2 text-xs text-muted">
+              {contact.length > 0 ? contact.map((item) => <p key={item}>{item}</p>) : <p>Contact details</p>}
+            </div>
+            <div className="mt-8">
+              <h3 className="mb-3 font-label text-xs font-bold uppercase tracking-[0.18em] text-ink">Skills</h3>
+              <SkillsPreview skills={resume.skills} small />
+            </div>
+          </aside>
+          <div>
+            <PreviewSection title="Summary">
+              <p className="text-sm leading-7 text-ink">{resume.summary || "Your professional summary will appear here."}</p>
+            </PreviewSection>
+            <ExperiencePreview compact={compact} experiences={resume.experiences} />
+            <EducationPreview education={resume.education} />
+          </div>
+        </div>
+      ) : (
+        <>
+          <header className={`mb-8 border-b border-outline/40 flex justify-between gap-6 ${compact ? "pb-5" : "pb-8"}`}>
+            <div>
+              <h2 className={`${compact ? "text-4xl" : "text-[42px]"} font-extrabold leading-tight tracking-normal text-ink`}>{fullName || "Your Name"}</h2>
+              <p className={`mt-2 text-lg font-bold ${accentClass}`}>{resume.title || "Professional Title"}</p>
+              <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted">
+                {contact.length > 0 ? contact.map((item) => <span key={item}>{item}</span>) : <span>Contact details</span>}
+              </div>
+            </div>
+            {resume.photoUrl && (
+              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-outline/30 bg-surface-soft">
+                <img
+                  alt={fullName}
+                  className="h-full w-full object-cover"
+                  src={resume.photoUrl}
+                  style={{
+                    objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%`,
+                    transform: `scale(${(resume.photoScale ?? 100) / 100})`
+                  }}
+                />
+              </div>
+            )}
+          </header>
+          <PreviewSection title="Summary">
+            <p className="text-sm leading-7 text-ink">
+              {resume.summary || "Your professional summary will appear here. Add a short draft, then use AI to make it clear, concise, and ATS-friendly."}
+            </p>
+          </PreviewSection>
+          <ExperiencePreview compact={compact} experiences={resume.experiences} />
+          <EducationPreview education={resume.education} />
+          <PreviewSection title="Skills">
+            <SkillsPreview skills={resume.skills} />
+          </PreviewSection>
+        </>
+      )}
+    </article>
+  );
+}
+
+function ExperiencePreview({ compact, experiences }: { compact: boolean; experiences: ExperienceItem[] }) {
+  return (
+    <PreviewSection title="Experience">
+      {experiences.length === 0 && <p className="text-sm text-muted">Experience entries will appear here.</p>}
+      <div className="space-y-5">
+        {experiences.map((experience) => (
+          <div key={experience.id}>
+            <div className="mb-2 flex justify-between gap-4">
+              <h4 className="font-bold text-ink">
+                {experience.role || "Role Title"} <span className="font-normal text-muted">| {experience.company || "Company"}</span>
+              </h4>
+              <span className="text-sm text-muted">{formatDateRange(experience)}</span>
+            </div>
+            {(experience.location || !compact) && <p className="mb-2 text-sm text-muted">{experience.location || "Location"}</p>}
+            <ul className="list-disc space-y-2 pl-5 text-sm leading-7 text-ink">
+              {experience.bullets.filter(Boolean).length > 0 ? (
+                experience.bullets.filter(Boolean).map((bullet) => <li key={bullet}>{bullet}</li>)
+              ) : (
+                <li>Add achievement-focused bullet points.</li>
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </PreviewSection>
+  );
+}
+
+function EducationPreview({ education }: { education: EducationItem[] }) {
+  return (
+    <PreviewSection title="Education">
+      {education.length === 0 && <p className="text-sm text-muted">Education entries will appear here.</p>}
+      <div className="space-y-4">
+        {education.map((item) => (
+          <div key={item.id}>
+            <div className="flex justify-between gap-4">
+              <h4 className="font-bold text-ink">{item.school || "School"}</h4>
+              <span className="text-sm text-muted">{[item.startDate, item.endDate].filter(Boolean).join(" - ") || "Dates"}</span>
+            </div>
+            <p className="text-sm text-muted">{[item.degree || "Degree", item.location].filter(Boolean).join(" / ")}</p>
+          </div>
+        ))}
+      </div>
+    </PreviewSection>
+  );
+}
+
+function SkillsPreview({ skills, small = false }: { skills: string[]; small?: boolean }) {
+  if (skills.length === 0) {
+    return <p className="text-sm text-muted">Skills will appear here.</p>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {skills.map((skill) => (
+        <span className={`rounded-full bg-primary/10 font-bold text-primary ${small ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"}`} key={skill}>
+          {skill}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function PreviewSection({ children, title }: { children: ReactNode; title: string }) {
+  return (
+    <section className="mb-8">
+      <h3 className="mb-4 border-b border-outline/40 pb-2 font-label text-sm font-bold uppercase tracking-[0.18em] text-ink">{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function EmptyHint({ text }: { text: string }) {
+  return <p className="rounded-xl bg-surface-soft px-4 py-3 text-sm text-muted">{text}</p>;
+}
+
+function AiHelperPanel({
+  helper,
+  isAnalyzing,
+  isGeneratingCover,
+  isSuggestingSkills,
+  onAnalyze,
+  onGenerateCover,
+  onSuggestSkills,
+  onAddSuggestedSkills
+}: {
+  helper: HelperState;
+  isAnalyzing: boolean;
+  isGeneratingCover: boolean;
+  isSuggestingSkills: boolean;
+  onAnalyze: () => void;
+  onGenerateCover: () => void;
+  onSuggestSkills: () => void;
+  onAddSuggestedSkills: () => void;
+}) {
+  return (
+    <section className="soft-card rounded-2xl p-5">
+      <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-ink">
+        <Icon className="text-primary" name="analytics" />
+        AI Helper
+      </h2>
+      <div className="grid gap-2 md:grid-cols-3">
+        <button
+          className="rounded-xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary disabled:opacity-60"
+          disabled={helper.action !== null}
+          onClick={onAnalyze}
+          type="button"
+        >
+          {isAnalyzing ? "Auditing..." : "Audit Resume"}
+        </button>
+        <button
+          className="rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
+          disabled={helper.action !== null}
+          onClick={onSuggestSkills}
+          type="button"
+        >
+          {isSuggestingSkills ? "Optimizing..." : "Optimize Competencies"}
+        </button>
+        <button
+          className="rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
+          disabled={helper.action !== null}
+          onClick={onGenerateCover}
+          type="button"
+        >
+          {isGeneratingCover ? "Drafting..." : "Draft Cover Letter"}
+        </button>
+      </div>
+
+      {helper.error && (
+        <p className="mt-4 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm font-semibold text-error" role="alert">
+          {helper.error}
+        </p>
+      )}
+
+      {helper.analysis && (
+        <div className="mt-4 rounded-2xl border border-outline/40 bg-surface-soft p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">CV score</p>
+              <p className="mt-1 text-3xl font-extrabold text-ink">{helper.analysis.score}</p>
+            </div>
+            <p className="max-w-md text-sm leading-6 text-muted">{helper.analysis.summary}</p>
+          </div>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
+            <HelperList title="Strengths" items={helper.analysis.strengths} />
+            <HelperList title="Gaps" items={helper.analysis.gaps} />
+            <HelperList title="Recommendations" items={helper.analysis.recommendations} />
+          </div>
+        </div>
+      )}
+
+      {helper.skills.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-outline/40 bg-surface-soft p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Suggested skills</p>
+              <p className="mt-1 text-sm text-muted">Add these to your resume or pick the ones that fit best.</p>
+            </div>
+            <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white" onClick={onAddSuggestedSkills} type="button">
+              Integrate All Competencies
+            </button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {helper.skills.map((skill) => (
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary" key={skill}>
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {helper.resultText && (
+        <div className="mt-4 rounded-2xl border border-outline/40 bg-surface-soft p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Generated text</p>
+          </div>
+          <textarea className="field min-h-40 resize-none bg-white" readOnly value={helper.resultText} />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function HelperList({ items, title }: { items: string[]; title: string }) {
+  return (
+    <div>
+      <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">{title}</p>
+      <ul className="mt-3 space-y-2 text-sm leading-6 text-ink">
+        {items.map((item) => (
+          <li className="rounded-xl bg-white px-3 py-2" key={item}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ReferenceCard({ reference, onDelete }: { reference: ResumeReference; onDelete: () => void }) {
+  const label = getReferenceLabel(reference.kind);
+
+  return (
+    <div className="rounded-xl border border-outline/40 bg-white p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <Icon className="text-primary" name={reference.kind === "image" ? "photo" : "document"} />
+            <h3 className="truncate font-bold text-ink">{reference.name}</h3>
+          </div>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-muted">
+            {label} · {formatFileSize(reference.size)}
+            {reference.imported ? " · imported" : ""}
+          </p>
+        </div>
+        <button className="rounded-xl border border-outline/70 bg-surface-soft px-3 py-2 text-sm font-bold text-ink" onClick={onDelete} type="button">
+          Remove
+        </button>
+      </div>
+
+      {reference.kind === "image" && reference.dataUrl && (
+        <img alt={reference.name} className="mt-4 h-40 w-full rounded-xl border border-outline/30 object-contain bg-surface-soft" src={reference.dataUrl} />
+      )}
+
+      {reference.kind === "pdf" && reference.dataUrl && (
+        <object
+          className="mt-4 h-56 w-full overflow-hidden rounded-xl border border-outline/30 bg-surface-soft"
+          data={reference.dataUrl}
+          type={reference.mimeType || "application/pdf"}
+        >
+          <p className="p-4 text-sm text-muted">This browser cannot preview the PDF, but the file is attached to the draft.</p>
+        </object>
+      )}
+
+      {(reference.kind === "text" || reference.kind === "json") && reference.text && (
+        <pre className="mt-4 max-h-40 overflow-auto rounded-xl bg-surface-soft p-4 text-xs leading-6 text-muted whitespace-pre-wrap">
+          {reference.text.slice(0, 900)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
+function getReferenceLabel(kind: ResumeReference["kind"]) {
+  const labels: Record<ResumeReference["kind"], string> = {
+    image: "Image reference",
+    pdf: "PDF resume",
+    text: "Text note",
+    json: "Resume import",
+    other: "File reference"
+  };
+
+  return labels[kind];
+}
+
+function getReferenceKind(file: File): ResumeReference["kind"] {
+  if (file.type.startsWith("image/")) {
+    return "image";
+  }
+
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+    return "pdf";
+  }
+
+  if (file.type === "application/json" || file.name.toLowerCase().endsWith(".json")) {
+    return "json";
+  }
+
+  if (file.type.startsWith("text/") || file.name.toLowerCase().match(/\.(txt|md)$/)) {
+    return "text";
+  }
+
+  return "other";
+}
+
+function parseImportedResume(text: string): Partial<ResumeData> | null {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    const candidate = extractResumeObject(parsed);
+
+    if (!candidate) {
+      return null;
+    }
+
+    return candidate;
+  } catch {
+    return null;
+  }
+}
+
+function extractResumeObject(value: unknown): Partial<ResumeData> | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const source = isRecord(value.resumeData) ? value.resumeData : value;
+  const resume: Partial<ResumeData> = {};
+
+  if (typeof source.firstName === "string") resume.firstName = source.firstName;
+  if (typeof source.lastName === "string") resume.lastName = source.lastName;
+  if (typeof source.title === "string") resume.title = source.title;
+  if (typeof source.email === "string") resume.email = source.email;
+  if (typeof source.phone === "string") resume.phone = source.phone;
+  if (typeof source.location === "string") resume.location = source.location;
+  if (typeof source.website === "string") resume.website = source.website;
+  if (typeof source.summary === "string") resume.summary = source.summary;
+
+  if (Array.isArray(source.skills)) {
+    resume.skills = source.skills.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
+  }
+
+  if (Array.isArray(source.experiences)) {
+    resume.experiences = source.experiences
+      .filter(isRecord)
+      .map((item) => ({
+        id: typeof item.id === "string" ? item.id : createId("exp"),
+        role: typeof item.role === "string" ? item.role : "",
+        company: typeof item.company === "string" ? item.company : "",
+        location: typeof item.location === "string" ? item.location : "",
+        startDate: typeof item.startDate === "string" ? item.startDate : "",
+        endDate: typeof item.endDate === "string" ? item.endDate : "",
+        current: Boolean(item.current),
+        bullets: Array.isArray(item.bullets) ? item.bullets.filter((bullet): bullet is string => typeof bullet === "string") : [""]
+      }));
+  }
+
+  if (Array.isArray(source.education)) {
+    resume.education = source.education
+      .filter(isRecord)
+      .map((item) => ({
+        id: typeof item.id === "string" ? item.id : createId("edu"),
+        school: typeof item.school === "string" ? item.school : "",
+        degree: typeof item.degree === "string" ? item.degree : "",
+        location: typeof item.location === "string" ? item.location : "",
+        startDate: typeof item.startDate === "string" ? item.startDate : "",
+        endDate: typeof item.endDate === "string" ? item.endDate : ""
+      }));
+  }
+
+  return Object.keys(resume).length > 0 ? resume : null;
+}
+
+function mergeImportedResume(current: ResumeData, imported: Partial<ResumeData> | null) {
+  if (!imported) {
+    return current;
+  }
+
+  return {
+    ...current,
+    firstName: imported.firstName?.trim() ? imported.firstName : current.firstName,
+    lastName: imported.lastName?.trim() ? imported.lastName : current.lastName,
+    title: imported.title?.trim() ? imported.title : current.title,
+    email: imported.email?.trim() ? imported.email : current.email,
+    phone: imported.phone?.trim() ? imported.phone : current.phone,
+    location: imported.location?.trim() ? imported.location : current.location,
+    website: imported.website?.trim() ? imported.website : current.website,
+    summary: imported.summary?.trim() ? imported.summary : current.summary,
+    skills: imported.skills && imported.skills.length > 0 ? imported.skills : current.skills,
+    experiences: imported.experiences && imported.experiences.length > 0 ? imported.experiences : current.experiences,
+    education: imported.education && imported.education.length > 0 ? imported.education : current.education
+  };
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+async function readFileAsDataUrl(file: File) {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error(`Could not read ${file.name}.`));
+    reader.readAsDataURL(file);
+  });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Something went wrong.";
+}
+
+function formatDateRange(experience: ExperienceItem) {
+  const start = experience.startDate || "Start";
+  const end = experience.current ? "Present" : experience.endDate || "End";
+  return `${start} - ${end}`;
+}
+
+function getAccentClass(accent: string) {
+  const classes: Record<string, string> = {
+    ink: "text-ink",
+    primary: "text-primary",
+    primaryBright: "text-primary-bright",
+    secondary: "text-secondary",
+    success: "text-success",
+    warning: "text-warning"
+  };
+
+  return classes[accent] || "text-primary";
+}

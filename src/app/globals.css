@@ -1,0 +1,138 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@500;600&family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --grid: rgba(113, 119, 134, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    #f9f9ff;
+  background-size: 48px 48px;
+  color: #141b2b;
+  font-family: Inter, Arial, sans-serif;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.resume-paper {
+  aspect-ratio: 0.707 / 1;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #0058bc, #4648d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.primary-gradient {
+  background: linear-gradient(135deg, #0058bc, #4648d4);
+}
+
+.field {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #dce2f7;
+  background: #ffffff;
+  padding: 12px 14px;
+  color: #141b2b;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.field:focus {
+  border-color: #0058bc;
+  box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.14);
+}
+
+.soft-card {
+  border: 1px solid rgba(193, 198, 215, 0.55);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 15px -3px rgba(20, 27, 43, 0.05);
+  backdrop-filter: blur(18px);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: #f9f9ff;
+}
+
+.dashboard-grid {
+  background:
+    linear-gradient(rgba(113, 119, 134, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(113, 119, 134, 0.08) 1px, transparent 1px),
+    #f9f9ff;
+  background-size: 40px 40px;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px);
+}
+
+.document-paper {
+  width: min(100%, 210mm);
+  min-height: 297mm;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    background: #ffffff;
+  }
+
+  .document-paper {
+    width: 210mm;
+    min-height: 297mm;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}

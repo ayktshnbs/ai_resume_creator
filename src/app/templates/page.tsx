@@ -62,15 +62,6 @@ export default function TemplatesPage() {
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
 
   function useTemplate(template: TemplateCard) {
-    // TODO: Connect to real Pro status from backend
-    const isPro = false; 
-
-    if (template.isPremium && !isPro) {
-      alert("This is a Pro template. Please upgrade to use it.");
-      router.push("/#pricing");
-      return;
-    }
-
     saveSelectedTemplate({
       name: template.name,
       layout: template.layout,

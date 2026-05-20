@@ -101,7 +101,6 @@ export const ResumePDF = ({ data, template }: { data: ResumeData; template: Sele
   const SectionTitle = ({ title, classic }: { title: string; classic?: boolean }) => (
     <Text style={classic ? S.sectionTitleClassic : S.sectionTitle}>{title}</Text>
   );
-};
 
   const ExperienceBlock = ({ experiences }: { experiences: ExperienceItem[] }) => (
     <View>

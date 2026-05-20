@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { signIn } from "next-auth/react";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { status } = useSession();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,12 +14,6 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
-    }
-  }, [status, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,23 +39,9 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Simulate account creation delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Sign in immediately after "creation"
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Could not establish session after registration.");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      // Simulated registration — replace with Supabase/Auth.js when backend is connected
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      router.push("/dashboard");
     } finally {
       setLoading(false);
     }
@@ -80,7 +58,7 @@ export default function SignUpPage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-ambient">
                 CV
               </span>
-              CVForge AI
+              AI CV Builder
             </Link>
             <p className="mt-8 max-w-xl text-4xl font-extrabold leading-tight tracking-normal text-ink md:text-5xl">
               Start building your career story today.

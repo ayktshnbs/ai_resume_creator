@@ -9,7 +9,6 @@ import type { SelectedTemplate, TemplateLayout } from "@/types/resume";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 import { sampleResume } from "@/components/cv-templates/sample-data";
-import { useSession } from "next-auth/react";
 
 type TemplateCard = SelectedTemplate & {
   text: string;
@@ -24,15 +23,15 @@ const handcraftedTemplates: TemplateCard[] = [
   { name: "Lumina Compact", text: "Dense but breathable layout for fitting more content per page.", tags: ["Compact", "Recruiter Ready"], accent: "primaryBright", layout: "compact", category: "Compact" },
   { name: "Startup Operator", text: "Modern SaaS profile built around outcomes and launch metrics.", tags: ["SaaS", "Metrics"], accent: "success", layout: "twoColumn", category: "Two Column" },
   { name: "Graduate Clean", text: "Polished entry-level template with clear visual priority.", tags: ["Entry Level", "Projects"], accent: "warning", layout: "single", category: "Single Column" },
-  { name: "Executive Impact", text: "High-end design for senior leadership and board-level roles.", tags: ["Leadership", "Results"], accent: "ink", layout: "classic", category: "Classic", isPremium: true },
+  { name: "Executive Impact", text: "High-end design for senior leadership and board-level roles.", tags: ["Leadership", "Results"], accent: "ink", layout: "classic", category: "Classic" },
   { name: "Academic Classic", text: "Structured for researchers with priority on publications.", tags: ["Research", "Academic"], accent: "primary", layout: "single", category: "Single Column" },
-  { name: "Obsidian Dark", text: "Bold dark-themed two-column design for creative professionals.", tags: ["Dark Theme", "Creative"], accent: "secondary", layout: "twoColumn", category: "Two Column", isPremium: true },
-  { name: "Helix Modern", text: "Sleek contemporary layout with geometric accent elements.", tags: ["Modern", "Geometric"], accent: "primaryBright", layout: "single", category: "Single Column", isPremium: true },
+  { name: "Obsidian Dark", text: "Bold dark-themed two-column design for creative professionals.", tags: ["Dark Theme", "Creative"], accent: "secondary", layout: "twoColumn", category: "Two Column" },
+  { name: "Helix Modern", text: "Sleek contemporary layout with geometric accent elements.", tags: ["Modern", "Geometric"], accent: "primaryBright", layout: "single", category: "Single Column" },
 ];
 
 function categoryForStyle(s: string): string {
   switch (s) {
-    case "clean": return "Single Column";
+    case "clean": case "split-header": case "minimal-line": case "card-header": return "Single Column";
     case "sidebar-dark": case "sidebar-light": return "Two Column";
     case "centered": return "Classic";
     case "compact-dense": return "Compact";
@@ -51,7 +50,6 @@ const parametricCards: TemplateCard[] = PARAMETRIC_CONFIGS.map((c) => ({
   layout: c.pdfLayout,
   themeColor: c.color,
   category: categoryForStyle(c.style),
-  parametricStyle: c.style,
 }));
 
 const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards];
@@ -60,8 +58,6 @@ const CATEGORIES = ["All", ...Array.from(new Set(ALL_TEMPLATES.map((t) => t.cate
 
 export default function TemplatesPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const userId = session?.user?.id;
   const [filter, setFilter] = useState("All");
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
 
@@ -80,8 +76,7 @@ export default function TemplatesPage() {
       layout: template.layout,
       accent: template.accent,
       themeColor: template.themeColor,
-      parametricStyle: template.parametricStyle,
-    }, userId);
+    });
     router.push("/resume");
   }
 
@@ -133,18 +128,15 @@ export default function TemplatesPage() {
               onClick={() => useTemplate(template)}
             >
               {/* Real CV preview — rendered at A4 size, scaled down */}
-              <div className="relative aspect-[210/297] overflow-hidden bg-surface-soft/50 rounded-t-3xl border-b border-outline/10">
-                <div className="absolute inset-0 flex items-start justify-center overflow-hidden">
+              <div className="relative aspect-[1/1.38] overflow-hidden bg-white">
+                <div className="absolute inset-0 overflow-hidden">
                   <div
                     style={{
-                      width: "210mm", // Match A4 width exactly
+                      width: "210mm",
                       minHeight: "297mm",
-                      transform: "scale(0.35)", // Scale down to fit card width (approx 270-300px)
-                      transformOrigin: "top center",
-                      backfaceVisibility: "hidden",
-                      WebkitFontSmoothing: "antialiased",
+                      transform: "scale(0.38)",
+                      transformOrigin: "top left",
                     }}
-                    className="origin-top bg-white shadow-2xl"
                   >
                     <TemplateRenderer
                       resume={sampleResume}

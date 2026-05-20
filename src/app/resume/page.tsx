@@ -2,18 +2,15 @@
 
 import Link from "next/link";
 import type { DragEvent, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import {
   clearResumeData,
   createId,
-  loadApiKey,
   loadResumeData,
   loadSelectedTemplate,
-  saveApiKey,
-  saveResumeData,
-  saveSelectedTemplate
+  saveResumeData
 } from "@/lib/resume-storage";
 import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
 
@@ -21,7 +18,6 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useSession } from "next-auth/react";
 import { ResumePDF } from "@/components/resume-pdf";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
-import { ALL_LANGUAGES } from "@/lib/languages";
 
 type AiState = {
   full: boolean;
@@ -77,26 +73,16 @@ export default function ResumeBuilderPage() {
   const [skillDraft, setSkillDraft] = useState("");
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
+  const [extracting, setExtracting] = useState(false);
   const [ai, setAi] = useState<AiState>(initialAiState);
   const [helper, setHelper] = useState<HelperState>(initialHelperState);
   const [loaded, setLoaded] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [showApiConfig, setShowApiConfig] = useState(false);
-  const [showDesignConfig, setShowDesignConfig] = useState(false);
-  const [languageDraft, setLanguageDraft] = useState("");
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-
-  const { data: session, status } = useSession();
-  const userId = session?.user?.id;
 
   useEffect(() => {
     setIsClient(true);
-    if (status === "loading") return;
-    
-    setResume(loadResumeData(userId));
-    setTemplate(loadSelectedTemplate(userId));
-    setApiKey(loadApiKey(userId));
+    setResume(loadResumeData());
+    setTemplate(loadSelectedTemplate());
     setLoaded(true);
   }, [userId, status]);
 
@@ -105,8 +91,6 @@ export default function ResumeBuilderPage() {
       saveResumeData(resume, userId);
     }
   }, [loaded, resume, userId]);
-
-  const fullName = `${resume.firstName} ${resume.lastName}`.trim();
 
   function updateResume<K extends keyof ResumeData>(key: K, value: ResumeData[K]) {
     setResume((current) => ({ ...current, [key]: value }));
@@ -265,6 +249,7 @@ export default function ResumeBuilderPage() {
     const importedReferences: ResumeReference[] = [];
     const rejected: string[] = [];
     let importedResume: Partial<ResumeData> | null = null;
+    const textsToExtract: string[] = [];
     setReferenceMessage("");
 
     for (const file of Array.from(files)) {
@@ -280,8 +265,17 @@ export default function ResumeBuilderPage() {
           ? MAX_TEXT_BYTES
           : MAX_PDF_BYTES;
 
-      if (file.size > sizeCap) {
-        rejected.push(`${file.name} (${formatFileSize(file.size)} — limit ${formatFileSize(sizeCap)})`);
+        if (kind === "json") {
+          const parsed = parseImportedResume(text);
+          if (parsed) {
+            importedResume = { ...(importedResume ?? {}), ...parsed };
+            reference.imported = true;
+          }
+        } else if (text.trim().length > 20) {
+          textsToExtract.push(text);
+        }
+
+        importedReferences.push(reference);
         continue;
       }
 
@@ -331,24 +325,39 @@ export default function ResumeBuilderPage() {
         ...mergeImportedResume(current, importedResume),
         references: [...current.references, ...importedReferences]
       }));
-
-      // Automatically trigger AI extraction for the first valid text/json reference found
-      const firstExtractable = importedReferences.find(ref => ref.kind === "text" || ref.kind === "json");
-      if (firstExtractable && !importedResume) {
-        void extractFromReference(firstExtractable);
-      }
     }
 
-    if (rejected.length > 0) {
-      setReferenceMessage(
-        `Some files were skipped: ${rejected.join(", ")}. Keep images under 6MB and PDFs under 12MB.`
-      );
-    } else if (importedReferences.length > 0) {
-      setReferenceMessage(
-        importedResume
-          ? "Uploaded files were attached and the JSON resume file was used to populate the form."
-          : "Uploaded files were attached to this draft. AI is automatically processing your documents."
-      );
+    if (textsToExtract.length > 0 && !importedResume) {
+      setExtracting(true);
+      setReferenceMessage("Extracting resume data from uploaded files...");
+      try {
+        const combined = textsToExtract.join("\n\n---\n\n");
+        const response = await fetch("/api/ai/resume-helper", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "extract_from_reference", text: combined })
+        });
+        const data = (await response.json()) as { resumeData?: Partial<ResumeData> };
+        if (data.resumeData) {
+          const extracted = extractResumeObject(data.resumeData);
+          if (extracted) {
+            setResume((current) => mergeImportedResume(current, extracted));
+            setReferenceMessage("Resume data was extracted from your uploaded files and used to populate the form.");
+          } else {
+            setReferenceMessage("Files were attached but no structured resume data could be extracted.");
+          }
+        } else {
+          setReferenceMessage("Files were attached but no resume data could be extracted.");
+        }
+      } catch {
+        setReferenceMessage("Files were attached. AI extraction failed — you can fill in the form manually.");
+      } finally {
+        setExtracting(false);
+      }
+    } else if (importedResume) {
+      setReferenceMessage("Uploaded files were attached and resume data was used to populate the form.");
+    } else {
+      setReferenceMessage("Uploaded files were attached to this draft.");
     }
   }
 
@@ -509,14 +518,6 @@ export default function ResumeBuilderPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <button
-                className="flex items-center justify-center gap-2 rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
-                onClick={() => setShowDesignConfig(true)}
-                type="button"
-              >
-                <Icon name="palette" />
-                Design
-              </button>
-              <button
                 className="primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
                 disabled={ai.full}
                 onClick={improveFullResume}
@@ -527,95 +528,6 @@ export default function ResumeBuilderPage() {
               </button>
             </div>
           </header>
-
-          {showDesignConfig && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm">
-              <div className="soft-card w-full max-w-lg rounded-2xl p-6 shadow-panel text-ink">
-                <div className="mb-5 flex items-center justify-between border-b border-outline/30 pb-4">
-                  <h2 className="text-xl font-bold">Design Settings</h2>
-                  <button onClick={() => setShowDesignConfig(false)} type="button">
-                    <Icon name="close" />
-                  </button>
-                </div>
-                
-                <div className="space-y-6 text-left">
-                  {/* Color Picker */}
-                  <div>
-                    <p className="mb-3 font-label text-[10px] font-bold uppercase tracking-widest text-muted text-left">Theme Color</p>
-                    <div className="flex flex-wrap gap-2">
-                      {["#2563eb", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#111827"].map((color) => (
-                        <button
-                          key={color}
-                          onClick={() => updateTemplate({ themeColor: color })}
-                          className={`h-8 w-8 rounded-full border-2 transition ${
-                            template.themeColor === color ? "border-ink scale-110 shadow-md" : "border-transparent"
-                          }`}
-                          style={{ backgroundColor: color }}
-                          type="button"
-                        />
-                      ))}
-                      <input 
-                        type="color" 
-                        value={template.themeColor} 
-                        onChange={(e) => updateTemplate({ themeColor: e.target.value })}
-                        className="h-8 w-8 cursor-pointer overflow-hidden rounded-full border-2 border-outline/30 bg-transparent p-0"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Typography */}
-                  <div>
-                    <p className="mb-3 font-label text-[10px] font-bold uppercase tracking-widest text-muted text-left">Typography</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(["sans", "serif", "mono"] as const).map((font) => (
-                        <button
-                          key={font}
-                          onClick={() => updateTemplate({ fontFamily: font })}
-                          className={`rounded-xl border px-3 py-2 text-sm font-bold transition capitalize ${
-                            template.fontFamily === font 
-                              ? "border-primary bg-primary/5 text-primary" 
-                              : "border-outline/50 bg-white hover:bg-surface-soft"
-                          }`}
-                          type="button"
-                        >
-                          {font}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Spacing */}
-                  <div>
-                    <p className="mb-3 font-label text-[10px] font-bold uppercase tracking-widest text-muted text-left">Document Spacing</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(["compact", "normal", "spacious"] as const).map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => updateTemplate({ spacing: s })}
-                          className={`rounded-xl border px-3 py-2 text-sm font-bold transition capitalize ${
-                            template.spacing === s 
-                              ? "border-primary bg-primary/5 text-primary" 
-                              : "border-outline/50 bg-white hover:bg-surface-soft"
-                          }`}
-                          type="button"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    className="flex w-full justify-center rounded-xl bg-ink py-3 font-bold text-white shadow-panel transition hover:brightness-110"
-                    onClick={() => setShowDesignConfig(false)}
-                    type="button"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {ai.error && <p className="mb-5 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm font-semibold text-error">{ai.error}</p>}
           {referenceMessage && <p className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary">{referenceMessage}</p>}
@@ -847,9 +759,15 @@ export default function ResumeBuilderPage() {
             </FormSection>
 
             <FormSection icon="upload" title="Reference Materials">
-              <p className="text-sm leading-6 text-muted text-left">
-                Securely attach supporting documents. You can use AI to extract data from text or JSON files to auto-populate your resume.
+              <p className="text-sm leading-6 text-muted">
+                Upload an old CV, cover letter, or text file — the AI will extract your details and fill the form automatically.
               </p>
+              {extracting && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Extracting resume data...
+                </div>
+              )}
               <label
                 className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-outline/70 bg-surface-soft px-5 py-6 text-center"
                 onDragOver={(event: DragEvent<HTMLLabelElement>) => event.preventDefault()}
@@ -928,9 +846,7 @@ export default function ResumeBuilderPage() {
             </div>
           </div>
           {shareMessage && <p className="mx-auto mb-4 w-full max-w-4xl rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">{shareMessage}</p>}
-          <div className="flex-1 overflow-y-auto">
-            <ResumeDocument resume={resume} template={template} />
-          </div>
+          <ScaledTemplatePreview resume={resume} template={template} />
         </section>
 
         <Link className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white shadow-panel md:hidden" href="/templates">
@@ -938,6 +854,58 @@ export default function ResumeBuilderPage() {
         </Link>
       </div>
     </AppShell>
+  );
+}
+
+const A4_W = 793;
+const A4_H = 1122;
+
+function ScaledTemplatePreview({ resume, template }: { resume: ResumeData; template: SelectedTemplate }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.65);
+  const [innerH, setInnerH] = useState(A4_H);
+
+  useEffect(() => {
+    const measure = () => {
+      if (wrapRef.current) setScale(Math.min(1, wrapRef.current.clientWidth / A4_W));
+      if (innerRef.current) setInnerH(innerRef.current.scrollHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    if (innerRef.current) ro.observe(innerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (innerRef.current) setInnerH(innerRef.current.scrollHeight);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [resume, template]);
+
+  return (
+    <div ref={wrapRef} className="flex-1 overflow-y-auto py-2">
+      <div
+        className="relative mx-auto"
+        style={{ width: A4_W * scale, height: innerH * scale }}
+      >
+        <div
+          ref={innerRef}
+          id="resume-export"
+          className="print-area absolute left-0 top-0 bg-white shadow-panel"
+          style={{
+            width: A4_W,
+            minHeight: A4_H,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <TemplateRenderer resume={resume} templateName={template.name} settings={template} />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1063,33 +1031,6 @@ function EducationEditor({ education, onDelete, onUpdate }: { education: Educati
   );
 }
 
-function ResumeDocument({ resume, template }: { resume: ResumeData; template: SelectedTemplate }) {
-  return (
-    <div className="mx-auto w-full max-w-4xl py-4 flex justify-center">
-      <div 
-        className="origin-top shadow-2xl transition-transform duration-300" 
-        style={{ 
-          width: "800px", 
-          minHeight: "1132px",
-          transform: "scale(var(--preview-scale, 1))",
-          backgroundColor: "#fff"
-        }}
-      >
-        <TemplateRenderer resume={resume} templateName={template.name} settings={template} />
-      </div>
-      <style jsx>{`
-        div {
-          --preview-scale: 0.45;
-        }
-        @media (min-width: 640px) { div { --preview-scale: 0.6; } }
-        @media (min-width: 768px) { div { --preview-scale: 0.8; } }
-        @media (min-width: 1024px) { div { --preview-scale: 0.9; } }
-        @media (min-width: 1280px) { div { --preview-scale: 1.0; } }
-      `}</style>
-    </div>
-  );
-}
-
 function EmptyHint({ text }: { text: string }) {
   return <p className="rounded-xl bg-surface-soft px-4 py-3 text-sm text-muted">{text}</p>;
 }
@@ -1114,21 +1055,16 @@ function AiHelperPanel({
   onAddSuggestedSkills: () => void;
 }) {
   return (
-    <section className="soft-card rounded-2xl p-5 text-left">
-      <header className="mb-4">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
-            <Icon className="text-primary" name="analytics" />
-            AI Helper
-          </h2>
-          <span className="rounded-full bg-success/10 px-3 py-1 font-label text-xs font-bold text-success">
-            ✦ Free — no API key needed
-          </span>
-        </div>
-        <p className="mt-1 text-sm leading-6 text-muted">
-          Three quick actions you can run on your draft. Each one reads the whole resume for context.
-        </p>
-      </header>
+    <section className="soft-card rounded-2xl p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
+          <Icon className="text-primary" name="analytics" />
+          AI Helper
+        </h2>
+        <span className="rounded-full bg-success/10 px-3 py-1 font-label text-xs font-bold text-success">
+          ✦ Free — no API key needed
+        </span>
+      </div>
       <div className="grid gap-2 md:grid-cols-3">
         <HelperAction
           caption="Score, strengths, and gaps"
@@ -1296,137 +1232,3 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Something went wrong.";
 }
 
-function parseImportedResume(text: string): Partial<ResumeData> | null {
-  try {
-    const parsed = JSON.parse(text) as unknown;
-    const candidate = extractResumeObject(parsed);
-    return candidate;
-  } catch {
-    return null;
-  }
-}
-
-function extractResumeObject(value: unknown): Partial<ResumeData> | null {
-  if (!isRecord(value)) return null;
-  const source = isRecord(value.resumeData) ? value.resumeData : value;
-  const resume: Partial<ResumeData> = {};
-  if (typeof source.firstName === "string") resume.firstName = source.firstName;
-  if (typeof source.lastName === "string") resume.lastName = source.lastName;
-  if (typeof source.title === "string") resume.title = source.title;
-  if (typeof source.email === "string") resume.email = source.email;
-  if (typeof source.phone === "string") resume.phone = source.phone;
-  if (typeof source.location === "string") resume.location = source.location;
-  if (typeof source.website === "string") resume.website = source.website;
-  if (typeof source.summary === "string") resume.summary = source.summary;
-  if (Array.isArray(source.skills)) {
-    resume.skills = source.skills.filter((s): s is string => typeof s === "string").map((s) => s.trim()).filter(Boolean);
-  }
-  if (Array.isArray(source.experiences)) {
-    resume.experiences = source.experiences.filter(isRecord).map((item) => ({
-      id: typeof item.id === "string" ? item.id : createId("exp"),
-      role: typeof item.role === "string" ? item.role : "",
-      company: typeof item.company === "string" ? item.company : "",
-      location: typeof item.location === "string" ? item.location : "",
-      startDate: typeof item.startDate === "string" ? item.startDate : "",
-      endDate: typeof item.endDate === "string" ? item.endDate : "",
-      current: Boolean(item.current),
-      bullets: Array.isArray(item.bullets) ? item.bullets.filter((b): b is string => typeof b === "string") : [""]
-    }));
-  }
-  if (Array.isArray(source.education)) {
-    resume.education = source.education.filter(isRecord).map((item) => ({
-      id: typeof item.id === "string" ? item.id : createId("edu"),
-      school: typeof item.school === "string" ? item.school : "",
-      degree: typeof item.degree === "string" ? item.degree : "",
-      location: typeof item.location === "string" ? item.location : "",
-      startDate: typeof item.startDate === "string" ? item.startDate : "",
-      endDate: typeof item.endDate === "string" ? item.endDate : ""
-    }));
-  }
-  return Object.keys(resume).length > 0 ? resume : null;
-}
-
-function mergeImportedResume(current: ResumeData, imported: Partial<ResumeData> | null) {
-  if (!imported) return current;
-  return {
-    ...current,
-    firstName: imported.firstName?.trim() ? imported.firstName : current.firstName,
-    lastName: imported.lastName?.trim() ? imported.lastName : current.lastName,
-    title: imported.title?.trim() ? imported.title : current.title,
-    email: imported.email?.trim() ? imported.email : current.email,
-    phone: imported.phone?.trim() ? imported.phone : current.phone,
-    location: imported.location?.trim() ? imported.location : current.location,
-    website: imported.website?.trim() ? imported.website : current.website,
-    summary: imported.summary?.trim() ? imported.summary : current.summary,
-    skills: imported.skills && imported.skills.length > 0 ? imported.skills : current.skills,
-    experiences: imported.experiences && imported.experiences.length > 0 ? imported.experiences : current.experiences,
-    education: imported.education && imported.education.length > 0 ? imported.education : current.education
-  };
-}
-
-
-function ReferenceCard({
-  reference,
-  onDelete,
-  onExtract,
-  extracting
-}: {
-  reference: ResumeReference;
-  onDelete: () => void;
-  onExtract?: () => void;
-  extracting?: boolean;
-}) {
-  const label = getReferenceLabel(reference.kind);
-  const canExtract = (reference.kind === "text" || reference.kind === "json") && Boolean(onExtract);
-  return (
-    <div className="rounded-xl border border-outline/40 bg-white p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <Icon className="text-primary" name={reference.kind === "image" ? "photo" : "document"} />
-            <h3 className="truncate font-bold text-ink">{reference.name}</h3>
-          </div>
-          <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-muted">
-            {label} · {formatFileSize(reference.size)}
-            {reference.imported ? " · imported" : ""}
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-2">
-          {canExtract && (
-            <button
-              className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
-              disabled={extracting}
-              onClick={onExtract}
-              type="button"
-            >
-              <Icon className="h-4 w-4" name="sparkle" />
-              {extracting ? "Extracting…" : "Extract"}
-            </button>
-          )}
-          <button className="rounded-xl border border-outline/70 bg-surface-soft px-3 py-2 text-sm font-bold text-ink" onClick={onDelete} type="button">
-            Remove
-          </button>
-        </div>
-      </div>
-      {reference.kind === "image" && reference.dataUrl && (
-        <img alt={reference.name} className="mt-4 h-40 w-full rounded-xl border border-outline/30 object-contain bg-surface-soft" src={reference.dataUrl} />
-      )}
-      {(reference.kind === "text" || reference.kind === "json") && reference.text && (
-        <pre className="mt-4 max-h-40 overflow-auto rounded-xl bg-surface-soft p-4 text-xs leading-6 text-muted whitespace-pre-wrap">
-          {reference.text.slice(0, 900)}
-        </pre>
-      )}
-    </div>
-  );
-}
-
-function getReferenceLabel(kind: ResumeReference["kind"]) {
-  const labels: Record<ResumeReference["kind"], string> = {
-    image: "Image reference",
-    pdf: "PDF resume",
-    text: "Text note",
-    json: "Resume import",
-    other: "File reference"
-  };
-  return labels[kind];
-}

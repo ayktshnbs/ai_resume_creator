@@ -7,7 +7,8 @@ type ResumeHelperAction =
   | "improve_bullet"
   | "suggest_skills"
   | "generate_cover_letter"
-  | "analyze_resume";
+  | "analyze_resume"
+  | "extract_from_reference";
 
 type ResumeAnalysis = {
   score: number;
@@ -119,11 +120,25 @@ Return:
 {"resultText":"..."}`;
   }
 
-  return `${base}
+  if (action === "analyze_resume") {
+    return `${base}
 Analyze this CV for ATS and recruiter clarity.
 Score from 0 to 100.
 Return:
 {"analysis":{"score":85,"strengths":["..."],"gaps":["..."],"recommendations":["..."],"summary":"..."}}`;
+  }
+
+  const refText = body.text || "";
+  return `You are an expert resume data extractor.
+Given the following text from a reference document (old CV, cover letter, LinkedIn export, etc.), extract all resume-relevant information into structured JSON.
+Extract as much as you can find. Use empty strings for fields you cannot determine. Generate unique IDs for each experience and education entry (e.g. "exp_1", "edu_1").
+For bullet points, extract individual achievements or responsibilities.
+
+Reference text:
+${refText}
+
+Return ONLY valid JSON in this exact format:
+{"resumeData":{"firstName":"","lastName":"","title":"","email":"","phone":"","location":"","website":"","summary":"","skills":["skill1","skill2"],"languages":["lang1"],"experiences":[{"id":"exp_1","role":"","company":"","location":"","startDate":"","endDate":"","current":false,"bullets":["bullet1"]}],"education":[{"id":"edu_1","school":"","degree":"","location":"","startDate":"","endDate":""}]}}`;
 }
 
 function safeResume(resume?: ResumeData): ResumeData {
@@ -159,10 +174,14 @@ function parseJson(text: string) {
   }
 }
 
-function mockResponse(action: ResumeHelperAction, body: RequestBody): { resultText?: string; skills?: string[]; analysis?: ResumeAnalysis } {
+function mockResponse(action: ResumeHelperAction, body: RequestBody): { resultText?: string; skills?: string[]; analysis?: ResumeAnalysis; resumeData?: Partial<ResumeData> } {
   const resume = safeResume(body.resumeData);
   const name = `${resume.firstName} ${resume.lastName}`.trim() || "This candidate";
   const role = body.targetRole || resume.title || "the target role";
+
+  if (action === "extract_from_reference") {
+    return { resumeData: mockExtract(body.text || "") };
+  }
 
   if (action === "improve_summary") {
     return {
@@ -222,4 +241,44 @@ ${name}`
       summary: "This CV is a solid draft. It will become stronger with more specific achievements and targeted keywords."
     }
   };
+}
+
+function mockExtract(text: string): Partial<ResumeData> {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const result: Partial<ResumeData> = {};
+
+  const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
+  if (emailMatch) result.email = emailMatch[0];
+
+  const phoneMatch = text.match(/\+?[\d\s().-]{7,}/);
+  if (phoneMatch) result.phone = phoneMatch[0].trim();
+
+  const urlMatch = text.match(/https?:\/\/[^\s,]+/);
+  if (urlMatch) result.website = urlMatch[0];
+
+  if (lines.length > 0 && !lines[0].includes("@")) {
+    const nameParts = lines[0].split(/\s+/);
+    if (nameParts.length >= 2 && nameParts[0].length < 30) {
+      result.firstName = nameParts[0];
+      result.lastName = nameParts.slice(1).join(" ");
+    }
+  }
+
+  if (lines.length > 1 && lines[1].length < 80 && !lines[1].includes("@")) {
+    result.title = lines[1];
+  }
+
+  const skills: string[] = [];
+  let inSkills = false;
+  for (const line of lines) {
+    if (/^skills?\b/i.test(line)) { inSkills = true; continue; }
+    if (/^(experience|education|summary|profile|work|projects)/i.test(line)) { inSkills = false; continue; }
+    if (inSkills) {
+      const items = line.split(/[,;|•·]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 40);
+      skills.push(...items);
+    }
+  }
+  if (skills.length > 0) result.skills = skills;
+
+  return result;
 }

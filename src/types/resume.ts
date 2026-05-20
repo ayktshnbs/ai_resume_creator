@@ -17,7 +17,6 @@ export type SelectedTemplate = {
   fontFamily?: TemplateFont;
   fontSize?: number;
   spacing?: TemplateSpacing;
-  parametricStyle?: string;
 };
 
 export const defaultTemplate: SelectedTemplate = {

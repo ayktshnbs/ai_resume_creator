@@ -1,8 +1,12 @@
 import type { ResumeData } from "@/types/resume";
 
+const _svg = '<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="80" fill="#6366f1"/><circle cx="40" cy="29" r="14" fill="rgba(255,255,255,0.9)"/><path d="M10 80 Q10 54 40 54 Q70 54 70 80Z" fill="rgba(255,255,255,0.85)"/></svg>';
+export const SAMPLE_PHOTO = `data:image/svg+xml,${encodeURIComponent(_svg)}`;
+
 export const sampleResume: ResumeData = {
   firstName: "Alexandra",
   lastName: "Mitchell",
+  photoUrl: SAMPLE_PHOTO,
   title: "Senior Product Manager",
   email: "[email protected]",
   phone: "(415) 555-0184",

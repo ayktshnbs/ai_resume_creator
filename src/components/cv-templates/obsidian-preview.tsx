@@ -1,18 +1,16 @@
-import type { ResumeData, SelectedTemplate } from "@/types/resume";
+import type { ResumeData } from "@/types/resume";
 import { formatDateRange, getFullName } from "./sample-data";
 
 // Obsidian — full dark-mode CV. White-on-near-black with a single
 // vibrant accent color. Reads like a premium product spec sheet.
 // Aimed at senior tech / creative / design candidates.
-export function ObsidianPreview({ resume, settings }: { resume: ResumeData; settings?: SelectedTemplate }) {
-  const color = settings?.themeColor || "#22d3ee";
-  const fontClass = settings?.fontFamily === "serif" ? "font-serif" : settings?.fontFamily === "mono" ? "font-mono" : "font-sans";
+export function ObsidianPreview({ resume }: { resume: ResumeData }) {
   const fullName = getFullName(resume) || "Your Name";
   const contact = [resume.email, resume.phone, resume.location, resume.website].filter(Boolean);
 
   return (
     <div
-      className={`${fontClass} text-white overflow-hidden`}
+      className="font-sans text-white"
       style={{
         width: "210mm",
         minHeight: "297mm",
@@ -20,30 +18,30 @@ export function ObsidianPreview({ resume, settings }: { resume: ResumeData; sett
         backgroundColor: "#0b0d12"
       }}
     >
-      <header className="mb-7 flex items-start justify-between gap-6 border-b border-white/10 pb-5">
-        <div className="flex-1 min-w-0">
-          <p className="font-label text-[10px] font-semibold uppercase tracking-[0.32em]" style={{ color: color }}>
+      <header className="mb-7 flex items-end justify-between gap-6 border-b border-white/10 pb-5">
+        <div>
+          <p className="font-label text-[10px] font-semibold uppercase tracking-[0.32em] text-[#22d3ee]">
             Curriculum Vitae
           </p>
-          <h1 className="mt-2 text-[36px] font-extrabold leading-[1.05] tracking-tight text-white break-words">
+          <h1 className="mt-2 text-[36px] font-extrabold leading-[1.05] tracking-tight text-white">
             {fullName}
           </h1>
-          <p className="mt-1.5 text-[12.5px] font-medium text-[#9ca3af] break-words">
+          <p className="mt-1.5 text-[12.5px] font-medium text-[#9ca3af]">
             {resume.title || "Professional Title"}
           </p>
         </div>
-        <div className="text-right text-[9.5px] leading-[1.7] text-[#cbd5e1] min-w-0 mt-5">
+        <div className="text-right text-[9.5px] leading-[1.7] text-[#cbd5e1]">
           {contact.length === 0 ? (
             <p>Add contact details</p>
           ) : (
-            contact.map((item) => <p key={item} className="break-all">{item}</p>)
+            contact.map((item) => <p key={item}>{item}</p>)
           )}
         </div>
       </header>
 
       {resume.summary && (
         <Section title="Summary">
-          <p className="text-[10.5px] leading-[1.7] text-[#e2e8f0] break-words">{resume.summary}</p>
+          <p className="text-[10.5px] leading-[1.7] text-[#e2e8f0]">{resume.summary}</p>
         </Section>
       )}
 
@@ -53,21 +51,21 @@ export function ObsidianPreview({ resume, settings }: { resume: ResumeData; sett
         ) : (
           <div className="space-y-5">
             {resume.experiences.map((exp) => (
-              <div key={exp.id} className="relative pl-4 min-w-0">
-                <span className="absolute left-0 top-2 h-2 w-2 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 0 3px ${color}2e` }} />
-                <div className="flex flex-wrap items-start justify-between gap-x-4">
-                  <h3 className="flex-1 text-[12.5px] font-bold text-white break-words">{exp.role || "Role Title"}</h3>
-                  <span className="shrink-0 text-[9.5px] font-medium uppercase tracking-wider text-[#94a3b8] whitespace-nowrap mt-0.5">
+              <div key={exp.id} className="relative pl-4">
+                <span className="absolute left-0 top-2 h-2 w-2 rounded-full bg-[#22d3ee] shadow-[0_0_0_3px_rgba(34,211,238,0.18)]" />
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                  <h3 className="text-[12.5px] font-bold text-white">{exp.role || "Role Title"}</h3>
+                  <span className="text-[9.5px] font-medium uppercase tracking-wider text-[#94a3b8]">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                   </span>
                 </div>
-                <p className="text-[11px] font-semibold break-words" style={{ color: color }}>
+                <p className="text-[11px] font-semibold text-[#22d3ee]">
                   {exp.company || "Company"}
                   {exp.location && <span className="font-normal text-[#94a3b8]"> · {exp.location}</span>}
                 </p>
                 <ul className="mt-2 space-y-1">
                   {exp.bullets.filter(Boolean).map((bullet, i) => (
-                    <li key={i} className="relative pl-3 text-[10.5px] leading-[1.55] text-[#e2e8f0] break-words">
+                    <li key={i} className="relative pl-3 text-[10.5px] leading-[1.55] text-[#e2e8f0]">
                       <span className="absolute left-0 top-[7px] h-1 w-1 rounded-full bg-[#64748b]" />
                       {bullet}
                     </li>

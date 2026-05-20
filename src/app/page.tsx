@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
@@ -51,6 +52,7 @@ const savedCvs = [
 
 export default function Home() {
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function selectTemplate(t: TemplateCard) {
     saveSelectedTemplate({ name: t.name, layout: t.layout, accent: t.accent, themeColor: t.themeColor });
@@ -102,11 +104,51 @@ export default function Home() {
             <a className="hidden rounded-xl px-4 py-2 text-sm font-bold text-ink transition-all hover:bg-surface-soft md:block" href="/signin">
               Sign in
             </a>
-            <a className="primary-gradient rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-ambient transition-all hover:shadow-panel hover:brightness-105 active:scale-[0.98]" href="/signup">
+            <a className="hidden primary-gradient rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-ambient transition-all hover:shadow-panel hover:brightness-105 active:scale-[0.98] sm:inline-flex" href="/signup">
               Get started free
             </a>
+            <button
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-ink transition hover:bg-surface-soft md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+              )}
+            </button>
           </div>
         </nav>
+        {mobileMenuOpen && (
+          <div className="border-t border-outline/30 bg-white/95 backdrop-blur-xl md:hidden">
+            <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4">
+              {[
+                { label: "Features", href: "#features" },
+                { label: "Builder", href: "/resume" },
+                { label: "Templates", href: "/templates" },
+                { label: "Pricing", href: "#pricing" },
+              ].map((link) => (
+                <a
+                  key={link.label}
+                  className="rounded-xl px-4 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft"
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ))}
+              <div className="mt-3 flex flex-col gap-2 border-t border-outline/30 pt-4">
+                <a className="rounded-xl px-4 py-3 text-center text-sm font-bold text-ink transition hover:bg-surface-soft" href="/signin">
+                  Sign in
+                </a>
+                <a className="primary-gradient rounded-xl px-4 py-3 text-center text-sm font-bold text-white" href="/signup">
+                  Get started free
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero */}
@@ -122,7 +164,7 @@ export default function Home() {
               <span className="h-1 w-1 rounded-full bg-outline" />
               <span className="text-xs font-medium text-muted">Trusted by 50k+ job seekers</span>
             </div>
-            <h1 className="text-balance text-5xl font-extrabold leading-[1.1] tracking-tight text-ink md:text-7xl">
+            <h1 className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-ink sm:text-5xl md:text-7xl">
               The <span className="gradient-text">smarter</span> way to build your resume.
             </h1>
             <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted">
@@ -152,7 +194,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="relative perspective-1000">
+          <div className="relative hidden perspective-1000 md:block">
             <div className="animate-float">
               <HeroPreview />
             </div>
@@ -183,7 +225,7 @@ export default function Home() {
             {marqueeTemplates.map((tmpl, i) => (
               <div
                 key={`${tmpl.name}-${i}`}
-                className="w-[240px] flex-shrink-0 cursor-pointer"
+                className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[240px]"
                 onClick={() => selectTemplate(tmpl)}
               >
                 <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
@@ -211,7 +253,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 md:px-10">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Everything you need</p>
-            <h2 className="mt-4 text-4xl font-bold tracking-tight text-ink">Built for precision and speed.</h2>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">Built for precision and speed.</h2>
             <p className="mt-4 text-lg text-muted">A streamlined workflow from draft to download.</p>
           </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -233,7 +275,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-7xl gap-12 px-4 md:grid-cols-[1fr_1.5fr] md:px-10">
           <div className="flex flex-col justify-center">
             <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-muted">Management</p>
-            <h2 className="mt-4 text-4xl font-bold tracking-tight text-ink">Keep your career history in one place.</h2>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">Keep your career history in one place.</h2>
             <p className="mt-6 text-lg leading-relaxed text-muted">Save multiple versions of your CV for different roles. Our dashboard makes it easy to manage, update, and export your documents.</p>
             <div className="mt-10 flex gap-4">
               <a className="primary-gradient rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-panel" href="/resume">
@@ -267,7 +309,7 @@ export default function Home() {
       {/* Pricing */}
       <section className="mx-auto max-w-7xl px-4 py-24 md:px-10" id="pricing">
         <div className="mx-auto mb-16 max-w-2xl text-center">
-          <h2 className="text-4xl font-bold tracking-tight text-ink">Simple, honest pricing.</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Simple, honest pricing.</h2>
           <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
         </div>
         <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">

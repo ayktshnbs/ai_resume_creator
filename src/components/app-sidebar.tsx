@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "@/components/icon";
@@ -20,6 +21,7 @@ const navItems = [
 
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {
   const { data: session } = useSession();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <div className={`min-h-screen bg-background text-ink ${fullHeight ? "h-screen overflow-hidden" : ""}`}>
@@ -95,22 +97,84 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
           <Link href="/" className="font-label text-lg font-bold text-ink">
             CVForge AI
           </Link>
-          <div className="flex items-center gap-3">
-            {session ? (
-               <button onClick={() => void signOut()} className="rounded-full bg-outline/40 px-4 py-2 text-sm font-semibold text-ink">
-                Sign Out
-              </button>
+          <button
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-ink transition hover:bg-surface-soft"
+            onClick={() => setDrawerOpen(!drawerOpen)}
+            aria-label="Toggle navigation"
+          >
+            {drawerOpen ? (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             ) : (
-              <Link
-                href="/signin"
-                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
-              >
-                Sign In
-              </Link>
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
             )}
-          </div>
+          </button>
         </div>
       </header>
+
+      {drawerOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-72 flex-col border-r border-outline bg-surface px-5 py-6 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center gap-3" onClick={() => setDrawerOpen(false)}>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-ambient">
+                  <Icon name="sparkle" className="text-[22px]" />
+                </div>
+                <div>
+                  <p className="font-label text-lg font-bold text-ink">CVForge AI</p>
+                  <p className="text-xs text-muted">Resume workspace</p>
+                </div>
+              </Link>
+            </div>
+            <nav className="mt-8 space-y-2">
+              {navItems.map((item) => {
+                const isActive = active === item.id;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setDrawerOpen(false)}
+                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted hover:bg-surface-soft hover:text-ink"
+                    }`}
+                  >
+                    <Icon name={item.icon} className="text-[20px]" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="mt-auto border-t border-outline/40 pt-6">
+              {session ? (
+                <div className="flex items-center justify-between gap-3 px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Icon name="user" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
+                      <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href="/signin"
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+                >
+                  <Icon name="user" className="text-[20px]" />
+                  Sign In
+                </Link>
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
 
       <main className={`${fullHeight ? "h-screen overflow-hidden" : "min-h-screen"} lg:pl-72`}>
         {children}

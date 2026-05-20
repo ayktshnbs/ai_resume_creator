@@ -1,11 +1,33 @@
 export type TemplateLayout = "single" | "classic" | "twoColumn" | "compact";
 
+export type TemplateVariant = "minimal" | "classic" | "tech" | "compact" | "startup" | "graduate";
+
+export type TemplateFont = "sans" | "serif" | "mono";
+
+export type TemplateSpacing = "compact" | "normal" | "spacious";
+
 export type TemplateAccent = "primary" | "primaryBright" | "secondary" | "ink" | "success" | "warning";
 
 export type SelectedTemplate = {
   name: string;
   layout: TemplateLayout;
   accent: TemplateAccent | string;
+  variant?: TemplateVariant;
+  themeColor?: string;
+  fontFamily?: TemplateFont;
+  fontSize?: number;
+  spacing?: TemplateSpacing;
+};
+
+export const defaultTemplate: SelectedTemplate = {
+  name: "Modern Minimalist",
+  layout: "single",
+  accent: "primary",
+  variant: "minimal",
+  themeColor: "#2563eb",
+  fontFamily: "sans",
+  fontSize: 10,
+  spacing: "normal"
 };
 
 export type ExperienceItem = {
@@ -58,7 +80,42 @@ export type ResumeData = {
   experiences: ExperienceItem[];
   education: EducationItem[];
   skills: string[];
+  languages: string[];
   references: ResumeReference[];
+};
+
+export type CoverLetterData = {
+  firstName: string;
+  lastName: string;
+  title: string;
+  email: string;
+  phone: string;
+  location: string;
+  website: string;
+  date: string;
+  recipientName: string;
+  recipientTitle: string;
+  recipientCompany: string;
+  recipientAddress: string;
+  subject: string;
+  body: string;
+};
+
+export const emptyCoverLetterData: CoverLetterData = {
+  firstName: "",
+  lastName: "",
+  title: "",
+  email: "",
+  phone: "",
+  location: "",
+  website: "",
+  date: "",
+  recipientName: "",
+  recipientTitle: "",
+  recipientCompany: "",
+  recipientAddress: "",
+  subject: "",
+  body: ""
 };
 
 export const emptyResumeData: ResumeData = {
@@ -73,5 +130,6 @@ export const emptyResumeData: ResumeData = {
   experiences: [],
   education: [],
   skills: [],
+  languages: [],
   references: []
 };

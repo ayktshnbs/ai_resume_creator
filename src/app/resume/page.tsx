@@ -2,22 +2,21 @@
 
 import Link from "next/link";
 import type { DragEvent, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import {
   clearResumeData,
   createId,
-  loadApiKey,
   loadResumeData,
   loadSelectedTemplate,
-  saveApiKey,
   saveResumeData
 } from "@/lib/resume-storage";
 import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ResumePDF } from "@/components/resume-pdf";
+import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 
 type AiState = {
   full: boolean;
@@ -69,14 +68,11 @@ export default function ResumeBuilderPage() {
   const [helper, setHelper] = useState<HelperState>(initialHelperState);
   const [loaded, setLoaded] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [showApiConfig, setShowApiConfig] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     setResume(loadResumeData());
     setTemplate(loadSelectedTemplate());
-    setApiKey(loadApiKey());
     setLoaded(true);
   }, []);
 
@@ -85,8 +81,6 @@ export default function ResumeBuilderPage() {
       saveResumeData(resume);
     }
   }, [loaded, resume]);
-
-  const fullName = `${resume.firstName} ${resume.lastName}`.trim();
 
   function updateResume<K extends keyof ResumeData>(key: K, value: ResumeData[K]) {
     setResume((current) => ({ ...current, [key]: value }));
@@ -414,14 +408,6 @@ export default function ResumeBuilderPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <button
-                className="rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink"
-                onClick={() => setShowApiConfig(true)}
-                type="button"
-              >
-                <Icon className="h-4 w-4" name="sparkle" />
-                AI Configuration
-              </button>
-              <button
                 className="primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
                 disabled={ai.full}
                 onClick={improveFullResume}
@@ -432,50 +418,6 @@ export default function ResumeBuilderPage() {
               </button>
             </div>
           </header>
-
-          {showApiConfig && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm">
-              <div className="soft-card w-full max-w-lg rounded-2xl p-6 shadow-panel">
-                <div className="mb-5 flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-ink">AI Configuration</h2>
-                  <button onClick={() => setShowApiConfig(false)} type="button">
-                    <Icon name="close" />
-                  </button>
-                </div>
-                <div className="space-y-4">
-                  <div className="rounded-xl bg-primary/5 p-4">
-                    <p className="text-sm leading-6 text-primary">
-                      <strong>Demo Mode:</strong> By default, we use our own demo AI with mock responses. To use real AI, connect your own OpenAI API key. We never store your key on our servers.
-                    </p>
-                  </div>
-                  <label>
-                    <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-muted">OpenAI API Key</span>
-                    <input
-                      className="field"
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setApiKey(val);
-                        saveApiKey(val);
-                      }}
-                      placeholder="sk-..."
-                      type="password"
-                      value={apiKey}
-                    />
-                  </label>
-                  <p className="text-xs text-muted">
-                    Your key is saved locally in your browser. Get your key from the <a className="text-primary hover:underline" href="https://platform.openai.com/api-keys" rel="noreferrer" target="_blank">OpenAI Dashboard</a>.
-                  </p>
-                  <button
-                    className="flex w-full justify-center rounded-xl bg-ink py-3 font-bold text-white"
-                    onClick={() => setShowApiConfig(false)}
-                    type="button"
-                  >
-                    Close Settings
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {ai.error && <p className="mb-5 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm font-semibold text-error">{ai.error}</p>}
           {referenceMessage && <p className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary">{referenceMessage}</p>}
@@ -746,9 +688,7 @@ export default function ResumeBuilderPage() {
             </div>
           </div>
           {shareMessage && <p className="mx-auto mb-4 w-full max-w-4xl rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">{shareMessage}</p>}
-          <div className="flex-1 overflow-y-auto">
-            <ResumeDocument fullName={fullName} resume={resume} template={template} />
-          </div>
+          <ScaledTemplatePreview resume={resume} template={template} />
         </section>
 
         <Link className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white shadow-panel md:hidden" href="/templates">
@@ -756,6 +696,58 @@ export default function ResumeBuilderPage() {
         </Link>
       </div>
     </AppShell>
+  );
+}
+
+const A4_W = 793;
+const A4_H = 1122;
+
+function ScaledTemplatePreview({ resume, template }: { resume: ResumeData; template: SelectedTemplate }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.65);
+  const [innerH, setInnerH] = useState(A4_H);
+
+  useEffect(() => {
+    const measure = () => {
+      if (wrapRef.current) setScale(Math.min(1, wrapRef.current.clientWidth / A4_W));
+      if (innerRef.current) setInnerH(innerRef.current.scrollHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    if (innerRef.current) ro.observe(innerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (innerRef.current) setInnerH(innerRef.current.scrollHeight);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [resume, template]);
+
+  return (
+    <div ref={wrapRef} className="flex-1 overflow-y-auto py-2">
+      <div
+        className="relative mx-auto"
+        style={{ width: A4_W * scale, height: innerH * scale }}
+      >
+        <div
+          ref={innerRef}
+          id="resume-export"
+          className="print-area absolute left-0 top-0 bg-white shadow-panel"
+          style={{
+            width: A4_W,
+            minHeight: A4_H,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <TemplateRenderer resume={resume} templateName={template.name} settings={template} />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -894,161 +886,6 @@ function EducationEditor({ education, onDelete, onUpdate }: { education: Educati
   );
 }
 
-function ResumeDocument({ fullName, resume, template }: { fullName: string; resume: ResumeData; template: SelectedTemplate }) {
-  const contact = [resume.email, resume.phone, resume.location, resume.website].filter(Boolean);
-  const accentClass = getAccentClass(template.accent);
-  const twoColumn = template.layout === "twoColumn";
-  const compact = template.layout === "compact";
-  const isClassic = template.layout === "classic";
-
-  return (
-    <article className={`document-paper print-area mx-auto rounded-sm bg-white p-12 shadow-panel ${isClassic ? "font-serif" : "font-sans"}`}>
-      {twoColumn ? (
-        <div className="grid grid-cols-[0.34fr_1fr] gap-8">
-          <aside className="border-r border-outline/40 pr-6">
-            {resume.photoUrl && (
-              <div className="mb-6 h-32 w-32 overflow-hidden rounded-2xl border border-outline/30 bg-surface-soft">
-                <img
-                  alt={fullName}
-                  className="h-full w-full object-cover"
-                  src={resume.photoUrl}
-                  style={{
-                    objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%`,
-                    transform: `scale(${(resume.photoScale ?? 100) / 100})`
-                  }}
-                />
-              </div>
-            )}
-            <h2 className="text-3xl font-extrabold leading-tight tracking-normal text-ink">{fullName || "Your Name"}</h2>
-            <p className={`mt-2 text-base font-bold ${accentClass}`}>{resume.title || "Professional Title"}</p>
-            <div className="mt-6 space-y-2 text-xs text-muted">
-              {contact.length > 0 ? contact.map((item) => <p key={item}>{item}</p>) : <p>Contact details</p>}
-            </div>
-            <div className="mt-8">
-              <h3 className="mb-3 font-label text-xs font-bold uppercase tracking-[0.18em] text-ink">Skills</h3>
-              <SkillsPreview skills={resume.skills} small />
-            </div>
-          </aside>
-          <div>
-            <PreviewSection title="Summary">
-              <p className="text-sm leading-7 text-ink">{resume.summary || "Your professional summary will appear here."}</p>
-            </PreviewSection>
-            <ExperiencePreview compact={compact} experiences={resume.experiences} />
-            <EducationPreview education={resume.education} />
-          </div>
-        </div>
-      ) : (
-        <>
-          <header className={`mb-8 border-b border-outline/40 flex justify-between gap-6 ${compact ? "pb-5" : "pb-8"}`}>
-            <div>
-              <h2 className={`${compact ? "text-4xl" : "text-[42px]"} font-extrabold leading-tight tracking-normal text-ink`}>{fullName || "Your Name"}</h2>
-              <p className={`mt-2 text-lg font-bold ${accentClass}`}>{resume.title || "Professional Title"}</p>
-              <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted">
-                {contact.length > 0 ? contact.map((item) => <span key={item}>{item}</span>) : <span>Contact details</span>}
-              </div>
-            </div>
-            {resume.photoUrl && (
-              <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-outline/30 bg-surface-soft">
-                <img
-                  alt={fullName}
-                  className="h-full w-full object-cover"
-                  src={resume.photoUrl}
-                  style={{
-                    objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%`,
-                    transform: `scale(${(resume.photoScale ?? 100) / 100})`
-                  }}
-                />
-              </div>
-            )}
-          </header>
-          <PreviewSection title="Summary">
-            <p className="text-sm leading-7 text-ink">
-              {resume.summary || "Your professional summary will appear here. Add a short draft, then use AI to make it clear, concise, and ATS-friendly."}
-            </p>
-          </PreviewSection>
-          <ExperiencePreview compact={compact} experiences={resume.experiences} />
-          <EducationPreview education={resume.education} />
-          <PreviewSection title="Skills">
-            <SkillsPreview skills={resume.skills} />
-          </PreviewSection>
-        </>
-      )}
-    </article>
-  );
-}
-
-function ExperiencePreview({ compact, experiences }: { compact: boolean; experiences: ExperienceItem[] }) {
-  return (
-    <PreviewSection title="Experience">
-      {experiences.length === 0 && <p className="text-sm text-muted">Experience entries will appear here.</p>}
-      <div className="space-y-5">
-        {experiences.map((experience) => (
-          <div key={experience.id}>
-            <div className="mb-2 flex justify-between gap-4">
-              <h4 className="font-bold text-ink">
-                {experience.role || "Role Title"} <span className="font-normal text-muted">| {experience.company || "Company"}</span>
-              </h4>
-              <span className="text-sm text-muted">{formatDateRange(experience)}</span>
-            </div>
-            {(experience.location || !compact) && <p className="mb-2 text-sm text-muted">{experience.location || "Location"}</p>}
-            <ul className="list-disc space-y-2 pl-5 text-sm leading-7 text-ink">
-              {experience.bullets.filter(Boolean).length > 0 ? (
-                experience.bullets.filter(Boolean).map((bullet) => <li key={bullet}>{bullet}</li>)
-              ) : (
-                <li>Add achievement-focused bullet points.</li>
-              )}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </PreviewSection>
-  );
-}
-
-function EducationPreview({ education }: { education: EducationItem[] }) {
-  return (
-    <PreviewSection title="Education">
-      {education.length === 0 && <p className="text-sm text-muted">Education entries will appear here.</p>}
-      <div className="space-y-4">
-        {education.map((item) => (
-          <div key={item.id}>
-            <div className="flex justify-between gap-4">
-              <h4 className="font-bold text-ink">{item.school || "School"}</h4>
-              <span className="text-sm text-muted">{[item.startDate, item.endDate].filter(Boolean).join(" - ") || "Dates"}</span>
-            </div>
-            <p className="text-sm text-muted">{[item.degree || "Degree", item.location].filter(Boolean).join(" / ")}</p>
-          </div>
-        ))}
-      </div>
-    </PreviewSection>
-  );
-}
-
-function SkillsPreview({ skills, small = false }: { skills: string[]; small?: boolean }) {
-  if (skills.length === 0) {
-    return <p className="text-sm text-muted">Skills will appear here.</p>;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {skills.map((skill) => (
-        <span className={`rounded-full bg-primary/10 font-bold text-primary ${small ? "px-2 py-1 text-xs" : "px-3 py-1 text-sm"}`} key={skill}>
-          {skill}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function PreviewSection({ children, title }: { children: ReactNode; title: string }) {
-  return (
-    <section className="mb-8">
-      <h3 className="mb-4 border-b border-outline/40 pb-2 font-label text-sm font-bold uppercase tracking-[0.18em] text-ink">{title}</h3>
-      {children}
-    </section>
-  );
-}
-
 function EmptyHint({ text }: { text: string }) {
   return <p className="rounded-xl bg-surface-soft px-4 py-3 text-sm text-muted">{text}</p>;
 }
@@ -1074,10 +911,15 @@ function AiHelperPanel({
 }) {
   return (
     <section className="soft-card rounded-2xl p-5">
-      <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-ink">
-        <Icon className="text-primary" name="analytics" />
-        AI Helper
-      </h2>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
+          <Icon className="text-primary" name="analytics" />
+          AI Helper
+        </h2>
+        <span className="rounded-full bg-success/10 px-3 py-1 font-label text-xs font-bold text-success">
+          ✦ Free — no API key needed
+        </span>
+      </div>
       <div className="grid gap-2 md:grid-cols-3">
         <button
           className="rounded-xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary disabled:opacity-60"
@@ -1370,21 +1212,3 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Something went wrong.";
 }
 
-function formatDateRange(experience: ExperienceItem) {
-  const start = experience.startDate || "Start";
-  const end = experience.current ? "Present" : experience.endDate || "End";
-  return `${start} - ${end}`;
-}
-
-function getAccentClass(accent: string) {
-  const classes: Record<string, string> = {
-    ink: "text-ink",
-    primary: "text-primary",
-    primaryBright: "text-primary-bright",
-    secondary: "text-secondary",
-    success: "text-success",
-    warning: "text-warning"
-  };
-
-  return classes[accent] || "text-primary";
-}

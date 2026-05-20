@@ -139,6 +139,7 @@ function safeResume(resume?: ResumeData): ResumeData {
     experiences: resume?.experiences || [],
     education: resume?.education || [],
     skills: resume?.skills || [],
+    languages: resume?.languages || [],
     references: []
   };
 }

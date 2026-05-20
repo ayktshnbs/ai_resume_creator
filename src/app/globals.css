@@ -105,7 +105,8 @@ select {
 
 @media print {
   body {
-    background: #ffffff;
+    background: #ffffff !important;
+    margin: 0;
   }
 
   body * {
@@ -120,8 +121,19 @@ select {
   .print-area {
     position: absolute;
     inset: 0 auto auto 0;
-    width: 100%;
+    width: 210mm;
+    min-height: 297mm;
     background: #ffffff;
+    transform: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    margin: 0;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
   }
 
   .document-paper {
@@ -133,6 +145,7 @@ select {
   }
 
   @page {
-    margin: 12mm;
+    size: A4;
+    margin: 0;
   }
 }

@@ -14,7 +14,8 @@ type AppShellProps = {
 const navItems = [
   { href: "/dashboard", id: "dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/resume", id: "resume", label: "Resume Builder", icon: "resume" },
-  { href: "/templates", id: "templates", label: "Templates", icon: "template" },
+  { href: "/templates", id: "templates", label: "CV Templates", icon: "template" },
+  { href: "/cover-letter", id: "cover-letter", label: "Cover Letters", icon: "document" },
 ] as const;
 
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {

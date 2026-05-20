@@ -1,5 +1,5 @@
-import { CreatePaymentInput, CreatePaymentResult, VerifyPaymentInput, VerifyPaymentResult } from "./types";
-import { MockProvider } from "./mock-provider";
+import type { CreatePaymentInput, CreatePaymentResult, VerifyPaymentInput, VerifyPaymentResult } from "./types";
+import { IyzicoProvider } from "./iyzico-provider";
 
 export interface PaymentProvider {
   name: string;
@@ -8,15 +8,5 @@ export interface PaymentProvider {
 }
 
 export function getPaymentProvider(): PaymentProvider {
-  const provider = process.env.PAYMENT_PROVIDER || "mock";
-
-  switch (provider) {
-    case "mock":
-      return new MockProvider();
-    // Add real providers here as they are implemented:
-    // case "iyzico": return new IyzicoProvider();
-    // case "paytr": return new PayTRProvider();
-    default:
-      return new MockProvider();
-  }
+  return new IyzicoProvider();
 }

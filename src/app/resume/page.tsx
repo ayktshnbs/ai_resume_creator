@@ -14,8 +14,6 @@ import {
 } from "@/lib/resume-storage";
 import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
 
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { ResumePDF } from "@/components/resume-pdf";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 
 type AiState = {
@@ -65,13 +63,12 @@ export default function ResumeBuilderPage() {
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
   const [extracting, setExtracting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [ai, setAi] = useState<AiState>(initialAiState);
   const [helper, setHelper] = useState<HelperState>(initialHelperState);
   const [loaded, setLoaded] = useState(false);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
     setResume(loadResumeData());
     setTemplate(loadSelectedTemplate());
     setLoaded(true);
@@ -211,6 +208,45 @@ export default function ResumeBuilderPage() {
       setShareMessage("Temporary preview URL copied. Public sharing will require login/backend.");
     } catch {
       window.alert("Sharing requires login/backend. For now, use this local preview URL: " + url);
+    }
+  }
+
+  async function exportPdf() {
+    const el = document.getElementById("resume-export");
+    if (!el) return;
+
+    setExporting(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        width: A4_W,
+        windowWidth: A4_W,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdfW = 210;
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      const pageH = 297;
+      const doc = new jsPDF("p", "mm", "a4");
+
+      let y = 0;
+      while (y < pdfH) {
+        if (y > 0) doc.addPage();
+        doc.addImage(imgData, "PNG", 0, -y, pdfW, pdfH);
+        y += pageH;
+      }
+
+      const name = `${resume.firstName || "Resume"}_${resume.lastName || ""}`.replace(/\s+$/, "");
+      doc.save(`${name}.pdf`);
+    } catch {
+      setAi((prev) => ({ ...prev, error: "PDF export failed. Try using your browser's Print function instead." }));
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -707,22 +743,14 @@ export default function ResumeBuilderPage() {
               <button className="rounded-xl border border-outline/50 bg-white px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
                 Share
               </button>
-              {isClient ? (
-                <PDFDownloadLink
-                  document={<ResumePDF data={resume} template={template} />}
-                  fileName={`${resume.firstName || "Resume"}_${resume.lastName || ""}.pdf`}
-                >
-                  {({ loading }) => (
-                    <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50" disabled={loading} type="button">
-                      {loading ? "Preparing..." : "Export PDF"}
-                    </button>
-                  )}
-                </PDFDownloadLink>
-              ) : (
-                <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white opacity-50" disabled type="button">
-                  Export PDF
-                </button>
-              )}
+              <button
+                className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                disabled={exporting}
+                onClick={() => void exportPdf()}
+                type="button"
+              >
+                {exporting ? "Exporting..." : "Export PDF"}
+              </button>
             </div>
           </div>
           {shareMessage && <p className="mx-auto mb-4 w-full max-w-4xl rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">{shareMessage}</p>}

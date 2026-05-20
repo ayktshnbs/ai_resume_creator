@@ -64,6 +64,7 @@ export default function ResumeBuilderPage() {
   const [skillDraft, setSkillDraft] = useState("");
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
+  const [extracting, setExtracting] = useState(false);
   const [ai, setAi] = useState<AiState>(initialAiState);
   const [helper, setHelper] = useState<HelperState>(initialHelperState);
   const [loaded, setLoaded] = useState(false);
@@ -220,6 +221,7 @@ export default function ResumeBuilderPage() {
 
     const importedReferences: ResumeReference[] = [];
     let importedResume: Partial<ResumeData> | null = null;
+    const textsToExtract: string[] = [];
     setReferenceMessage("");
 
     for (const file of Array.from(files)) {
@@ -244,6 +246,8 @@ export default function ResumeBuilderPage() {
             importedResume = { ...(importedResume ?? {}), ...parsed };
             reference.imported = true;
           }
+        } else if (text.trim().length > 20) {
+          textsToExtract.push(text);
         }
 
         importedReferences.push(reference);
@@ -267,11 +271,39 @@ export default function ResumeBuilderPage() {
         ...mergeImportedResume(current, importedResume),
         references: [...current.references, ...importedReferences]
       }));
-      setReferenceMessage(
-        importedResume
-          ? "Uploaded files were attached and the JSON resume file was used to populate the form."
-          : "Uploaded files were attached to this draft."
-      );
+    }
+
+    if (textsToExtract.length > 0 && !importedResume) {
+      setExtracting(true);
+      setReferenceMessage("Extracting resume data from uploaded files...");
+      try {
+        const combined = textsToExtract.join("\n\n---\n\n");
+        const response = await fetch("/api/ai/resume-helper", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "extract_from_reference", text: combined })
+        });
+        const data = (await response.json()) as { resumeData?: Partial<ResumeData> };
+        if (data.resumeData) {
+          const extracted = extractResumeObject(data.resumeData);
+          if (extracted) {
+            setResume((current) => mergeImportedResume(current, extracted));
+            setReferenceMessage("Resume data was extracted from your uploaded files and used to populate the form.");
+          } else {
+            setReferenceMessage("Files were attached but no structured resume data could be extracted.");
+          }
+        } else {
+          setReferenceMessage("Files were attached but no resume data could be extracted.");
+        }
+      } catch {
+        setReferenceMessage("Files were attached. AI extraction failed — you can fill in the form manually.");
+      } finally {
+        setExtracting(false);
+      }
+    } else if (importedResume) {
+      setReferenceMessage("Uploaded files were attached and resume data was used to populate the form.");
+    } else {
+      setReferenceMessage("Uploaded files were attached to this draft.");
     }
   }
 
@@ -624,8 +656,14 @@ export default function ResumeBuilderPage() {
 
             <FormSection icon="upload" title="Reference Materials">
               <p className="text-sm leading-6 text-muted">
-                Securely attach supporting documents to assist the AI in tailoring your content.
+                Upload an old CV, cover letter, or text file — the AI will extract your details and fill the form automatically.
               </p>
+              {extracting && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Extracting resume data...
+                </div>
+              )}
               <label
                 className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-outline/70 bg-surface-soft px-5 py-6 text-center"
                 onDragOver={(event: DragEvent<HTMLLabelElement>) => event.preventDefault()}

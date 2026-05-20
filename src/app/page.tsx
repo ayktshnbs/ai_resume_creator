@@ -1,48 +1,64 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
+import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
+import { sampleResume } from "@/components/cv-templates/sample-data";
+import { saveSelectedTemplate } from "@/lib/resume-storage";
+import type { SelectedTemplate } from "@/types/resume";
+
+type TemplateCard = SelectedTemplate & {
+  text: string;
+  category: string;
+};
+
+const handcraftedTemplates: TemplateCard[] = [
+  { name: "Modern Minimalist", text: "Clean single-column with whitespace focus.", accent: "primary", layout: "single", category: "Single Column" },
+  { name: "Professional Serif", text: "Traditional layout for executive roles.", accent: "ink", layout: "classic", category: "Classic" },
+  { name: "Creative Tech", text: "Two-column layout for tech professionals.", accent: "secondary", layout: "twoColumn", category: "Two Column" },
+  { name: "Lumina Compact", text: "Dense but breathable layout.", accent: "primaryBright", layout: "compact", category: "Compact" },
+  { name: "Startup Operator", text: "Modern SaaS profile with metrics.", accent: "success", layout: "twoColumn", category: "Two Column" },
+  { name: "Graduate Clean", text: "Entry-level template with clarity.", accent: "warning", layout: "single", category: "Single Column" },
+  { name: "Executive Impact", text: "High-end for senior leadership.", accent: "ink", layout: "classic", category: "Classic" },
+  { name: "Academic Classic", text: "Structured for researchers.", accent: "primary", layout: "single", category: "Single Column" },
+  { name: "Obsidian Dark", text: "Dark-themed two-column design.", accent: "secondary", layout: "twoColumn", category: "Two Column" },
+  { name: "Helix Modern", text: "Sleek contemporary layout.", accent: "primaryBright", layout: "single", category: "Single Column" },
+];
+
+const parametricCards: TemplateCard[] = PARAMETRIC_CONFIGS.map((c) => ({
+  name: c.name,
+  text: c.desc,
+  accent: "primary",
+  layout: c.pdfLayout,
+  themeColor: c.color,
+  category: "Parametric",
+}));
+
+const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards];
+
 const features = [
-  {
-    title: "AI CV Enhancement",
-    text: "Rewrite weak bullets into professional, ATS-friendly achievements with one click.",
-    icon: "AI",
-    gradient: "from-primary/10 to-primary/5"
-  },
-  {
-    title: "Live Template Preview",
-    text: "Edit your details while the CV preview updates beside the form in real time.",
-    icon: "CV",
-    gradient: "from-secondary/10 to-secondary/5"
-  },
-  {
-    title: "Cover Letter Generator",
-    text: "Generate targeted cover letters from your saved CV data in seconds.",
-    icon: "CL",
-    gradient: "from-success/10 to-success/5"
-  },
-  {
-    title: "PDF Export",
-    text: "Export polished A4 PDFs that match your chosen template exactly.",
-    icon: "PDF",
-    gradient: "from-warning/10 to-warning/5"
-  }
+  { title: "AI CV Enhancement", text: "Rewrite weak bullets into professional, ATS-friendly achievements with one click.", icon: "sparkle", gradient: "from-primary/10 to-primary/5" },
+  { title: "Live Template Preview", text: "Edit your details while the CV preview updates beside the form in real time.", icon: "document", gradient: "from-secondary/10 to-secondary/5" },
+  { title: "Cover Letter Generator", text: "Generate targeted cover letters from your saved CV data in seconds.", icon: "cl", gradient: "from-success/10 to-success/5" },
+  { title: "PDF Export", text: "Export polished A4 PDFs that match your chosen template exactly.", icon: "pdf", gradient: "from-warning/10 to-warning/5" },
 ];
 
 const savedCvs = [
   ["Product Manager CV", "Updated today", "ATS 92"],
   ["SaaS Founder Resume", "2 days ago", "ATS 88"],
-  ["Consulting Cover Letter", "Draft", "AI"]
-];
-
-const slidingTemplates = [
-  { name: "Modern Minimalist", accent: "bg-primary", label: "Single Column" },
-  { name: "Professional Serif", accent: "bg-ink", label: "Classic Layout" },
-  { name: "Creative Tech", accent: "bg-secondary", label: "Two Column" },
-  { name: "Lumina Compact", accent: "bg-primary-bright", label: "Compact" },
-  { name: "Startup Operator", accent: "bg-success", label: "Metrics Focus" },
-  { name: "Graduate Clean", accent: "bg-warning", label: "Entry Level" },
-  { name: "Executive Impact", accent: "bg-ink", label: "Leadership" },
-  { name: "Academic Classic", accent: "bg-primary", label: "Research" },
+  ["Consulting Cover Letter", "Draft", "AI"],
 ];
 
 export default function Home() {
+  const router = useRouter();
+
+  function selectTemplate(t: TemplateCard) {
+    saveSelectedTemplate({ name: t.name, layout: t.layout, accent: t.accent, themeColor: t.themeColor });
+    router.push("/resume");
+  }
+
+  const marqueeTemplates = [...ALL_TEMPLATES, ...ALL_TEMPLATES];
+
   return (
     <main className="min-h-screen overflow-x-hidden">
       <style>{`
@@ -51,7 +67,10 @@ export default function Home() {
           100% { transform: translateX(-50%); }
         }
         .animate-marquee {
-          animation: marquee 40s linear infinite;
+          animation: marquee 120s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
         }
         @keyframes float-up {
           0%, 100% { transform: translateY(0px); }
@@ -68,10 +87,10 @@ export default function Home() {
         }
       `}</style>
 
-      <header className="sticky top-0 z-50 border-b border-outline/50 bg-background/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-outline/50 bg-white/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
-          <a className="text-lg font-bold tracking-tight text-primary" href="#">
-            AI CV Builder
+          <a className="text-xl font-bold tracking-tight text-ink" href="#">
+            <span className="text-primary">AI</span> CV Builder
           </a>
           <div className="hidden items-center gap-8 text-sm font-medium text-muted md:flex">
             <a className="transition-colors hover:text-primary" href="#features">Features</a>
@@ -80,16 +99,10 @@ export default function Home() {
             <a className="transition-colors hover:text-primary" href="#pricing">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
-            <a
-              className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/10 md:block"
-              href="/signin"
-            >
+            <a className="hidden rounded-xl px-4 py-2 text-sm font-bold text-ink transition-all hover:bg-surface-soft md:block" href="/signin">
               Sign in
             </a>
-            <a
-              className="primary-gradient rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-ambient transition-all hover:shadow-panel hover:brightness-105"
-              href="/signup"
-            >
+            <a className="primary-gradient rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-ambient transition-all hover:shadow-panel hover:brightness-105 active:scale-[0.98]" href="/signup">
               Get started free
             </a>
           </div>
@@ -97,97 +110,118 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(0,112,235,0.14),transparent_30%),radial-gradient(circle_at_78%_10%,rgba(70,72,212,0.12),transparent_28%),linear-gradient(180deg,#ffffff_0%,#f1f3ff_58%,#f9f9ff_100%)]" />
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(113,119,134,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.08)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 md:grid-cols-[0.88fr_1.12fr] md:px-10 md:py-20">
-          <div className="flex flex-col justify-center">
-            <p className="mb-4 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-              Production-ready SaaS MVP
-            </p>
-            <h1 className="text-balance text-4xl font-extrabold leading-tight tracking-normal text-ink md:text-6xl">
-              Build a job-winning CV in minutes with <span className="gradient-text">AI</span>.
+      <section className="relative overflow-hidden pt-8 pb-20">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(0,112,235,0.08),transparent_40%),radial-gradient(circle_at_78%_10%,rgba(70,72,212,0.07),transparent_35%),linear-gradient(180deg,#ffffff_0%,#f8faff_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(113,119,134,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.04)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+        <div className="mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
+          <div className="flex flex-col justify-center py-10">
+            <div className="mb-6 flex items-center gap-3">
+              <span className="rounded-full bg-primary/10 px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.15em] text-primary">
+                New: AI Power-Up
+              </span>
+              <span className="h-1 w-1 rounded-full bg-outline" />
+              <span className="text-xs font-medium text-muted">Trusted by 50k+ job seekers</span>
+            </div>
+            <h1 className="text-balance text-5xl font-extrabold leading-[1.1] tracking-tight text-ink md:text-7xl">
+              The <span className="gradient-text">smarter</span> way to build your resume.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-              Professional templates, AI-powered rewrites, cover letter generation, and one-click PDF export — all free to start.
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted">
+              Stop fighting with Word. Use professional templates, AI-powered rewrites, and one-click export to land your next interview.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                className="primary-gradient group relative overflow-hidden rounded-xl px-6 py-3 text-center text-sm font-bold text-white shadow-panel transition-all hover:shadow-[0_8px_32px_rgba(99,102,241,0.4)] hover:brightness-105"
+                className="primary-gradient group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-center text-base font-bold text-white shadow-panel transition-all hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] hover:brightness-105 active:scale-[0.98]"
                 href="/resume"
               >
-                Open builder
-              </a>
-              <a
-                className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-center text-sm font-bold text-ink shadow-ambient transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-panel"
-                href="/templates"
-              >
-                Browse templates
+                Create your resume — it&apos;s free
+                <SvgIcon name="arrow-right" />
               </a>
             </div>
-            <div className="mt-10 flex items-center gap-5">
-              <div className="flex -space-x-2">
-                {["bg-primary", "bg-secondary", "bg-success", "bg-warning"].map((color, i) => (
-                  <div key={i} className={`h-8 w-8 rounded-full border-2 border-white ${color} flex items-center justify-center text-[10px] font-bold text-white`}>
-                    {String.fromCharCode(65 + i)}
-                  </div>
+            <div className="mt-12 flex items-center gap-8 border-t border-outline/30 pt-8">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-10 w-10 rounded-full border-4 border-white bg-surface-soft shadow-sm" />
                 ))}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-primary text-[10px] font-bold text-white shadow-sm">+</div>
               </div>
-              <p className="text-sm text-muted"><strong className="text-ink">2,400+</strong> resumes built this month</p>
+              <div>
+                <div className="flex items-center gap-1 text-warning">
+                  {[1, 2, 3, 4, 5].map((i) => <SvgIcon key={i} className="h-4 w-4" name="star" />)}
+                </div>
+                <p className="mt-1 text-sm text-muted"><strong>4.9/5</strong> from our community</p>
+              </div>
             </div>
           </div>
-          <HeroPreview />
+          <div className="relative perspective-1000">
+            <div className="animate-float">
+              <HeroPreview />
+            </div>
+            <div className="absolute -left-12 bottom-12 h-32 w-32 animate-float-delay rounded-3xl bg-primary/10 blur-2xl" />
+            <div className="absolute -right-8 top-12 h-40 w-40 animate-float rounded-full bg-secondary/10 blur-3xl" />
+          </div>
         </div>
       </section>
 
-      {/* Cinematic sliding templates showcase */}
-      <section className="overflow-hidden border-y border-outline/30 bg-surface-soft py-12">
-        <div className="mb-6 px-4 text-center md:px-10">
-          <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Template Gallery</p>
-          <h2 className="mt-2 text-xl font-bold text-ink">8 professionally designed templates</h2>
+      {/* All templates showcase — dark background */}
+      <section className="overflow-hidden bg-[#0f1117] py-20" id="templates">
+        <div className="mx-auto max-w-7xl px-4 md:px-10">
+          <div className="mb-12 flex flex-col items-end justify-between gap-6 md:flex-row">
+            <div className="max-w-xl">
+              <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Templates</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">Designed for every career stage.</h2>
+              <p className="mt-3 text-sm text-white/50">{ALL_TEMPLATES.length} professionally crafted templates, ready to use.</p>
+            </div>
+            <a className="group flex items-center gap-2 text-sm font-bold text-white/70 hover:text-primary" href="/templates">
+              View all {ALL_TEMPLATES.length} templates
+              <SvgIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" name="arrow-right" />
+            </a>
+          </div>
         </div>
-        <div className="relative">
-          <div className="flex animate-marquee gap-5" style={{ width: "max-content" }}>
-            {[...slidingTemplates, ...slidingTemplates].map((tmpl, i) => (
-              <a
-                key={i}
-                href="/templates"
-                className="group flex-shrink-0 w-52 cursor-pointer overflow-hidden rounded-2xl border border-outline/30 bg-white shadow-ambient transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-panel"
+
+        <div className="relative mt-8">
+          <div className="flex animate-marquee gap-6" style={{ width: "max-content" }}>
+            {marqueeTemplates.map((tmpl, i) => (
+              <div
+                key={`${tmpl.name}-${i}`}
+                className="w-[240px] flex-shrink-0 cursor-pointer"
+                onClick={() => selectTemplate(tmpl)}
               >
-                <div className={`h-1.5 w-full ${tmpl.accent}`} />
-                <div className="p-4">
-                  <SlidingTemplateMiniPreview accent={tmpl.accent} />
-                  <p className="mt-3 text-sm font-bold text-ink">{tmpl.name}</p>
-                  <p className="text-xs text-muted">{tmpl.label}</p>
+                <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
+                  <div className="absolute inset-0 overflow-hidden">
+                    <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.302)", transformOrigin: "top left" }}>
+                      <TemplateRenderer resume={sampleResume} templateName={tmpl.name} />
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="absolute inset-x-0 bottom-0 translate-y-full p-4 transition-transform duration-300 group-hover:translate-y-0">
+                    <p className="text-sm font-bold text-white drop-shadow-lg">{tmpl.name}</p>
+                    <p className="mt-1 text-xs font-semibold text-primary">Use this template →</p>
+                  </div>
                 </div>
-              </a>
+              </div>
             ))}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-surface-soft to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-surface-soft to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-[#0f1117] to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-[#0f1117] to-transparent" />
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-20" id="features">
+      <section className="bg-surface-soft py-24" id="features">
         <div className="mx-auto max-w-7xl px-4 md:px-10">
-          <div className="mb-10 max-w-2xl">
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-primary">Core features</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-normal text-ink md:text-4xl">
-              Everything for a job-winning application.
-            </h2>
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Everything you need</p>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-ink">Built for precision and speed.</h2>
+            <p className="mt-4 text-lg text-muted">A streamlined workflow from draft to download.</p>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <article
-                className="card-hover soft-card cursor-default rounded-2xl p-6"
-                key={feature.title}
-              >
-                <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${feature.gradient} font-label text-sm font-bold text-primary ring-1 ring-primary/10`}>
-                  {feature.icon}
+              <article className="card-hover group rounded-3xl bg-white p-8 shadow-ambient" key={feature.title}>
+                <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} transition-transform group-hover:scale-110`}>
+                  <SvgIcon className="h-6 w-6 text-primary" name={feature.icon} />
                 </div>
                 <h3 className="text-xl font-bold text-ink">{feature.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted">{feature.text}</p>
+                <p className="mt-4 text-sm leading-relaxed text-muted">{feature.text}</p>
               </article>
             ))}
           </div>
@@ -195,68 +229,35 @@ export default function Home() {
       </section>
 
       {/* Dashboard preview */}
-      <section className="bg-surface-soft py-20" id="management">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 md:grid-cols-[320px_1fr] md:px-10">
-          <aside className="soft-card rounded-2xl p-5">
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Management</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">Manage saved documents</h2>
-            <p className="mt-3 text-sm leading-6 text-muted">Auth and database keep each resume connected to your account.</p>
-            <a
-              className="primary-gradient mt-6 block w-full rounded-xl px-4 py-3 text-center text-sm font-bold text-white transition-all hover:brightness-105"
-              href="/resume"
-            >
-              Create new CV
-            </a>
-          </aside>
-          <div className="grid gap-4">
+      <section className="py-24" id="management">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 md:grid-cols-[1fr_1.5fr] md:px-10">
+          <div className="flex flex-col justify-center">
+            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-muted">Management</p>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-ink">Keep your career history in one place.</h2>
+            <p className="mt-6 text-lg leading-relaxed text-muted">Save multiple versions of your CV for different roles. Our dashboard makes it easy to manage, update, and export your documents.</p>
+            <div className="mt-10 flex gap-4">
+              <a className="primary-gradient rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-panel" href="/resume">
+                Create new CV
+              </a>
+            </div>
+          </div>
+          <div className="space-y-4 rounded-3xl border border-outline/30 bg-surface-soft p-6 shadow-panel">
             {savedCvs.map(([title, date, score]) => (
-              <div
-                className="card-hover soft-card flex flex-col justify-between gap-4 rounded-2xl p-5 sm:flex-row sm:items-center"
-                key={title}
-              >
-                <div>
-                  <h3 className="text-lg font-bold text-ink">{title}</h3>
-                  <p className="text-sm text-muted">{date}</p>
+              <div className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5 shadow-ambient sm:flex-row sm:items-center" key={title}>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <SvgIcon name="document" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-ink">{title}</h3>
+                    <p className="text-xs text-muted">{date}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">{score}</span>
-                  <a className="rounded-xl border border-outline/70 bg-white px-4 py-2 text-sm font-bold text-ink transition-all hover:border-primary/40 hover:text-primary" href="/resume">
-                    Edit
-                  </a>
-                  <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white transition-all hover:bg-ink/80">
-                    Export PDF
-                  </button>
+                  <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">ATS {score}</span>
+                  <div className="h-8 w-px bg-outline/30" />
+                  <a className="text-sm font-bold text-primary hover:underline" href="/resume">Edit</a>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Architecture */}
-      <section className="bg-ink py-20 text-white" id="architecture">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 md:grid-cols-2 md:px-10">
-          <div>
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-blue-200">Architecture</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-normal md:text-4xl">Simple now, scalable later.</h2>
-            <p className="mt-5 leading-7 text-blue-100">
-              Clean App Router structure, API routes for AI work, auth for account management, and reusable UI modules for templates and form sections.
-            </p>
-          </div>
-          <div className="grid gap-3 text-sm">
-            {[
-              "src/app — routes, layout, pages, API handlers",
-              "src/components — reusable builder, dashboard, preview UI",
-              "src/app/api/auth — NextAuth with Google OAuth",
-              "src/services/ai — OpenAI prompts and structured responses",
-              "src/services/pdf — React-PDF template export",
-              "src/types — CV, user, template, AI response types"
-            ].map((item) => (
-              <div
-                className="rounded-xl border border-white/10 bg-white/7 px-4 py-3 transition-all hover:border-white/20 hover:bg-white/10"
-                key={item}
-              >
-                {item}
               </div>
             ))}
           </div>
@@ -264,205 +265,105 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section className="mx-auto max-w-7xl px-4 py-20 md:px-10" id="pricing">
-        <div className="mx-auto mb-10 max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">Transparent pricing</h2>
-          <p className="mt-4 text-muted">Start free with full builder access, then unlock AI and premium templates.</p>
+      <section className="mx-auto max-w-7xl px-4 py-24 md:px-10" id="pricing">
+        <div className="mx-auto mb-16 max-w-2xl text-center">
+          <h2 className="text-4xl font-bold tracking-tight text-ink">Simple, honest pricing.</h2>
+          <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
         </div>
-        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
-          <PricingCard
-            cta="Start free"
-            features={["1 saved CV", "All standard templates", "Cover letter generator", "Watermarked PDF export"]}
-            name="Basic"
-            price="$0"
-          />
-          <PricingCard
-            cta="Upgrade to Pro"
-            featured
-            features={["Unlimited CVs & cover letters", "AI rewrite & optimization", "Premium templates", "Clean PDF exports", "Priority support"]}
-            name="Pro"
-            price="$12"
-          />
+        <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+          <PricingCard cta="Start free" features={["1 saved CV", "All standard templates", "Live preview", "Basic PDF export"]} name="Basic" price="$0" />
+          <PricingCard cta="Get started with Pro" featured features={["Unlimited CVs", "AI rewrite & optimization", "Cover letter generator", "Premium templates", "High-res PDF exports", "No watermarks"]} name="Pro" price="$12" />
         </div>
       </section>
 
-      <footer className="border-t border-outline/50 bg-surface py-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 text-sm text-muted md:flex-row md:items-center md:justify-between md:px-10">
-          <strong className="text-primary">AI CV Builder</strong>
-          <div className="flex gap-6">
-            <a className="hover:text-primary" href="/signin">Sign in</a>
-            <a className="hover:text-primary" href="/signup">Sign up</a>
-            <a className="hover:text-primary" href="/templates">Templates</a>
+      <footer className="border-t border-outline/20 bg-white py-12">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-10">
+          <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
+            <a className="text-xl font-bold tracking-tight text-ink" href="#">
+              <span className="text-primary">AI</span> CV Builder
+            </a>
+            <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-muted">
+              <a className="hover:text-primary" href="/resume">Builder</a>
+              <a className="hover:text-primary" href="/templates">Templates</a>
+              <a className="hover:text-primary" href="/signin">Sign in</a>
+              <a className="hover:text-primary" href="/signup">Sign up</a>
+            </div>
           </div>
-          <span>Precision through Simplicity.</span>
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-outline/20 pt-8 text-xs text-muted md:flex-row">
+            <p>© 2026 AI CV Builder. All rights reserved.</p>
+            <p>Made with precision for modern professionals.</p>
+          </div>
         </div>
       </footer>
     </main>
   );
 }
 
-function SlidingTemplateMiniPreview({ accent }: { accent: string }) {
-  return (
-    <div className="space-y-1.5">
-      <div className={`h-2 w-24 rounded ${accent} opacity-80`} />
-      <div className="h-1 w-32 rounded bg-outline/40" />
-      <div className="h-1 w-28 rounded bg-outline/30" />
-      <div className="mt-2 h-px bg-outline/20" />
-      <div className="h-1 w-full rounded bg-outline/20" />
-      <div className="h-1 w-5/6 rounded bg-outline/20" />
-      <div className="h-1 w-4/5 rounded bg-outline/15" />
-    </div>
-  );
-}
-
 function HeroPreview() {
   return (
-    <div className="relative min-h-[560px]">
-      <div className="absolute inset-x-4 bottom-4 top-8 rounded-[28px] bg-primary/10 blur-3xl" />
-      <div className="relative grid gap-5 rounded-3xl border border-white/70 bg-white/70 p-4 shadow-panel backdrop-blur-xl lg:grid-cols-[1fr_220px]">
-        <div className="rounded-2xl border border-outline/40 bg-surface-soft p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Live Preview</p>
-              <h2 className="text-lg font-bold text-ink">Modern Minimalist</h2>
-            </div>
-            <span className="rounded-full bg-primary/10 px-3 py-1 font-label text-xs font-semibold text-primary">ATS 94</span>
-          </div>
-          <div className="mx-auto aspect-[0.707/1] max-h-[470px] min-h-[420px] w-full max-w-[335px] rounded bg-white p-8 shadow-panel ring-1 ring-outline/30">
-            <div className="border-b border-outline/40 pb-5 text-center">
-              <div className="mx-auto mb-3 h-5 w-44 rounded bg-ink/85" />
-              <div className="mx-auto mb-4 h-2.5 w-32 rounded bg-primary" />
-              <div className="mx-auto h-1.5 w-52 rounded bg-outline/45" />
-            </div>
-            <div className="mt-6 space-y-6">
-              <HeroResumeSection rows={4} titleWidth="w-20" />
-              <HeroResumeRole />
-              <HeroResumeRole muted />
-              <div>
-                <div className="mb-3 h-2.5 w-16 rounded bg-ink/75" />
-                <div className="flex flex-wrap gap-2">
-                  {["w-16", "w-12", "w-20", "w-14", "w-10"].map((width, index) => (
-                    <div className={`h-5 rounded-full ${width} ${index % 2 === 0 ? "bg-primary/10" : "bg-surface-soft"}`} key={`${width}-${index}`} />
-                  ))}
-                </div>
-              </div>
+    <div className="relative">
+      <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
+      <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/20 blur-[100px]" />
+
+      <div className="relative rounded-3xl border border-white/80 bg-white/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
+        <div className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-outline/30 bg-white shadow-panel">
+          <div className="absolute inset-0 overflow-hidden">
+            <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.53)", transformOrigin: "top left" }}>
+              <TemplateRenderer resume={sampleResume} templateName="Modern Minimalist" />
             </div>
           </div>
         </div>
-        <aside className="grid gap-4 lg:content-start">
-          <div className="rounded-2xl border border-outline/40 bg-white p-4 shadow-ambient">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-white">AI</span>
-              <div>
-                <h3 className="text-sm font-bold text-ink">Rewrite ready</h3>
-                <p className="text-xs text-muted">Summary and bullets</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="h-2 rounded bg-outline/35" />
-              <div className="h-2 rounded bg-outline/25" />
-              <div className="h-2 w-4/5 rounded bg-outline/25" />
-            </div>
-            <a className="primary-gradient mt-4 block rounded-xl px-4 py-2 text-center text-sm font-bold text-white transition-all hover:brightness-105" href="/resume">
-              Try builder
-            </a>
-          </div>
-          <div className="rounded-2xl border border-outline/40 bg-white p-4 shadow-ambient">
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Templates</p>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {["bg-primary", "bg-ink", "bg-secondary"].map((color) => (
-                <div className="rounded-lg border border-outline/30 bg-surface-soft p-2" key={color}>
-                  <div className={`mb-2 h-1.5 rounded ${color}`} />
-                  <div className="space-y-1">
-                    <div className="h-1 rounded bg-outline/40" />
-                    <div className="h-1 rounded bg-outline/30" />
-                    <div className="h-1 w-4/5 rounded bg-outline/30" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="rounded-2xl border border-outline/40 bg-ink p-4 text-white shadow-ambient">
-            <p className="text-sm font-bold">One-click PDF export</p>
-            <p className="mt-1 text-xs text-white/70">Print-ready A4 layout</p>
-          </div>
-        </aside>
       </div>
     </div>
   );
 }
 
-function HeroResumeSection({ rows, titleWidth }: { rows: number; titleWidth: string }) {
+function PricingCard({ cta, featured = false, features, name, price }: { cta: string; featured?: boolean; features: string[]; name: string; price: string }) {
   return (
-    <div>
-      <div className={`mb-3 h-2.5 rounded bg-ink/75 ${titleWidth}`} />
-      <div className="space-y-1.5">
-        {Array.from({ length: rows }).map((_, index) => (
-          <div className={`h-1.5 rounded ${index === rows - 1 ? "w-4/5 bg-outline/30" : "w-full bg-outline/40"}`} key={index} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeroResumeRole({ muted = false }: { muted?: boolean }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-2">
-        <div className={`h-2.5 w-24 rounded ${muted ? "bg-outline/50" : "bg-primary/60"}`} />
-        <div className="h-2 w-16 rounded bg-outline/35" />
-      </div>
-      <div className="space-y-1.5">
-        <div className="h-1.5 rounded bg-outline/40" />
-        <div className="h-1.5 rounded bg-outline/30" />
-        <div className="h-1.5 w-5/6 rounded bg-outline/30" />
-      </div>
-    </div>
-  );
-}
-
-function PricingCard({
-  cta,
-  featured = false,
-  features,
-  name,
-  price
-}: {
-  cta: string;
-  featured?: boolean;
-  features: string[];
-  name: string;
-  price: string;
-}) {
-  return (
-    <article className={`card-hover soft-card rounded-2xl p-7 ${featured ? "border-primary ring-2 ring-primary/15" : ""}`}>
+    <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-outline/30"}`}>
       {featured && (
-        <p className="mb-3 w-fit rounded-full bg-primary px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-white">
-          Most popular
-        </p>
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+          Recommended
+        </div>
       )}
-      <h3 className="text-xl font-bold text-ink">{name}</h3>
-      <p className="mt-4 text-5xl font-extrabold text-ink">
-        {price}
-        <span className="text-base font-medium text-muted">/mo</span>
-      </p>
-      <ul className="mt-6 space-y-3 text-sm text-muted">
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-ink">{name}</h3>
+        <div className="mt-4 flex items-baseline gap-1">
+          <span className="text-4xl font-extrabold text-ink">{price}</span>
+          <span className="text-sm font-medium text-muted">/month</span>
+        </div>
+      </div>
+      <ul className="mb-10 flex-1 space-y-4 text-sm text-muted">
         {features.map((feature) => (
           <li className="flex items-center gap-3" key={feature}>
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">✓</span>
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <SvgIcon className="h-3 w-3" name="sparkle" />
+            </div>
             {feature}
           </li>
         ))}
       </ul>
       <button
-        className={`mt-7 w-full rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-          featured
-            ? "primary-gradient text-white hover:brightness-105 hover:shadow-panel"
-            : "bg-surface-soft text-ink hover:bg-outline/20"
+        className={`w-full rounded-2xl px-6 py-4 text-sm font-bold transition-all ${
+          featured ? "primary-gradient text-white shadow-lg hover:brightness-105" : "bg-surface-soft text-ink hover:bg-outline/20"
         }`}
       >
         {cta}
       </button>
     </article>
+  );
+}
+
+
+function SvgIcon({ className = "h-5 w-5", name }: { className?: string; name: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      {name === "arrow-right" && <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
+      {name === "sparkle" && <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
+      {name === "document" && <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
+      {name === "cl" && <path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
+      {name === "pdf" && <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
+      {name === "star" && <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" fill="currentColor" />}
+    </svg>
   );
 }

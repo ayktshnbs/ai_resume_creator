@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 
@@ -11,8 +11,6 @@ type CoverLetterTemplate = {
   tags: string[];
   style: "modern" | "classic" | "creative" | "minimal" | "bold";
   accentColor: string;
-  accentClass: string;
-  softAccentClass: string;
 };
 
 const templates: CoverLetterTemplate[] = [
@@ -23,8 +21,6 @@ const templates: CoverLetterTemplate[] = [
     tags: ["Most Popular", "ATS Friendly"],
     style: "modern",
     accentColor: "#6366f1",
-    accentClass: "bg-primary",
-    softAccentClass: "bg-primary/10",
   },
   {
     id: "classic-business",
@@ -33,8 +29,6 @@ const templates: CoverLetterTemplate[] = [
     tags: ["Executive", "Serif"],
     style: "classic",
     accentColor: "#111827",
-    accentClass: "bg-ink",
-    softAccentClass: "bg-ink/10",
   },
   {
     id: "creative-standout",
@@ -43,8 +37,6 @@ const templates: CoverLetterTemplate[] = [
     tags: ["Creative", "Two-tone"],
     style: "creative",
     accentColor: "#ec4899",
-    accentClass: "bg-secondary",
-    softAccentClass: "bg-secondary/10",
   },
   {
     id: "minimal-clean",
@@ -53,8 +45,6 @@ const templates: CoverLetterTemplate[] = [
     tags: ["Minimal", "Clean"],
     style: "minimal",
     accentColor: "#10b981",
-    accentClass: "bg-success",
-    softAccentClass: "bg-success/10",
   },
   {
     id: "bold-impact",
@@ -63,8 +53,6 @@ const templates: CoverLetterTemplate[] = [
     tags: ["Leadership", "High Impact"],
     style: "bold",
     accentColor: "#f59e0b",
-    accentClass: "bg-warning",
-    softAccentClass: "bg-warning/10",
   },
 ];
 
@@ -72,13 +60,16 @@ const sampleContent = {
   name: "Alexandra Chen",
   title: "Senior Product Manager",
   email: "alex.chen@email.com",
+  phone: "+1 (555) 234-5678",
   date: "May 20, 2026",
   company: "Acme Corp",
+  recipientName: "Sarah Williams",
+  recipientTitle: "VP of Product",
   role: "Head of Product",
   body: [
     "I am writing to express my strong interest in the Head of Product position at Acme Corp. With seven years of experience leading cross-functional teams and shipping products used by millions, I am excited by the opportunity to scale your platform.",
-    "In my current role, I led a team of 12 that delivered a 38% increase in user retention and drove $4M in net new ARR through targeted feature launches. I believe this same outcome-focused approach will translate directly to the challenges your team is tackling.",
-    "I would welcome the opportunity to discuss how my experience aligns with your roadmap.",
+    "In my current role at TechVenture Inc., I led a team of 12 that delivered a 38% increase in user retention and drove $4M in net new ARR through targeted feature launches. I spearheaded the migration to a modular architecture that cut release cycles by 60%, enabling the team to ship weekly instead of monthly.",
+    "I would welcome the opportunity to discuss how my experience in product strategy, data-driven decision making, and team leadership aligns with your roadmap. Thank you for considering my application.",
   ],
 };
 
@@ -86,6 +77,8 @@ export default function CoverLetterPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const letterRef = useRef<HTMLDivElement>(null);
 
   async function generateCoverLetter(templateId: string) {
     setSelected(templateId);
@@ -95,9 +88,35 @@ export default function CoverLetterPage() {
     await new Promise((r) => setTimeout(r, 1200));
 
     setGeneratedText(
-      `Dear Hiring Manager,\n\n${sampleContent.body[0]}\n\n${sampleContent.body[1]}\n\n${sampleContent.body[2]}\n\nSincerely,\n${sampleContent.name}`
+      `Dear ${sampleContent.recipientName},\n\n${sampleContent.body[0]}\n\n${sampleContent.body[1]}\n\n${sampleContent.body[2]}\n\nSincerely,\n${sampleContent.name}`
     );
     setGenerating(false);
+  }
+
+  async function exportPdf() {
+    if (!letterRef.current) return;
+    setExporting(true);
+    try {
+      const html2canvas = (await import("html2canvas-pro")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(letterRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdfW = 210;
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      const doc = new jsPDF("p", "mm", "a4");
+      doc.addImage(imgData, "PNG", 0, 0, pdfW, Math.min(pdfH, 297));
+      doc.save(`Cover_Letter_${sampleContent.name.replace(/\s+/g, "_")}.pdf`);
+    } catch {
+      alert("PDF export failed. Try using your browser's Print function instead.");
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -136,8 +155,30 @@ export default function CoverLetterPage() {
               }`}
               onClick={() => void generateCoverLetter(template.id)}
             >
-              <div className="relative aspect-[1/1.2] overflow-hidden bg-gradient-to-b from-surface-soft to-white p-5">
-                <CoverLetterPreview template={template} />
+              <div className="relative aspect-[1/1.3] overflow-hidden bg-white">
+                <div className="absolute inset-0 overflow-hidden">
+                  <div
+                    style={{
+                      width: 595,
+                      minHeight: 842,
+                      transform: "scale(0.42)",
+                      transformOrigin: "top left",
+                    }}
+                  >
+                    <LetterLayout
+                      template={template}
+                      name={sampleContent.name}
+                      title={sampleContent.title}
+                      email={sampleContent.email}
+                      phone={sampleContent.phone}
+                      date={sampleContent.date}
+                      recipientName={sampleContent.recipientName}
+                      recipientTitle={sampleContent.recipientTitle}
+                      company={sampleContent.company}
+                      body={sampleContent.body}
+                    />
+                  </div>
+                </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
                   <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel">
                     <Icon name="edit" />
@@ -147,13 +188,11 @@ export default function CoverLetterPage() {
               </div>
               <div className="p-6">
                 <div className="mb-3 flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-xl font-bold text-ink transition-colors group-hover:text-primary">
-                      {template.name}
-                    </h2>
-                  </div>
-                  <div className={`h-8 w-8 shrink-0 rounded-xl ${template.softAccentClass} flex items-center justify-center`}>
-                    <div className={`h-4 w-4 rounded-full ${template.accentClass}`} />
+                  <h2 className="text-xl font-bold text-ink transition-colors group-hover:text-primary">
+                    {template.name}
+                  </h2>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: template.accentColor + "18" }}>
+                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: template.accentColor }} />
                   </div>
                 </div>
                 <p className="min-h-12 text-sm leading-6 text-muted">{template.description}</p>
@@ -177,15 +216,23 @@ export default function CoverLetterPage() {
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="text-xl font-bold text-ink">Generated Cover Letter</h2>
               {generatedText && (
-                <button
-                  className="rounded-xl border border-outline/70 bg-white px-4 py-2 text-sm font-bold text-ink hover:bg-surface-soft"
-                  onClick={() => {
-                    void navigator.clipboard.writeText(generatedText);
-                  }}
-                  type="button"
-                >
-                  Copy Text
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    className="rounded-xl border border-outline/70 bg-white px-4 py-2 text-sm font-bold text-ink hover:bg-surface-soft"
+                    onClick={() => void navigator.clipboard.writeText(generatedText)}
+                    type="button"
+                  >
+                    Copy Text
+                  </button>
+                  <button
+                    className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                    disabled={exporting}
+                    onClick={() => void exportPdf()}
+                    type="button"
+                  >
+                    {exporting ? "Exporting..." : "Export PDF"}
+                  </button>
+                </div>
               )}
             </div>
             {generating ? (
@@ -198,8 +245,19 @@ export default function CoverLetterPage() {
                 <div className="h-3 w-2/3 animate-pulse rounded bg-outline/20" />
               </div>
             ) : (
-              <div className="mx-auto max-w-2xl">
-                <RenderedLetter templateId={selected} text={generatedText} />
+              <div ref={letterRef} className="mx-auto max-w-[595px]">
+                <LetterLayout
+                  template={templates.find((t) => t.id === selected) || templates[0]}
+                  name={sampleContent.name}
+                  title={sampleContent.title}
+                  email={sampleContent.email}
+                  phone={sampleContent.phone}
+                  date={sampleContent.date}
+                  recipientName={sampleContent.recipientName}
+                  recipientTitle={sampleContent.recipientTitle}
+                  company={sampleContent.company}
+                  body={sampleContent.body}
+                />
               </div>
             )}
           </div>
@@ -209,251 +267,180 @@ export default function CoverLetterPage() {
   );
 }
 
-function CoverLetterPreview({ template }: { template: CoverLetterTemplate }) {
-  if (template.style === "classic") {
-    return <ClassicLetterPreview template={template} />;
+type LetterLayoutProps = {
+  template: CoverLetterTemplate;
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  date: string;
+  recipientName: string;
+  recipientTitle: string;
+  company: string;
+  body: string[];
+};
+
+function LetterLayout(props: LetterLayoutProps) {
+  switch (props.template.style) {
+    case "classic": return <ClassicLetter {...props} />;
+    case "creative": return <CreativeLetter {...props} />;
+    case "minimal": return <MinimalLetter {...props} />;
+    case "bold": return <BoldLetter {...props} />;
+    default: return <ModernLetter {...props} />;
   }
-  if (template.style === "creative") {
-    return <CreativeLetterPreview template={template} />;
-  }
-  if (template.style === "minimal") {
-    return <MinimalLetterPreview template={template} />;
-  }
-  if (template.style === "bold") {
-    return <BoldLetterPreview template={template} />;
-  }
-  return <ModernLetterPreview template={template} />;
 }
 
-function ModernLetterPreview({ template }: { template: CoverLetterTemplate }) {
+function ModernLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div className="mx-auto h-full max-w-[300px] rounded-xl bg-white p-5 shadow-ambient ring-1 ring-outline/20">
-      <div className={`-mx-5 -mt-5 mb-5 rounded-t-xl ${template.softAccentClass} px-5 py-4`}>
-        <div className="mb-1.5 h-3 w-40 rounded bg-ink/80" />
-        <div className={`h-1.5 w-28 rounded-full ${template.accentClass}`} />
-        <div className="mt-3 flex gap-3">
-          <div className="h-1 w-20 rounded bg-outline/30" />
-          <div className="h-1 w-16 rounded bg-outline/25" />
+    <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
+      <div style={{ background: template.accentColor + "12", padding: "36px 48px 28px" }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "#141b2b" }}>{name}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: template.accentColor, marginTop: 4, textTransform: "uppercase", letterSpacing: 1.5 }}>{title}</div>
+        <div style={{ display: "flex", gap: 24, marginTop: 14, fontSize: 10, color: "#6b7280" }}>
+          <span>{email}</span>
+          <span>{phone}</span>
         </div>
       </div>
-      <div className="mb-3 h-1 w-32 rounded bg-outline/25" />
-      <div className="space-y-1.5">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/30 ${i === 4 ? "w-4/5" : "w-full"}`} />
+      <div style={{ padding: "32px 48px 48px" }}>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 4 }}>{date}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 28 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 11, color: "#141b2b", lineHeight: 1.85, fontWeight: 600, marginBottom: 20 }}>
+          Dear {recipientName},
+        </div>
+        {body.map((p, i) => (
+          <div key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.85, marginBottom: 16 }}>{p}</div>
         ))}
-      </div>
-      <div className="my-3 space-y-1.5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/25 ${i === 5 ? "w-3/4" : "w-full"}`} />
-        ))}
-      </div>
-      <div className="space-y-1.5">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/25 ${i === 3 ? "w-1/2" : "w-full"}`} />
-        ))}
-      </div>
-      <div className="mt-5">
-        <div className="mb-1.5 h-1 w-20 rounded bg-outline/30" />
-        <div className={`h-2 w-32 rounded ${template.accentClass} opacity-60`} />
+        <div style={{ marginTop: 32, fontSize: 11, color: "#141b2b", lineHeight: 1.85 }}>
+          <div>Sincerely,</div>
+          <div style={{ fontWeight: 700, marginTop: 20 }}>{name}</div>
+          <div style={{ height: 3, width: 40, background: template.accentColor, borderRadius: 2, marginTop: 8 }} />
+        </div>
       </div>
     </div>
   );
 }
 
-function ClassicLetterPreview({ template }: { template: CoverLetterTemplate }) {
+function ClassicLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div className="mx-auto h-full max-w-[300px] rounded bg-white px-6 py-5 shadow-ambient ring-1 ring-outline/20">
-      <div className="mb-5 border-b border-outline/30 pb-4 text-center">
-        <div className="mx-auto mb-2 h-3 w-36 rounded bg-ink/80" />
-        <div className="mx-auto mb-2 h-1 w-24 rounded bg-outline/30" />
-        <div className={`mx-auto h-0.5 w-16 rounded-full ${template.accentClass}`} />
+    <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Georgia, 'Times New Roman', serif" }}>
+      <div style={{ textAlign: "center", padding: "44px 48px 24px", borderBottom: "1px solid #e5e7eb" }}>
+        <div style={{ fontSize: 24, fontWeight: 700, color: "#141b2b", letterSpacing: 0.5 }}>{name}</div>
+        <div style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>{title}</div>
+        <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 4 }}>{email} · {phone}</div>
+        <div style={{ height: 2, width: 48, background: template.accentColor, borderRadius: 1, margin: "16px auto 0" }} />
       </div>
-      <div className="mb-3 h-1 w-28 rounded bg-outline/25" />
-      <div className="mb-1 h-1 w-24 rounded bg-outline/25" />
-      <div className="mt-4 space-y-1.5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/30 ${i === 5 ? "w-4/5" : "w-full"}`} />
+      <div style={{ padding: "32px 56px 48px" }}>
+        <div style={{ textAlign: "right", fontSize: 10, color: "#6b7280", marginBottom: 24 }}>{date}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 28 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 11, color: "#141b2b", lineHeight: 1.9, marginBottom: 20 }}>
+          Dear {recipientName},
+        </div>
+        {body.map((p, i) => (
+          <div key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.9, marginBottom: 18, textIndent: 24 }}>{p}</div>
         ))}
-      </div>
-      <div className="my-3 space-y-1.5">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/25 ${i === 4 ? "w-2/3" : "w-full"}`} />
-        ))}
-      </div>
-      <div className="mt-5 space-y-1.5">
-        <div className="h-1 w-16 rounded bg-outline/30" />
-        <div className="h-2 w-28 rounded bg-ink/50" />
+        <div style={{ marginTop: 36, fontSize: 11, color: "#141b2b", lineHeight: 1.9 }}>
+          <div>Yours sincerely,</div>
+          <div style={{ fontWeight: 700, marginTop: 24, fontStyle: "italic" }}>{name}</div>
+        </div>
       </div>
     </div>
   );
 }
 
-function CreativeLetterPreview({ template }: { template: CoverLetterTemplate }) {
+function CreativeLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div className="mx-auto flex h-full max-w-[300px] overflow-hidden rounded-xl shadow-ambient ring-1 ring-outline/20">
-      <div className={`w-2 shrink-0 ${template.accentClass}`} />
-      <div className="flex-1 bg-white p-5">
-        <div className="mb-4 flex items-start justify-between">
+    <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif", display: "flex" }}>
+      <div style={{ width: 6, background: template.accentColor, flexShrink: 0 }} />
+      <div style={{ flex: 1, padding: "40px 44px 48px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
           <div>
-            <div className="mb-1.5 h-3 w-32 rounded bg-ink/80" />
-            <div className={`h-1.5 w-20 rounded-full ${template.accentClass}`} />
+            <div style={{ fontSize: 22, fontWeight: 700, color: "#141b2b" }}>{name}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: template.accentColor, marginTop: 4 }}>{title}</div>
+            <div style={{ fontSize: 10, color: "#6b7280", marginTop: 6 }}>{email} · {phone}</div>
           </div>
-          <div className={`h-10 w-10 rounded-lg ${template.softAccentClass}`} />
+          <div style={{ background: template.accentColor + "18", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, color: template.accentColor }}>
+            {date}
+          </div>
         </div>
-        <div className="mb-3 h-px bg-outline/20" />
-        <div className="space-y-1.5">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-[2px] rounded-full bg-outline/30 ${i === 4 ? "w-4/5" : "w-full"}`} />
-          ))}
+        <div style={{ height: 1, background: "#e5e7eb", marginBottom: 24 }} />
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 24 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 11, color: "#141b2b", lineHeight: 1.85, fontWeight: 600, marginBottom: 18 }}>
+          Dear {recipientName},
         </div>
-        <div className="my-3 space-y-1.5">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-[2px] rounded-full bg-outline/25 ${i === 4 ? "w-2/3" : "w-full"}`} />
-          ))}
-        </div>
-        <div className="space-y-1.5">
-          {[1, 2].map((i) => (
-            <div key={i} className={`h-[2px] rounded-full bg-outline/20 ${i === 2 ? "w-1/2" : "w-full"}`} />
-          ))}
-        </div>
-        <div className="mt-5 flex items-center gap-2">
-          <div className={`h-5 w-5 rounded ${template.softAccentClass}`} />
-          <div className="h-2 w-24 rounded bg-ink/50" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MinimalLetterPreview({ template }: { template: CoverLetterTemplate }) {
-  return (
-    <div className="mx-auto h-full max-w-[300px] rounded bg-white p-6 shadow-ambient ring-1 ring-outline/20">
-      <div className="mb-6">
-        <div className="mb-2 h-4 w-36 rounded bg-ink/85" />
-        <div className="h-1 w-24 rounded bg-outline/30" />
-      </div>
-      <div className={`mb-6 h-0.5 w-full rounded-full ${template.accentClass} opacity-40`} />
-      <div className="mb-4 h-1 w-28 rounded bg-outline/25" />
-      <div className="space-y-1.5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/30 ${i === 5 ? "w-3/4" : "w-full"}`} />
+        {body.map((p, i) => (
+          <div key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.85, marginBottom: 16 }}>{p}</div>
         ))}
+        <div style={{ marginTop: 32, fontSize: 11, color: "#141b2b", lineHeight: 1.85 }}>
+          <div>Best regards,</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 20 }}>
+            <div style={{ height: 3, width: 24, background: template.accentColor, borderRadius: 2 }} />
+            <span style={{ fontWeight: 700 }}>{name}</span>
+          </div>
+        </div>
       </div>
-      <div className="my-4 space-y-1.5">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className={`h-[2px] rounded-full bg-outline/25 ${i === 4 ? "w-2/3" : "w-full"}`} />
+    </div>
+  );
+}
+
+function MinimalLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
+  return (
+    <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
+      <div style={{ padding: "48px 56px 0" }}>
+        <div style={{ fontSize: 26, fontWeight: 700, color: "#141b2b", letterSpacing: -0.5 }}>{name}</div>
+        <div style={{ fontSize: 11, color: "#6b7280", marginTop: 6 }}>{email} · {phone}</div>
+        <div style={{ height: 1, background: template.accentColor + "60", marginTop: 20 }} />
+      </div>
+      <div style={{ padding: "28px 56px 48px" }}>
+        <div style={{ fontSize: 10, color: "#9ca3af", marginBottom: 20 }}>{date}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 32 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 11, color: "#141b2b", lineHeight: 1.9, marginBottom: 20 }}>
+          Dear {recipientName},
+        </div>
+        {body.map((p, i) => (
+          <div key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.9, marginBottom: 18 }}>{p}</div>
         ))}
-      </div>
-      <div className={`mt-6 h-0.5 w-full rounded-full ${template.accentClass} opacity-20`} />
-      <div className="mt-4">
-        <div className="mb-1 h-1 w-16 rounded bg-outline/25" />
-        <div className="h-2 w-28 rounded bg-ink/50" />
-      </div>
-    </div>
-  );
-}
-
-function BoldLetterPreview({ template }: { template: CoverLetterTemplate }) {
-  return (
-    <div className="mx-auto h-full max-w-[300px] overflow-hidden rounded-xl bg-white shadow-ambient ring-1 ring-outline/20">
-      <div className={`${template.accentClass} px-5 py-4`}>
-        <div className="mb-1.5 h-3 w-40 rounded bg-white/90" />
-        <div className="h-1.5 w-24 rounded-full bg-white/60" />
-      </div>
-      <div className="p-5">
-        <div className="mb-3 h-1 w-32 rounded bg-outline/25" />
-        <div className="space-y-1.5">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-[2px] rounded-full bg-outline/30 ${i === 4 ? "w-4/5" : "w-full"}`} />
-          ))}
-        </div>
-        <div className="my-3 space-y-1.5">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-[2px] rounded-full bg-outline/25 ${i === 4 ? "w-2/3" : "w-full"}`} />
-          ))}
-        </div>
-        <div className="space-y-1.5">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className={`h-[2px] rounded-full bg-outline/20 ${i === 3 ? "w-1/2" : "w-full"}`} />
-          ))}
-        </div>
-        <div className="mt-5 flex items-center gap-2">
-          <div className={`h-0.5 w-8 rounded-full ${template.accentClass}`} />
-          <div className="h-2 w-24 rounded bg-ink/50" />
+        <div style={{ height: 1, background: template.accentColor + "30", marginTop: 36, marginBottom: 28 }} />
+        <div style={{ fontSize: 11, color: "#141b2b", lineHeight: 1.9 }}>
+          <div style={{ color: "#9ca3af", fontSize: 10 }}>Sincerely,</div>
+          <div style={{ fontWeight: 700, marginTop: 8 }}>{name}</div>
         </div>
       </div>
     </div>
   );
 }
 
-function RenderedLetter({ templateId, text }: { templateId: string | null; text: string }) {
-  const template = templates.find((t) => t.id === templateId);
-  const lines = text.split("\n");
-
-  if (template?.style === "classic") {
-    return (
-      <div className="rounded-2xl bg-white p-8 shadow-ambient ring-1 ring-outline/20">
-        <div className="mb-8 border-b border-outline/30 pb-6 text-center">
-          <h2 className="text-2xl font-bold text-ink">{sampleContent.name}</h2>
-          <p className="mt-1 text-sm text-muted">{sampleContent.email}</p>
-          <div className={`mx-auto mt-3 h-0.5 w-16 rounded-full`} style={{ background: template.accentColor }} />
-        </div>
-        <div className="space-y-5 text-sm leading-7 text-ink">
-          {lines.map((line, i) => (line ? <p key={i}>{line}</p> : null))}
-        </div>
-      </div>
-    );
-  }
-
-  if (template?.style === "creative") {
-    return (
-      <div className="flex overflow-hidden rounded-2xl shadow-ambient ring-1 ring-outline/20">
-        <div className="w-2 shrink-0" style={{ background: template.accentColor }} />
-        <div className="flex-1 bg-white p-8">
-          <div className="mb-6 flex items-start justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-ink">{sampleContent.name}</h2>
-              <p className="mt-1 font-semibold" style={{ color: template.accentColor }}>
-                {sampleContent.title}
-              </p>
-            </div>
-            <div className="rounded-xl px-3 py-1 text-xs font-bold" style={{ background: template.accentColor + "20", color: template.accentColor }}>
-              {sampleContent.date}
-            </div>
-          </div>
-          <div className="space-y-5 text-sm leading-7 text-ink">
-            {lines.map((line, i) => (line ? <p key={i}>{line}</p> : null))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (template?.style === "bold") {
-    return (
-      <div className="overflow-hidden rounded-2xl shadow-ambient ring-1 ring-outline/20">
-        <div className="px-8 py-5 text-white" style={{ background: template.accentColor }}>
-          <h2 className="text-2xl font-bold">{sampleContent.name}</h2>
-          <p className="mt-1 text-sm opacity-80">{sampleContent.title}</p>
-        </div>
-        <div className="bg-white p-8 space-y-5 text-sm leading-7 text-ink">
-          {lines.map((line, i) => (line ? <p key={i}>{line}</p> : null))}
-        </div>
-      </div>
-    );
-  }
-
+function BoldLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div className="rounded-2xl bg-white p-8 shadow-ambient ring-1 ring-outline/20">
-      <div className="mb-6 rounded-xl p-4" style={{ background: template?.accentColor ? template.accentColor + "15" : "#f3f4f6" }}>
-        <h2 className="text-2xl font-bold text-ink">{sampleContent.name}</h2>
-        <p className="mt-1 font-semibold" style={{ color: template?.accentColor }}>
-          {sampleContent.title}
-        </p>
-        <p className="mt-1 text-sm text-muted">{sampleContent.email}</p>
+    <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
+      <div style={{ background: template.accentColor, padding: "32px 48px 24px", color: "#fff" }}>
+        <div style={{ fontSize: 24, fontWeight: 800 }}>{name}</div>
+        <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{title}</div>
+        <div style={{ display: "flex", gap: 20, marginTop: 12, fontSize: 10, opacity: 0.7 }}>
+          <span>{email}</span>
+          <span>{phone}</span>
+        </div>
       </div>
-      <div className="space-y-5 text-sm leading-7 text-ink">
-        {lines.map((line, i) => (line ? <p key={i}>{line}</p> : null))}
+      <div style={{ padding: "32px 48px 48px" }}>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 4 }}>{date}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
+        <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 28 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 11, color: "#141b2b", lineHeight: 1.85, fontWeight: 600, marginBottom: 20 }}>
+          Dear {recipientName},
+        </div>
+        {body.map((p, i) => (
+          <div key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.85, marginBottom: 16 }}>{p}</div>
+        ))}
+        <div style={{ marginTop: 32, fontSize: 11, color: "#141b2b", lineHeight: 1.85 }}>
+          <div>Sincerely,</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 20 }}>
+            <div style={{ height: 2, width: 32, background: template.accentColor, borderRadius: 2 }} />
+            <span style={{ fontWeight: 700 }}>{name}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,8 @@
+import { TemplateCarousel } from "@/components/cv-templates/template-carousel";
+import { OnyxPreview } from "@/components/cv-templates/onyx-preview";
+import { sampleResume } from "@/components/cv-templates/sample-data";
+import { PaymentButton } from "@/components/payment-button";
+
 const features = [
   {
     title: "AI CV enhancement",
@@ -33,7 +38,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-outline/50 bg-background/85 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
           <a className="text-lg font-bold tracking-tight text-primary" href="#">
-            AI CV Builder
+            CVForge AI
           </a>
           <div className="hidden items-center gap-8 text-sm font-medium text-muted md:flex">
             <a className="hover:text-primary" href="#features">
@@ -42,19 +47,19 @@ export default function Home() {
             <a className="hover:text-primary" href="/resume">
               Builder
             </a>
-            <a className="hover:text-primary" href="#architecture">
-              Architecture
+            <a className="hover:text-primary" href="/templates">
+              Templates
             </a>
             <a className="hover:text-primary" href="#pricing">
               Pricing
             </a>
           </div>
           <div className="flex items-center gap-3">
-            <a className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-primary hover:bg-surface-soft md:block" href="/signin">
-              Login
+            <a className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/10 md:block" href="/signin">
+              Sign in
             </a>
-            <a className="primary-gradient rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-ambient" href="/resume">
-              Start free
+            <a className="primary-gradient rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-ambient transition-all hover:brightness-105 hover:shadow-panel" href="/signup">
+              Get started free
             </a>
           </div>
         </nav>
@@ -78,8 +83,8 @@ export default function Home() {
             <a className="primary-gradient rounded-xl px-6 py-3 text-center text-sm font-bold text-white shadow-panel" href="/resume">
               Open builder
             </a>
-            <a className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-center text-sm font-bold text-ink shadow-ambient" href="#architecture">
-              View roadmap
+            <a className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-center text-sm font-bold text-ink shadow-ambient" href="/templates">
+              View designs
             </a>
           </div>
         </div>
@@ -87,6 +92,8 @@ export default function Home() {
         <HeroPreview />
         </div>
       </section>
+
+      <TemplateCarousel />
 
       <section className="bg-surface-soft py-20" id="features">
         <div className="mx-auto max-w-7xl px-4 md:px-10">
@@ -96,7 +103,7 @@ export default function Home() {
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <article className="soft-card rounded-2xl p-6 transition hover:-translate-y-0.5 hover:shadow-panel" key={feature.title}>
+              <article className="soft-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-panel hover:border-primary/30" key={feature.title}>
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 font-label text-sm font-bold text-primary">
                   {feature.icon}
                 </div>
@@ -132,25 +139,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-ink py-20 text-white" id="architecture">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 md:grid-cols-2 md:px-10">
-          <div>
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-blue-200">Architecture</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-normal md:text-4xl">Simple now, scalable later.</h2>
-            <p className="mt-5 leading-7 text-blue-100">
-              The product starts with a clean App Router structure, API routes for AI and PDF work, Supabase for auth/database, and reusable UI modules for templates and form sections.
-            </p>
-          </div>
-          <div className="grid gap-3 text-sm">
-            {["src/app - routes, layout, pages, API handlers", "src/components - reusable builder, dashboard, preview UI", "src/lib/supabase - browser and server clients", "src/services/ai - OpenAI prompts and structured responses", "src/services/pdf - Puppeteer or React-PDF export", "src/types - CV, user, template, AI response types"].map((item) => (
-              <div className="rounded-xl border border-white/10 bg-white/7 px-4 py-3" key={item}>
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="mx-auto max-w-7xl px-4 py-20 md:px-10" id="pricing">
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">Transparent MVP pricing</h2>
@@ -175,7 +163,7 @@ export default function Home() {
 
       <footer className="border-t border-outline/50 bg-surface py-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 text-sm text-muted md:flex-row md:items-center md:justify-between md:px-10">
-          <strong className="text-primary">AI CV Builder</strong>
+          <strong className="text-primary">CVForge AI</strong>
           <span>Precision through Simplicity. Built for a step-by-step SaaS launch.</span>
         </div>
       </footer>
@@ -185,33 +173,34 @@ export default function Home() {
 
 function HeroPreview() {
   return (
-    <div className="relative min-h-[560px]">
-      <div className="absolute inset-x-4 bottom-4 top-8 rounded-[28px] bg-primary/10 blur-3xl" />
-      <div className="relative grid gap-5 rounded-3xl border border-white/70 bg-white/70 p-4 shadow-panel backdrop-blur-xl lg:grid-cols-[1fr_220px]">
-        <div className="rounded-2xl border border-outline/40 bg-surface-soft p-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Live Preview</p>
-              <h2 className="text-lg font-bold text-ink">Modern Minimalist</h2>
+    <div className="relative min-h-[600px]">
+      <div className="absolute inset-x-6 bottom-6 top-10 rounded-[32px] bg-[radial-gradient(circle_at_30%_30%,rgba(0,112,235,0.18),transparent_60%),radial-gradient(circle_at_75%_70%,rgba(70,72,212,0.16),transparent_55%)] blur-3xl" />
+      <div className="relative grid gap-5 rounded-3xl border border-white/70 bg-white/60 p-4 shadow-panel backdrop-blur-xl lg:grid-cols-[1fr_236px]">
+        <div className="relative overflow-hidden rounded-2xl border border-outline/30 bg-[linear-gradient(180deg,#eef2ff_0%,#f7f8ff_100%)] p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#fb7185]" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#fbbf24]" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#34d399]" />
             </div>
-            <span className="rounded-full bg-primary/10 px-3 py-1 font-label text-xs font-semibold text-primary">ATS 94</span>
+            <div className="flex flex-1 items-center gap-2">
+              <p className="font-label text-[10px] font-bold uppercase tracking-[0.18em] text-muted">Live preview</p>
+              <span className="text-[10px] text-muted/70">·</span>
+              <p className="text-[10px] font-bold text-ink">Modern Minimalist</p>
+            </div>
+            <span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 font-label text-[10px] font-bold tracking-wide text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              ATS 94
+            </span>
           </div>
-          <div className="mx-auto aspect-[0.707/1] max-h-[470px] min-h-[420px] w-full max-w-[335px] rounded bg-white p-8 shadow-panel ring-1 ring-outline/30">
-            <div className="border-b border-outline/40 pb-5 text-center">
-              <div className="mx-auto mb-3 h-5 w-44 rounded bg-ink/85" />
-              <div className="mx-auto mb-4 h-2.5 w-32 rounded bg-primary" />
-              <div className="mx-auto h-1.5 w-52 rounded bg-outline/45" />
-            </div>
-            <div className="mt-6 space-y-6">
-              <HeroResumeSection rows={4} titleWidth="w-20" />
-              <HeroResumeRole />
-              <HeroResumeRole muted />
-              <div>
-                <div className="mb-3 h-2.5 w-16 rounded bg-ink/75" />
-                <div className="flex flex-wrap gap-2">
-                  {["w-16", "w-12", "w-20", "w-14", "w-10"].map((width, index) => (
-                    <div className={`h-5 rounded-full ${width} ${index % 2 === 0 ? "bg-primary/10" : "bg-surface-soft"}`} key={`${width}-${index}`} />
-                  ))}
+          <HeroResumeStage />
+          <div className="pointer-events-none absolute -bottom-3 -right-3 hidden rotate-[2deg] md:block">
+            <div className="rounded-2xl border border-white/80 bg-white/95 px-4 py-3 shadow-panel backdrop-blur">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-[11px] font-bold text-white shadow-sm">AI</span>
+                <div>
+                  <p className="text-[11px] font-bold text-ink">Rewriting bullet 3…</p>
+                  <p className="text-[10px] text-muted">+18% impact wording</p>
                 </div>
               </div>
             </div>
@@ -220,39 +209,49 @@ function HeroPreview() {
         <aside className="grid gap-4 lg:content-start">
           <div className="rounded-2xl border border-outline/40 bg-white p-4 shadow-ambient">
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-bold text-white">AI</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-xs font-bold text-white">AI</span>
               <div>
                 <h3 className="text-sm font-bold text-ink">Rewrite ready</h3>
                 <p className="text-xs text-muted">Summary and bullets</p>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="h-2 rounded bg-outline/35" />
-              <div className="h-2 rounded bg-outline/25" />
-              <div className="h-2 w-4/5 rounded bg-outline/25" />
-            </div>
-            <a className="primary-gradient mt-4 block rounded-xl px-4 py-2 text-center text-sm font-bold text-white" href="/resume">
-              Try builder
-            </a>
+            <ul className="space-y-1.5 text-[11px] leading-snug text-muted">
+              <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span><span>Polished &quot;Led&quot; → <strong className="text-ink">&quot;Owned end-to-end&quot;</strong></span></li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span><span>Quantified onboarding → <strong className="text-ink">45% TTFM</strong></span></li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span><span>Tightened summary by 28 words</span></li>
+            </ul>
+            <a className="primary-gradient mt-4 block rounded-xl px-4 py-2 text-center text-sm font-bold text-white shadow-sm" href="/resume">Try the builder</a>
           </div>
           <div className="rounded-2xl border border-outline/40 bg-white p-4 shadow-ambient">
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Templates</p>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {["bg-primary", "bg-ink", "bg-secondary"].map((color) => (
-                <div className="rounded-lg border border-outline/30 bg-surface-soft p-2" key={color}>
-                  <div className={`mb-2 h-1.5 rounded ${color}`} />
-                  <div className="space-y-1">
-                    <div className="h-1 rounded bg-outline/40" />
-                    <div className="h-1 rounded bg-outline/30" />
-                    <div className="h-1 w-4/5 rounded bg-outline/30" />
+            <div className="mb-3 flex items-center justify-between">
+              <p className="font-label text-[10px] font-bold uppercase tracking-[0.16em] text-muted">Templates</p>
+              <span className="font-label text-[10px] font-bold text-primary">10 styles</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[{tint:"bg-[#0058bc]"},{tint:"bg-[#0f172a]"},{tint:"bg-[#4648d4]"},{tint:"bg-[#0b3d5a]"},{tint:"bg-[#6b5235]"},{tint:"bg-[#0d9488]"}].map((t, i) => (
+                <div key={i} className="relative overflow-hidden rounded-lg border border-outline/20 bg-white p-1.5 shadow-sm">
+                  <div className={`mb-1 h-1 w-2/3 rounded-full ${t.tint}`} />
+                  <div className="space-y-0.5">
+                    <div className="h-0.5 rounded bg-outline/45" />
+                    <div className="h-0.5 rounded bg-outline/35" />
+                    <div className="h-0.5 w-5/6 rounded bg-outline/30" />
+                    <div className="mt-1 h-0.5 w-1/2 rounded bg-outline/35" />
+                    <div className="h-0.5 rounded bg-outline/25" />
+                    <div className="h-0.5 w-4/5 rounded bg-outline/25" />
                   </div>
                 </div>
               ))}
             </div>
+            <a className="mt-3 block rounded-xl border border-outline/40 px-4 py-2 text-center text-xs font-bold text-ink hover:bg-surface-soft" href="/templates">Browse all templates</a>
           </div>
-          <div className="rounded-2xl border border-outline/40 bg-ink p-4 text-white shadow-ambient">
+          <div className="rounded-2xl border border-ink/20 bg-gradient-to-br from-ink to-[#1e293b] p-4 text-white shadow-ambient">
             <p className="text-sm font-bold">One-click PDF export</p>
-            <p className="mt-1 text-xs text-white/70">Print-ready A4 layout</p>
+            <p className="mt-1 text-xs text-white/70">Print-ready A4, no watermark</p>
+            <div className="mt-3 flex items-center gap-2 text-[11px] text-white/80">
+              <span className="rounded bg-white/10 px-2 py-0.5 font-mono">.pdf</span>
+              <span className="rounded bg-white/10 px-2 py-0.5">A4</span>
+              <span className="rounded bg-white/10 px-2 py-0.5">300dpi</span>
+            </div>
           </div>
         </aside>
       </div>
@@ -260,30 +259,14 @@ function HeroPreview() {
   );
 }
 
-function HeroResumeSection({ rows, titleWidth }: { rows: number; titleWidth: string }) {
+function HeroResumeStage() {
   return (
-    <div>
-      <div className={`mb-3 h-2.5 rounded bg-ink/75 ${titleWidth}`} />
-      <div className="space-y-1.5">
-        {Array.from({ length: rows }).map((_, index) => (
-          <div className={`h-1.5 rounded ${index === rows - 1 ? "w-4/5 bg-outline/30" : "w-full bg-outline/40"}`} key={index} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HeroResumeRole({ muted = false }: { muted?: boolean }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-2">
-        <div className={`h-2.5 w-24 rounded ${muted ? "bg-outline/50" : "bg-primary/60"}`} />
-        <div className="h-2 w-16 rounded bg-outline/35" />
-      </div>
-      <div className="space-y-1.5">
-        <div className="h-1.5 rounded bg-outline/40" />
-        <div className="h-1.5 rounded bg-outline/30" />
-        <div className="h-1.5 w-5/6 rounded bg-outline/30" />
+    <div
+      className="relative mx-auto overflow-hidden rounded bg-white shadow-[0_18px_40px_-18px_rgba(15,23,42,0.35)] ring-1 ring-outline/25"
+      style={{ width: 285, height: 403 }}
+    >
+      <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.36)", transformOrigin: "top left" }}>
+        <OnyxPreview resume={sampleResume} />
       </div>
     </div>
   );
@@ -303,24 +286,32 @@ function PricingCard({
   price: string;
 }) {
   return (
-    <article className={`soft-card rounded-2xl p-7 ${featured ? "border-primary ring-2 ring-primary/15" : ""}`}>
-      {featured && <p className="mb-3 w-fit rounded-full bg-primary px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-white">Most popular</p>}
-      <h3 className="text-xl font-bold text-ink">{name}</h3>
-      <p className="mt-4 text-5xl font-extrabold text-ink">
-        {price}
-        <span className="text-base font-medium text-muted">/mo</span>
-      </p>
-      <ul className="mt-6 space-y-3 text-sm text-muted">
+    <div className={`soft-card flex flex-col gap-6 rounded-2xl p-7 ${featured ? "ring-2 ring-primary" : ""}`}>
+      <div>
+        <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-primary">{name}</p>
+        <p className="mt-2 text-4xl font-extrabold text-ink">{price}</p>
+        <p className="text-sm text-muted">per month</p>
+      </div>
+      <ul className="space-y-2 text-sm text-ink">
         {features.map((feature) => (
-          <li className="flex items-center gap-3" key={feature}>
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">✓</span>
-            {feature}
+          <li key={feature} className="flex items-start gap-2">
+            <span className="mt-0.5 text-primary">✓</span>
+            <span>{feature}</span>
           </li>
         ))}
       </ul>
-      <button className={`mt-7 w-full rounded-xl px-4 py-3 text-sm font-bold ${featured ? "primary-gradient text-white" : "bg-surface-soft text-ink"}`}>
-        {cta}
-      </button>
-    </article>
+      {featured ? (
+        <PaymentButton
+          price={price}
+          className="mt-auto rounded-xl px-4 py-3 text-center text-sm font-bold primary-gradient text-white"
+        >
+          {cta}
+        </PaymentButton>
+      ) : (
+        <a className={`mt-auto rounded-xl px-4 py-3 text-center text-sm font-bold border border-outline/70 bg-white text-ink`} href="/resume">
+          {cta}
+        </a>
+      )}
+    </div>
   );
 }

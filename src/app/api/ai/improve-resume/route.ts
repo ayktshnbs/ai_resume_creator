@@ -5,7 +5,6 @@ import type { ResumeData } from "@/types/resume";
 type RequestBody = {
   resumeData?: ResumeData;
   targetRole?: string;
-  userApiKey?: string;
 };
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
@@ -19,13 +18,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing resumeData." }, { status: 400 });
     }
 
-    const effectiveKey = body.userApiKey || process.env.OPENAI_API_KEY;
-
-    if (!effectiveKey) {
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ resumeData: mockImproveResume(resume) });
     }
 
-    const client = new OpenAI({ apiKey: effectiveKey });
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const response = await client.responses.create({
       model: MODEL,

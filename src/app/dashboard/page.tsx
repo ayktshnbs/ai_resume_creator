@@ -1,14 +1,31 @@
+"use client";
+
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { PaymentButton } from "@/components/payment-button";
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const isPro = false; // TODO: Connect to backend status
+
   return (
     <AppShell active="dashboard">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 md:px-10 md:py-12">
-        <header>
-          <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">Elevate Your Professional Narrative</h1>
-          <p className="mt-2 text-lg text-muted">Your executive workspace for high-impact resumes and strategic career documents.</p>
+        <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">Elevate Your Professional Narrative</h1>
+            <p className="mt-2 text-lg text-muted">Your executive workspace for high-impact resumes and strategic career documents.</p>
+          </div>
+          {!isPro && (
+            <PaymentButton
+              price="149"
+              className="primary-gradient rounded-xl px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105"
+            >
+              Upgrade to Pro
+            </PaymentButton>
+          )}
         </header>
 
         <section className="grid gap-6 lg:grid-cols-3">

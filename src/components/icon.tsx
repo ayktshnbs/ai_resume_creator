@@ -20,10 +20,14 @@ const iconMap = {
   upload: "upload_file",
   user: "person",
   visibility: "visibility",
-  work: "work"
+  work: "work",
+  education: "school",
+  language: "language",
+  bolt: "bolt",
+  check: "check"
 } as const;
 
-export type IconName = 
+export type IconName =
   | "add"
   | "analytics"
   | "arrowRight"
@@ -43,7 +47,11 @@ export type IconName =
   | "upload"
   | "user"
   | "visibility"
-  | "work";
+  | "work"
+  | "education"
+  | "language"
+  | "bolt"
+  | "check";
 
 export function Icon({
   className = "",
@@ -53,7 +61,12 @@ export function Icon({
   name: IconName;
 }) {
   return (
-    <span aria-hidden="true" className={`material-symbols-outlined notranslate ${className}`} style={{ display: 'inline-block' }} {...props}>
+    <span
+      aria-hidden="true"
+      className={`material-symbols-outlined notranslate ${className}`}
+      style={{ display: "inline-block" }}
+      {...props}
+    >
       {iconMap[name as keyof typeof iconMap]}
     </span>
   );

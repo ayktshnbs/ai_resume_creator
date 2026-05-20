@@ -1,0 +1,20 @@
+export const ALL_LANGUAGES = [
+  "Abkhazian", "Afar", "Afrikaans", "Akan", "Albanian", "Amharic", "Arabic", "Aragonese", "Armenian", "Assamese",
+  "Avaric", "Avestan", "Aymara", "Azerbaijani", "Bambara", "Bashkir", "Basque", "Belarusian", "Bengali", "Bislama",
+  "Bosnian", "Breton", "Bulgarian", "Burmese", "Catalan", "Chamorro", "Chechen", "Chichewa", "Chinese", "Chuvash",
+  "Cornish", "Corsican", "Cree", "Croatian", "Czech", "Danish", "Divehi", "Dutch", "Dzongkha", "English", "Esperanto",
+  "Estonian", "Ewe", "Faroese", "Fijian", "Finnish", "French", "Fula", "Galician", "Georgian", "German", "Greek",
+  "Guarani", "Gujarati", "Haitian Creole", "Hausa", "Hebrew", "Herero", "Hindi", "Hiri Motu", "Hungarian", "Icelandic",
+  "Ido", "Igbo", "Indonesian", "Interlingua", "Interlingue", "Inuktitut", "Inupiaq", "Irish", "Italian", "Japanese",
+  "Javanese", "Kalaallisut", "Kannada", "Kanuri", "Kashmiri", "Kazakh", "Khmer", "Kikuyu", "Kinyarwanda", "Kirghiz",
+  "Komi", "Kongo", "Korean", "Kuanyama", "Kurdish", "Lao", "Latin", "Latvian", "Letzeburgesch", "Limburgish", "Lingala",
+  "Lithuanian", "Luba-Katanga", "Luganda", "Macedonian", "Malagasy", "Malay", "Malayalam", "Maltese", "Manx", "Maori",
+  "Marathi", "Marshallese", "Moldavian", "Mongolian", "Nauru", "Navajo", "Ndonga", "Nepali", "Northern Sami", "Norwegian",
+  "Norwegian Bokmål", "Norwegian Nynorsk", "Occitan", "Ojibwa", "Oriya", "Oromo", "Ossetian", "Pali", "Panjabi", "Pashto",
+  "Persian", "Polish", "Portuguese", "Quechua", "Rhaeto-Romance", "Romanian", "Rundi", "Russian", "Samoan", "Sango",
+  "Sanskrit", "Sardinian", "Scottish Gaelic", "Serbian", "Shona", "Sindhi", "Sinhalese", "Slovak", "Slovenian", "Somali",
+  "Southern Sotho", "Spanish", "Sundanese", "Swahili", "Swati", "Swedish", "Tagalog", "Tahitian", "Tajik", "Tamil",
+  "Tatar", "Telugu", "Thai", "Tibetan", "Tigrinya", "Tonga", "Tsonga", "Tswana", "Turkish", "Turkmen", "Twi", "Uighur",
+  "Ukrainian", "Urdu", "Uzbek", "Venda", "Vietnamese", "Volapük", "Walloon", "Welsh", "Western Frisian", "Wolof", "Xhosa",
+  "Yiddish", "Yoruba", "Zhuang", "Zulu"
+];

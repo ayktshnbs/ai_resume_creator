@@ -3,15 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useEffect } from "react";
 
 export default function SignInPage() {
   const router = useRouter();
+  const { status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,9 +38,19 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      // TODO: Replace this with Supabase or Auth.js sign-in once auth is connected.
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      router.push("/dashboard");
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password.");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -45,7 +63,7 @@ export default function SignInPage() {
           <div>
             <Link className="inline-flex items-center gap-3 text-lg font-bold tracking-tight text-primary" href="/">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-ambient">CV</span>
-              AI CV Builder
+              CVForge AI
             </Link>
             <p className="mt-8 max-w-xl text-4xl font-extrabold leading-tight tracking-normal text-ink md:text-5xl">
               Build a job-winning CV with AI.
@@ -161,9 +179,6 @@ export default function SignInPage() {
                       fill="#EA4335"
                     />
                   </svg>
-                </SocialButton>
-                <SocialButton label="Sign in with LinkedIn" onClick={() => void signIn("linkedin", { callbackUrl: "/dashboard" })}>
-                  <span className="flex h-5 w-5 items-center justify-center rounded bg-[#0077b5] text-[10px] font-bold text-white">in</span>
                 </SocialButton>
               </div>
 

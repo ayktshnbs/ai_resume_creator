@@ -14,7 +14,8 @@ type AppShellProps = {
 const navItems = [
   { href: "/dashboard", id: "dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/resume", id: "resume", label: "Resume Builder", icon: "resume" },
-  { href: "/templates", id: "templates", label: "Templates", icon: "template" },
+  { href: "/templates", id: "templates", label: "CV Templates", icon: "template" },
+  { href: "/cover-letter", id: "cover-letter", label: "Cover Letters", icon: "document" },
 ] as const;
 
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {
@@ -29,7 +30,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
               <Icon name="sparkle" className="text-[22px]" />
             </div>
             <div>
-              <p className="font-label text-lg font-bold text-ink">AI CV Builder</p>
+              <p className="font-label text-lg font-bold text-ink">CVForge AI</p>
               <p className="text-xs text-muted">Resume workspace</p>
             </div>
           </Link>
@@ -57,7 +58,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
 
         <div className="mt-auto pt-6 border-t border-outline/40">
           {session ? (
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 px-2">
               <div className="flex items-center gap-3">
                 {session.user?.image ? (
                   <img src={session.user.image} alt={session.user.name || "User"} className="h-10 w-10 rounded-xl object-cover" />
@@ -67,7 +68,10 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-black text-primary">PRO</span>
+                  </div>
                   <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
                     Sign Out
                   </button>
@@ -77,7 +81,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
           ) : (
             <Link
               href="/signin"
-              className="flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+              className="mx-2 flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
             >
               <Icon name="user" className="text-[20px]" />
               Sign In
@@ -89,24 +93,28 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
       <header className="sticky top-0 z-20 border-b border-outline bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between">
           <Link href="/" className="font-label text-lg font-bold text-ink">
-            AI CV Builder
+            CVForge AI
           </Link>
-          {session ? (
-             <button onClick={() => void signOut()} className="rounded-full bg-outline/40 px-4 py-2 text-sm font-semibold text-ink">
-              Sign Out
-            </button>
-          ) : (
-            <Link
-              href="/signin"
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
-            >
-              Sign In
-            </Link>
-          )}
+          <div className="flex items-center gap-3">
+            {session ? (
+               <button onClick={() => void signOut()} className="rounded-full bg-outline/40 px-4 py-2 text-sm font-semibold text-ink">
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                href="/signin"
+                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className={`min-h-screen lg:pl-72 ${fullHeight ? "h-screen" : ""}`}>{children}</main>
+      <main className={`${fullHeight ? "h-screen overflow-hidden" : "min-h-screen"} lg:pl-72`}>
+        {children}
+      </main>
     </div>
   );
 }

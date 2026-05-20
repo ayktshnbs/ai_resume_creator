@@ -24,7 +24,7 @@ export async function POST() {
     // });
 
     const result = await provider.createPayment({
-      userId: (session.user as any).id,
+      userId: session.user.id,
       email: session.user.email!,
       productName: "CVForge AI Pro Plan",
       price: Number(process.env.PAYMENT_PRICE || 149),

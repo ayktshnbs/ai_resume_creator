@@ -307,16 +307,7 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section className="mx-auto max-w-7xl px-4 py-24 md:px-10" id="pricing">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Simple, honest pricing.</h2>
-          <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
-        </div>
-        <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-          <PricingCard cta="Start free" href="/signup" features={["1 saved CV", "All standard templates", "Live preview", "Basic PDF export"]} name="Basic" price="$0" />
-          <PricingCard cta="Get started with Pro" href="/signup?plan=pro" featured features={["Unlimited CVs", "AI rewrite & optimization", "Cover letter generator", "Premium templates", "High-res PDF exports", "No watermarks"]} name="Pro" price="$12" />
-        </div>
-      </section>
+      <PricingSection />
 
       <footer className="border-t border-outline/20 bg-white py-12">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-10">
@@ -360,7 +351,56 @@ function HeroPreview() {
   );
 }
 
-function PricingCard({ cta, featured = false, features, href, name, price }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string }) {
+function PricingSection() {
+  const [yearly, setYearly] = useState(false);
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-24 md:px-10" id="pricing">
+      <div className="mx-auto mb-12 max-w-2xl text-center">
+        <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Simple, honest pricing.</h2>
+        <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
+        <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-outline/40 bg-surface-soft p-1.5">
+          <button
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${!yearly ? "bg-white text-ink shadow-sm" : "text-muted"}`}
+            onClick={() => setYearly(false)}
+            type="button"
+          >
+            Monthly
+          </button>
+          <button
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${yearly ? "bg-white text-ink shadow-sm" : "text-muted"}`}
+            onClick={() => setYearly(true)}
+            type="button"
+          >
+            Yearly
+            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">Save 37%</span>
+          </button>
+        </div>
+      </div>
+      <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+        <PricingCard
+          cta="Start free"
+          href="/signup"
+          features={["1 saved CV", "All standard templates", "Live preview"]}
+          name="Basic"
+          price="$0"
+          period=""
+        />
+        <PricingCard
+          cta="Get started with Pro"
+          href="/signup?plan=pro"
+          featured
+          features={["Unlimited CVs & cover letters", "AI rewrite & optimization", "AI cover letter generator", "Resume analysis & scoring", "High-res PDF exports", "Priority support"]}
+          name="Pro"
+          price={yearly ? "$5" : "$8"}
+          period={yearly ? "/mo — billed $60/year" : "/month"}
+        />
+      </div>
+    </section>
+  );
+}
+
+function PricingCard({ cta, featured = false, features, href, name, price, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; period: string }) {
   return (
     <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-outline/30"}`}>
       {featured && (
@@ -372,7 +412,7 @@ function PricingCard({ cta, featured = false, features, href, name, price }: { c
         <h3 className="text-xl font-bold text-ink">{name}</h3>
         <div className="mt-4 flex items-baseline gap-1">
           <span className="text-4xl font-extrabold text-ink">{price}</span>
-          <span className="text-sm font-medium text-muted">/month</span>
+          <span className="text-sm font-medium text-muted">{period || "/month"}</span>
         </div>
       </div>
       <ul className="mb-10 flex-1 space-y-4 text-sm text-muted">

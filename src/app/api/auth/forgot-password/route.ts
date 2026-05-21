@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     // Always return success to prevent email enumeration
-    if (!user || !user.password) {
+    if (!user) {
       return NextResponse.json({ ok: true });
     }
 

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
+import { PaymentButton } from "@/components/payment-button";
 import Link from "next/link";
 
 type CoverLetterTemplate = {
@@ -258,9 +259,12 @@ export default function CoverLetterPage() {
               <p className="text-lg font-bold text-ink">Pro Feature</p>
               <p className="mt-1 text-sm text-muted">AI-powered cover letter generation is available for Pro users. Upgrade to create personalized cover letters from your resume data.</p>
             </div>
-            <Link className="primary-gradient shrink-0 rounded-xl px-6 py-3 text-sm font-bold text-white" href="/signup?plan=pro">
+            <PaymentButton
+              price="149"
+              className="primary-gradient shrink-0 rounded-xl px-6 py-3 text-sm font-bold text-white"
+            >
               Upgrade to Pro
-            </Link>
+            </PaymentButton>
           </div>
         )}
 
@@ -277,14 +281,23 @@ export default function CoverLetterPage() {
                   >
                     Copy Text
                   </button>
-                  <button
-                    className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-                    disabled={exporting}
-                    onClick={() => void exportPdf()}
-                    type="button"
-                  >
-                    {exporting ? "Exporting..." : "Export PDF"}
-                  </button>
+                  {isPro ? (
+                    <button
+                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                      disabled={exporting}
+                      onClick={() => void exportPdf()}
+                      type="button"
+                    >
+                      {exporting ? "Exporting..." : "Export PDF"}
+                    </button>
+                  ) : (
+                    <PaymentButton
+                      price="149"
+                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white"
+                    >
+                      Export PDF (Pro)
+                    </PaymentButton>
+                  )}
                 </div>
               )}
             </div>

@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
+import { PaymentButton } from "@/components/payment-button";
 import {
   clearResumeData,
   createId,
@@ -534,13 +535,13 @@ export default function ResumeBuilderPage() {
                   {ai.full ? "Optimizing..." : "AI-Powered Optimization"}
                 </button>
               ) : (
-                <Link
+                <PaymentButton
+                  price="149"
                   className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-bold text-primary"
-                  href="/signup?plan=pro"
                 >
                   <Icon name="sparkle" />
                   Upgrade for AI Features
-                </Link>
+                </PaymentButton>
               )}
             </div>
           </header>
@@ -805,14 +806,23 @@ export default function ResumeBuilderPage() {
               <button className="rounded-xl border border-outline/50 bg-white px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
                 Share
               </button>
-              <button
-                className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-                disabled={exporting}
-                onClick={() => void exportPdf()}
-                type="button"
-              >
-                {exporting ? "Exporting..." : "Export PDF"}
-              </button>
+              {isPro ? (
+                <button
+                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  disabled={exporting}
+                  onClick={() => void exportPdf()}
+                  type="button"
+                >
+                  {exporting ? "Exporting..." : "Export PDF"}
+                </button>
+              ) : (
+                <PaymentButton
+                  price="149"
+                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white"
+                >
+                  Export PDF (Pro)
+                </PaymentButton>
+              )}
             </div>
           </div>
           {shareMessage && <p className="mx-auto mb-4 w-full max-w-4xl rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">{shareMessage}</p>}

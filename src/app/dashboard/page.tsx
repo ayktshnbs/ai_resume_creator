@@ -32,7 +32,7 @@ export default function DashboardPage() {
           <p className="max-w-md text-muted">Create an account or sign in to access your resume workspace and manage your documents.</p>
           <div className="flex gap-3">
             <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
           </div>
         </div>
       </AppShell>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
               </div>
               <h3 className="font-bold text-ink">Browse designs</h3>
               <p className="mt-2 max-w-64 text-sm leading-6 text-muted">Explore our gallery of ATS-optimized layouts tailored for various career stages.</p>
-              <span className="mt-6 rounded-xl border border-outline/70 bg-white px-4 py-2 text-sm font-bold text-ink">View Designs</span>
+              <span className="mt-6 rounded-xl border border-outline/70 bg-surface px-4 py-2 text-sm font-bold text-ink">View Designs</span>
             </Link>
           </div>
         </section>

@@ -89,7 +89,7 @@ export default function Home() {
         }
       `}</style>
 
-      <header className="sticky top-0 z-50 border-b border-outline/50 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-outline/50 bg-surface/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
           <a className="text-xl font-bold tracking-tight text-ink" href="#">
             <span className="text-primary">AI</span> CV Builder
@@ -121,7 +121,7 @@ export default function Home() {
           </div>
         </nav>
         {mobileMenuOpen && (
-          <div className="border-t border-outline/30 bg-white/95 backdrop-blur-xl md:hidden">
+          <div className="border-t border-outline/30 bg-surface/95 backdrop-blur-xl md:hidden">
             <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4">
               {[
                 { label: "Features", href: "#features" },
@@ -228,7 +228,7 @@ export default function Home() {
                 className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[240px]"
                 onClick={() => selectTemplate(tmpl)}
               >
-                <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
+                <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-surface transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
                   <div className="absolute inset-0 overflow-hidden">
                     <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.302)", transformOrigin: "top left" }}>
                       <TemplateRenderer resume={sampleResume} templateName={tmpl.name} />
@@ -258,7 +258,7 @@ export default function Home() {
           </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <article className="card-hover group rounded-3xl bg-white p-8 shadow-ambient" key={feature.title}>
+              <article className="card-hover group rounded-3xl bg-surface p-8 shadow-ambient" key={feature.title}>
                 <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} transition-transform group-hover:scale-110`}>
                   <SvgIcon className="h-6 w-6 text-primary" name={feature.icon} />
                 </div>
@@ -285,7 +285,7 @@ export default function Home() {
           </div>
           <div className="space-y-4 rounded-3xl border border-outline/30 bg-surface-soft p-6 shadow-panel">
             {savedCvs.map(([title, date, score]) => (
-              <div className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5 shadow-ambient sm:flex-row sm:items-center" key={title}>
+              <div className="flex flex-col justify-between gap-4 rounded-2xl bg-surface p-5 shadow-ambient sm:flex-row sm:items-center" key={title}>
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <SvgIcon name="document" />
@@ -309,7 +309,7 @@ export default function Home() {
       {/* Pricing */}
       <PricingSection />
 
-      <footer className="border-t border-outline/20 bg-white py-12">
+      <footer className="border-t border-outline/20 bg-surface py-12">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-10">
           <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
             <a className="text-xl font-bold tracking-tight text-ink" href="#">
@@ -338,8 +338,8 @@ function HeroPreview() {
       <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
       <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/20 blur-[100px]" />
 
-      <div className="relative rounded-3xl border border-white/80 bg-white/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
-        <div className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-outline/30 bg-white shadow-panel">
+      <div className="relative rounded-3xl border border-white/80 bg-surface/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
+        <div className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-outline/30 bg-surface shadow-panel">
           <div className="absolute inset-0 overflow-hidden">
             <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.53)", transformOrigin: "top left" }}>
               <TemplateRenderer resume={sampleResume} templateName="Modern Minimalist" />
@@ -361,14 +361,14 @@ function PricingSection() {
         <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
         <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-outline/40 bg-surface-soft p-1.5">
           <button
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${!yearly ? "bg-white text-ink shadow-sm" : "text-muted"}`}
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${!yearly ? "bg-surface text-ink shadow-sm" : "text-muted"}`}
             onClick={() => setYearly(false)}
             type="button"
           >
             Monthly
           </button>
           <button
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${yearly ? "bg-white text-ink shadow-sm" : "text-muted"}`}
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${yearly ? "bg-surface text-ink shadow-sm" : "text-muted"}`}
             onClick={() => setYearly(true)}
             type="button"
           >
@@ -402,7 +402,7 @@ function PricingSection() {
 
 function PricingCard({ cta, featured = false, features, href, name, price, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; period: string }) {
   return (
-    <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-outline/30"}`}>
+    <article className={`card-hover relative flex flex-col rounded-3xl bg-surface p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-outline/30"}`}>
       {featured && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
           Recommended

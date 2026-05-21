@@ -8,6 +8,53 @@
 :root {
   color-scheme: light;
   --grid: rgba(113, 119, 134, 0.12);
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-soft: #f1f5f9;
+  --outline: #cbd5e1;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --primary: #0058bc;
+  --primary-bright: #2563eb;
+  --secondary: #4648d4;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --error: #dc2626;
+  --shadow-ambient: rgba(15, 23, 42, 0.08);
+  --shadow-panel: rgba(15, 23, 42, 0.14);
+  --body-bg: #f9f9ff;
+  --field-border: #dce2f7;
+  --field-bg: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(193, 198, 215, 0.55);
+  --glass-bg: rgba(255, 255, 255, 0.74);
+  --glass-border: rgba(255, 255, 255, 0.5);
+}
+
+.dark {
+  color-scheme: dark;
+  --grid: rgba(148, 163, 184, 0.08);
+  --background: #0f172a;
+  --surface: #1e293b;
+  --surface-soft: #1e293b;
+  --outline: #334155;
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+  --primary: #3b82f6;
+  --primary-bright: #60a5fa;
+  --secondary: #818cf8;
+  --success: #22c55e;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --shadow-ambient: rgba(0, 0, 0, 0.25);
+  --shadow-panel: rgba(0, 0, 0, 0.4);
+  --body-bg: #0b1120;
+  --field-border: #334155;
+  --field-bg: #1e293b;
+  --card-bg: rgba(30, 41, 59, 0.9);
+  --card-border: rgba(51, 65, 85, 0.55);
+  --glass-bg: rgba(30, 41, 59, 0.74);
+  --glass-border: rgba(51, 65, 85, 0.5);
 }
 
 * {
@@ -23,9 +70,9 @@ body {
   background:
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-    #f9f9ff;
+    var(--body-bg);
   background-size: 48px 48px;
-  color: #141b2b;
+  color: var(--ink);
   font-family: Inter, Arial, sans-serif;
 }
 
@@ -59,42 +106,42 @@ select {
 .field {
   width: 100%;
   border-radius: 12px;
-  border: 1px solid #dce2f7;
-  background: #ffffff;
+  border: 1px solid var(--field-border);
+  background: var(--field-bg);
   padding: 12px 14px;
-  color: #141b2b;
+  color: var(--ink);
   outline: none;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .field:focus {
-  border-color: #0058bc;
-  box-shadow: 0 0 0 3px rgba(0, 88, 188, 0.14);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
 }
 
 .soft-card {
-  border: 1px solid rgba(193, 198, 215, 0.55);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 10px 15px -3px rgba(20, 27, 43, 0.05);
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  box-shadow: 0 10px 15px -3px var(--shadow-ambient);
   backdrop-filter: blur(18px);
 }
 
 .app-shell {
   min-height: 100vh;
-  background: #f9f9ff;
+  background: var(--body-bg);
 }
 
 .dashboard-grid {
   background:
-    linear-gradient(rgba(113, 119, 134, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(113, 119, 134, 0.08) 1px, transparent 1px),
-    #f9f9ff;
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    var(--body-bg);
   background-size: 40px 40px;
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(16px);
 }
 

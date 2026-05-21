@@ -90,7 +90,7 @@ export default function ResumeBuilderPage() {
           <p className="max-w-md text-muted">Create an account or sign in to start building your professional resume with our AI-powered tools.</p>
           <div className="flex gap-3">
             <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
           </div>
         </div>
       </AppShell>
@@ -803,7 +803,7 @@ export default function ResumeBuilderPage() {
               {template.name}
             </Link>
             <div className="flex gap-3">
-              <button className="rounded-xl border border-outline/50 bg-white px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
+              <button className="rounded-xl border border-outline/50 bg-surface px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
                 Share
               </button>
               {isPro ? (
@@ -958,7 +958,7 @@ function ExperienceEditor({
   onUpdateBullet: (index: number, value: string) => void;
 }) {
   return (
-    <div className="rounded-xl border border-outline/40 bg-white p-4">
+    <div className="rounded-xl border border-outline/40 bg-surface p-4">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-bold text-ink">Experience Item</h3>
         <button className="flex items-center gap-1 text-sm font-bold text-error" onClick={onDelete} type="button">
@@ -992,7 +992,7 @@ function ExperienceEditor({
                 {isImproving(index) ? "Refining..." : "AI-Refine Achievement"}
               </button>
             )}
-            <button className="rounded-xl border border-outline/70 bg-white px-3 py-2 text-sm font-bold text-ink" onClick={() => onDeleteBullet(index)} type="button">
+            <button className="rounded-xl border border-outline/70 bg-surface px-3 py-2 text-sm font-bold text-ink" onClick={() => onDeleteBullet(index)} type="button">
               Delete
             </button>
           </div>
@@ -1007,7 +1007,7 @@ function ExperienceEditor({
 
 function EducationEditor({ education, onDelete, onUpdate }: { education: EducationItem; onDelete: () => void; onUpdate: (patch: Partial<EducationItem>) => void }) {
   return (
-    <div className="rounded-xl border border-outline/40 bg-white p-4">
+    <div className="rounded-xl border border-outline/40 bg-surface p-4">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-bold text-ink">Education Item</h3>
         <button className="flex items-center gap-1 text-sm font-bold text-error" onClick={onDelete} type="button">
@@ -1070,7 +1070,7 @@ function AiHelperPanel({
           {isAnalyzing ? "Auditing..." : "Audit Resume"}
         </button>
         <button
-          className="rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
+          className="rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
           disabled={helper.action !== null}
           onClick={onSuggestSkills}
           type="button"
@@ -1078,7 +1078,7 @@ function AiHelperPanel({
           {isSuggestingSkills ? "Optimizing..." : "Optimize Competencies"}
         </button>
         <button
-          className="rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
+          className="rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
           disabled={helper.action !== null}
           onClick={onGenerateCover}
           type="button"
@@ -1137,7 +1137,7 @@ function AiHelperPanel({
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Generated text</p>
           </div>
-          <textarea className="field min-h-40 resize-none bg-white" readOnly value={helper.resultText} />
+          <textarea className="field min-h-40 resize-none bg-surface" readOnly value={helper.resultText} />
         </div>
       )}
     </section>
@@ -1150,7 +1150,7 @@ function HelperList({ items, title }: { items: string[]; title: string }) {
       <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">{title}</p>
       <ul className="mt-3 space-y-2 text-sm leading-6 text-ink">
         {items.map((item) => (
-          <li className="rounded-xl bg-white px-3 py-2" key={item}>
+          <li className="rounded-xl bg-surface px-3 py-2" key={item}>
             {item}
           </li>
         ))}
@@ -1163,7 +1163,7 @@ function ReferenceCard({ reference, onDelete }: { reference: ResumeReference; on
   const label = getReferenceLabel(reference.kind);
 
   return (
-    <div className="rounded-xl border border-outline/40 bg-white p-4">
+    <div className="rounded-xl border border-outline/40 bg-surface p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">

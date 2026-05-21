@@ -24,7 +24,9 @@ const iconMap = {
   education: "school",
   language: "language",
   bolt: "bolt",
-  check: "check"
+  check: "check",
+  darkMode: "dark_mode",
+  lightMode: "light_mode"
 } as const;
 
 export type IconName =
@@ -51,7 +53,9 @@ export type IconName =
   | "education"
   | "language"
   | "bolt"
-  | "check";
+  | "check"
+  | "darkMode"
+  | "lightMode";
 
 export function Icon({
   className = "",

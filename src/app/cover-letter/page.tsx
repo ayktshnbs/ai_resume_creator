@@ -106,7 +106,7 @@ export default function CoverLetterPage() {
           <p className="max-w-md text-muted">Create an account or sign in to generate professional cover letters with AI.</p>
           <div className="flex gap-3">
             <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
           </div>
         </div>
       </AppShell>
@@ -189,7 +189,7 @@ export default function CoverLetterPage() {
           {templates.map((template) => (
             <article
               key={template.id}
-              className={`group cursor-pointer overflow-hidden rounded-3xl border bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-panel ${
+              className={`group cursor-pointer overflow-hidden rounded-3xl border bg-surface transition-all duration-300 hover:-translate-y-1 hover:shadow-panel ${
                 selected === template.id
                   ? "border-primary ring-2 ring-primary/20"
                   : "border-outline/30 hover:border-primary/50"
@@ -269,13 +269,13 @@ export default function CoverLetterPage() {
         )}
 
         {(generating || generatedText) && (
-          <div className="mt-12 rounded-3xl border border-outline/30 bg-white p-8 shadow-panel">
+          <div className="mt-12 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="text-xl font-bold text-ink">Generated Cover Letter</h2>
               {generatedText && (
                 <div className="flex gap-3">
                   <button
-                    className="rounded-xl border border-outline/70 bg-white px-4 py-2 text-sm font-bold text-ink hover:bg-surface-soft"
+                    className="rounded-xl border border-outline/70 bg-surface px-4 py-2 text-sm font-bold text-ink hover:bg-surface-soft"
                     onClick={() => void navigator.clipboard.writeText(generatedText)}
                     type="button"
                   >

@@ -114,12 +114,12 @@ export default function TemplatesPage() {
         <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((template) => (
             <article
-              className="group cursor-pointer overflow-hidden rounded-3xl border border-outline/30 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel"
+              className="group cursor-pointer overflow-hidden rounded-3xl border border-outline/30 bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel"
               key={template.name}
               onClick={() => useTemplate(template)}
             >
               {/* Real CV preview — rendered at A4 size, scaled down */}
-              <div className="relative aspect-[1/1.38] overflow-hidden bg-white">
+              <div className="relative aspect-[1/1.38] overflow-hidden bg-surface">
                 <div className="absolute inset-0 overflow-hidden">
                   <div
                     style={{
@@ -135,7 +135,7 @@ export default function TemplatesPage() {
                     />
                   </div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
+                <div className="absolute inset-0 flex items-center justify-center bg-surface/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
                   <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5">
                     <Icon name="edit" />
                     Use Template

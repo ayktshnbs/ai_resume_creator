@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Icon } from "@/components/icon";
 import { useSession, signOut } from "next-auth/react";
 import { useProStatus } from "@/lib/use-pro-status";
+import { useTheme } from "@/lib/use-theme";
 
 type AppShellProps = {
   children: ReactNode;
@@ -23,6 +24,7 @@ const navItems = [
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {
   const { data: session } = useSession();
   const { isPro } = useProStatus();
+  const { dark, toggle: toggleTheme } = useTheme();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -60,7 +62,14 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
           </nav>
         </div>
 
-        <div className="mt-auto pt-6 border-t border-outline/40">
+        <div className="mt-auto space-y-4 pt-6 border-t border-outline/40">
+          <button
+            onClick={toggleTheme}
+            className="flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
+          >
+            <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
+            {dark ? "Light Mode" : "Dark Mode"}
+          </button>
           {session ? (
             <div className="flex items-center justify-between gap-3 px-2">
               <div className="flex items-center gap-3">
@@ -148,7 +157,14 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                 );
               })}
             </nav>
-            <div className="mt-auto border-t border-outline/40 pt-6">
+            <div className="mt-auto space-y-4 border-t border-outline/40 pt-6">
+              <button
+                onClick={toggleTheme}
+                className="flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
+              >
+                <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
+                {dark ? "Light Mode" : "Dark Mode"}
+              </button>
               {session ? (
                 <div className="flex items-center justify-between gap-3 px-2">
                   <div className="flex items-center gap-3">

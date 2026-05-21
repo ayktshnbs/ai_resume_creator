@@ -276,7 +276,7 @@ export default function SignUpPage() {
 
 function FeatureItem({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-3 rounded-xl border border-outline/40 bg-white/70 px-4 py-3 shadow-sm">
+    <li className="flex items-start gap-3 rounded-xl border border-outline/40 bg-surface/70 px-4 py-3 shadow-sm">
       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
         ✓
       </span>
@@ -287,7 +287,7 @@ function FeatureItem({ text }: { text: string }) {
 
 function MockResumeCard() {
   return (
-    <div className="max-w-md rounded-2xl border border-white/70 bg-white/80 p-4 shadow-panel backdrop-blur-xl">
+    <div className="max-w-md rounded-2xl border border-white/70 bg-surface/80 p-4 shadow-panel backdrop-blur-xl">
       <div className="rounded-2xl border border-outline/40 bg-surface-soft p-4">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -337,7 +337,7 @@ function SocialButton({
 }) {
   return (
     <button
-      className="flex w-full items-center justify-center gap-3 rounded-xl border border-outline/70 bg-white px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+      className="flex w-full items-center justify-center gap-3 rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
       onClick={onClick}
       type="button"
     >

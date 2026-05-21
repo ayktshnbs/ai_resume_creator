@@ -2,29 +2,30 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        background: "#f8fafc",
-        surface: "#ffffff",
-        "surface-soft": "#f1f5f9",
-        outline: "#cbd5e1",
-        ink: "#0f172a",
-        muted: "#64748b",
-        primary: "#0058bc",
-        "primary-bright": "#2563eb",
-        secondary: "#4648d4",
-        success: "#16a34a",
-        warning: "#f59e0b",
-        error: "#dc2626"
+        background: "var(--background)",
+        surface: "var(--surface)",
+        "surface-soft": "var(--surface-soft)",
+        outline: "var(--outline)",
+        ink: "var(--ink)",
+        muted: "var(--muted)",
+        primary: "var(--primary)",
+        "primary-bright": "var(--primary-bright)",
+        secondary: "var(--secondary)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+        error: "var(--error)"
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         label: ["Geist", "Inter", "sans-serif"]
       },
       boxShadow: {
-        ambient: "0 10px 25px rgba(15, 23, 42, 0.08)",
-        panel: "0 24px 60px rgba(15, 23, 42, 0.14)"
+        ambient: "0 10px 25px var(--shadow-ambient)",
+        panel: "0 24px 60px var(--shadow-panel)"
       }
     }
   },

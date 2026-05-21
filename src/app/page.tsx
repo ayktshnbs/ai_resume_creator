@@ -313,8 +313,8 @@ export default function Home() {
           <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
         </div>
         <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-          <PricingCard cta="Start free" features={["1 saved CV", "All standard templates", "Live preview", "Basic PDF export"]} name="Basic" price="$0" />
-          <PricingCard cta="Get started with Pro" featured features={["Unlimited CVs", "AI rewrite & optimization", "Cover letter generator", "Premium templates", "High-res PDF exports", "No watermarks"]} name="Pro" price="$12" />
+          <PricingCard cta="Start free" href="/signup" features={["1 saved CV", "All standard templates", "Live preview", "Basic PDF export"]} name="Basic" price="$0" />
+          <PricingCard cta="Get started with Pro" href="/signup?plan=pro" featured features={["Unlimited CVs", "AI rewrite & optimization", "Cover letter generator", "Premium templates", "High-res PDF exports", "No watermarks"]} name="Pro" price="$12" />
         </div>
       </section>
 
@@ -360,7 +360,7 @@ function HeroPreview() {
   );
 }
 
-function PricingCard({ cta, featured = false, features, name, price }: { cta: string; featured?: boolean; features: string[]; name: string; price: string }) {
+function PricingCard({ cta, featured = false, features, href, name, price }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string }) {
   return (
     <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-outline/30"}`}>
       {featured && (
@@ -385,13 +385,14 @@ function PricingCard({ cta, featured = false, features, name, price }: { cta: st
           </li>
         ))}
       </ul>
-      <button
-        className={`w-full rounded-2xl px-6 py-4 text-sm font-bold transition-all ${
+      <a
+        href={href}
+        className={`block w-full rounded-2xl px-6 py-4 text-center text-sm font-bold transition-all ${
           featured ? "primary-gradient text-white shadow-lg hover:brightness-105" : "bg-surface-soft text-ink hover:bg-outline/20"
         }`}
       >
         {cta}
-      </button>
+      </a>
     </article>
   );
 }

@@ -1,20 +1,16 @@
 import { NextResponse } from "next/server";
 import { getPaymentProvider } from "@/lib/payments/provider";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const rawData = await req.formData();
     const data = Object.fromEntries(rawData.entries());
 
-    console.log("[Payment Callback] Received data:", Object.keys(data));
-
     const provider = getPaymentProvider();
-
-    // iyzico sends the token back in the callback
     const token = data.token as string;
 
     if (!token) {
-      console.error("[Payment Callback] Missing token");
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       return NextResponse.redirect(`${siteUrl}/payment/fail`);
     }
@@ -27,16 +23,24 @@ export async function POST(req: Request) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     if (verification.success && verification.status === "paid") {
-      // TODO: Update user to PRO in database
-      // 1. Find the payment record by token/conversationId.
-      // 2. Mark payment as 'paid'.
-      // 3. Set user plan = 'pro', proExpiresAt = now + 30 days.
+      const conversationId = data.conversationId as string | undefined;
 
-      console.log("[Payment Callback] Payment verified:", verification.paymentId);
+      if (conversationId) {
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+        await prisma.user.update({
+          where: { id: conversationId },
+          data: {
+            plan: "pro",
+            planExpiresAt: thirtyDaysFromNow,
+          },
+        });
+      }
+
       return NextResponse.redirect(`${siteUrl}/payment/success`);
     }
 
-    console.log("[Payment Callback] Payment failed:", verification.error);
     return NextResponse.redirect(`${siteUrl}/payment/fail`);
   } catch (error) {
     console.error("[Payment Callback Error]", error);

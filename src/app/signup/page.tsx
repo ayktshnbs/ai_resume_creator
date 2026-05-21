@@ -39,9 +39,33 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Simulated registration — replace with Supabase/Auth.js when backend is connected
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: fullName, email, password }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error || "Something went wrong.");
+        return;
+      }
+
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Account created but sign-in failed. Please sign in manually.");
+        router.push("/signin");
+        return;
+      }
+
       router.push("/dashboard");
+    } catch {
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

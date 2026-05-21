@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { DragEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import {
@@ -12,6 +13,7 @@ import {
   loadSelectedTemplate,
   saveResumeData
 } from "@/lib/resume-storage";
+import { useAutoSaveToDb, loadFromDb } from "@/lib/use-db-sync";
 import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
 
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
@@ -57,6 +59,7 @@ const initialHelperState: HelperState = {
 };
 
 export default function ResumeBuilderPage() {
+  const { data: session } = useSession();
   const [resume, setResume] = useState<ResumeData>(emptyResumeData);
   const [template, setTemplate] = useState<SelectedTemplate>({ name: "Modern Minimalist", layout: "single", accent: "primary" });
   const [skillDraft, setSkillDraft] = useState("");
@@ -67,6 +70,7 @@ export default function ResumeBuilderPage() {
   const [ai, setAi] = useState<AiState>(initialAiState);
   const [helper, setHelper] = useState<HelperState>(initialHelperState);
   const [loaded, setLoaded] = useState(false);
+  const resumeDocId = useRef<string | null>(null);
 
   useEffect(() => {
     setResume(loadResumeData());
@@ -74,11 +78,25 @@ export default function ResumeBuilderPage() {
     setLoaded(true);
   }, []);
 
+  // Load from DB if logged in (DB data takes priority)
+  useEffect(() => {
+    if (!session?.user || !loaded) return;
+    loadFromDb<ResumeData>("/api/user/resumes").then((result) => {
+      if (result) {
+        resumeDocId.current = result.id;
+        setResume((local) => ({ ...emptyResumeData, ...result.data, references: local.references }));
+      }
+    });
+  }, [session, loaded]);
+
   useEffect(() => {
     if (loaded) {
       saveResumeData(resume);
     }
   }, [loaded, resume]);
+
+  // Auto-save to DB when logged in (debounced)
+  useAutoSaveToDb("/api/user/resumes", resume, loaded, resumeDocId);
 
   function updateResume<K extends keyof ResumeData>(key: K, value: ResumeData[K]) {
     setResume((current) => ({ ...current, [key]: value }));
@@ -472,7 +490,7 @@ export default function ResumeBuilderPage() {
           <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-normal text-ink">New Resume</h1>
-              <p className="mt-1 text-sm text-muted">Autosaves locally. Sign in later to sync across devices.</p>
+              <p className="mt-1 text-sm text-muted">Autosaves locally and syncs to your account when signed in.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button

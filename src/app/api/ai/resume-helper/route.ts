@@ -26,7 +26,7 @@ type RequestBody = {
   userApiKey?: string;
 };
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
 
 export async function POST(request: Request) {
   try {
@@ -71,10 +71,10 @@ function buildPrompt(action: ResumeHelperAction, body: RequestBody) {
   const text = body.text || "";
   const targetRole = body.targetRole || resume.title || "the target role";
 
-  const base = `
-You are an expert resume writer.
-Return only valid JSON. Do not use markdown.
+  const base = `You are a world-class resume strategist and career coach who has helped thousands of professionals land roles at top companies like Google, McKinsey, Goldman Sachs, and leading startups.
+Return ONLY valid JSON. No markdown, no explanation, no extra text.
 Target role: ${targetRole}
+Candidate: ${resume.firstName} ${resume.lastName}
 
 Resume data:
 ${JSON.stringify(resume, null, 2)}
@@ -82,57 +82,112 @@ ${JSON.stringify(resume, null, 2)}
 
   if (action === "improve_summary") {
     return `${base}
-Rewrite this professional summary into a concise, ATS-friendly summary.
-Keep it truthful. Use 2-4 sentences.
-Text:
+Rewrite this professional summary into an elite, ATS-optimized executive summary.
+
+REQUIREMENTS:
+- 2-4 powerful sentences, no fluff
+- Open with years of experience + domain expertise (infer from the resume timeline)
+- Weave in 2-3 high-value keywords that recruiters and ATS systems search for in "${targetRole}" roles
+- Highlight the candidate's unique differentiator — what sets them apart
+- End with a forward-looking value proposition
+- Never use clichés like "passionate", "team player", "hard-working" — be specific and compelling
+- Keep it truthful — do not invent facts
+
+Current summary to improve:
 ${text}
 
 Return:
-{"resultText":"..."}`;
+{"resultText":"...improved summary..."}`;
   }
 
   if (action === "improve_bullet") {
     return `${base}
-Rewrite this experience bullet into one achievement-focused bullet.
-Start with a strong action verb. Add measurable language where appropriate, but do not invent exact numbers.
-Bullet:
+Transform this experience bullet into a high-impact, recruiter-ready achievement statement.
+
+REQUIREMENTS:
+- Start with a powerful, specific action verb (Led, Architected, Spearheaded, Delivered, Optimized, Orchestrated, Streamlined, Pioneered)
+- Follow the CAR method: Challenge → Action → Result
+- If the original mentions any metrics, preserve and amplify them
+- If no metrics exist, add qualitative impact language: "resulting in improved...", "enabling..."
+- Keep it to 1-2 concise lines — dense with value
+- Make it ATS-friendly with relevant keywords for "${targetRole}"
+- NEVER fabricate exact numbers or percentages — only enhance what's implied
+
+Original bullet:
 ${text}
 
 Return:
-{"resultText":"..."}`;
+{"resultText":"...improved bullet..."}`;
   }
 
   if (action === "suggest_skills") {
     return `${base}
-Suggest 10-14 relevant resume skills based on the resume and target role.
-Avoid duplicates.
+Suggest 12-16 highly relevant skills for this candidate targeting "${targetRole}" roles.
+
+REQUIREMENTS:
+- Prioritize hard/technical skills that ATS systems scan for — list them first
+- Include industry-standard tools, frameworks, and methodologies relevant to "${targetRole}"
+- Add 3-4 transferable soft skills that hiring managers value (e.g., "Cross-functional Leadership", not "teamwork")
+- Look at the candidate's experience and infer skills they likely have but didn't list
+- Avoid generic filler skills (e.g., "Microsoft Office", "Communication" unless highly specific)
+- Use professional terminology — "Agile/Scrum" not "agile methodology"
+- No duplicates with existing skills: ${JSON.stringify(resume.skills)}
 
 Return:
-{"skills":["skill 1","skill 2"]}`;
+{"skills":["skill 1","skill 2",...]}`;
   }
 
   if (action === "generate_cover_letter") {
     return `${base}
-Generate a professional cover letter for this candidate.
-Use 4 paragraphs. Keep it adaptable, confident, and natural.
+Write a compelling, professional cover letter for this candidate applying to a "${targetRole}" position.
+
+REQUIREMENTS:
+- 4 paragraphs, each with a clear purpose:
+  1. HOOK: Open with a confident, specific statement about why this role excites them. Reference the role and hint at their strongest qualification. No generic "I am writing to apply..."
+  2. VALUE PROOF: Highlight 2-3 concrete achievements from their resume that directly map to what a "${targetRole}" needs. Use specific examples with context.
+  3. CULTURAL FIT: Show understanding of what companies hiring for "${targetRole}" typically value. Connect the candidate's approach/philosophy to those values.
+  4. CLOSE: Confident but not arrogant. Express enthusiasm for discussing further. Include a forward-looking statement.
+- Tone: Professional yet human — avoid corporate robot language
+- Length: 250-350 words total
+- Never fabricate experiences — only reference what's in the resume
+- Address to "Dear Hiring Manager" unless a specific name is available
 
 Return:
-{"resultText":"..."}`;
+{"resultText":"...full cover letter text..."}`;
   }
 
   if (action === "analyze_resume") {
     return `${base}
-Analyze this CV for ATS and recruiter clarity.
-Score from 0 to 100.
+Perform a comprehensive professional audit of this resume as if you were a senior recruiter at a top-tier company reviewing it for a "${targetRole}" position.
+
+SCORING CRITERIA (score 0-100):
+- ATS Compatibility (keywords, formatting, standard sections): 25 points
+- Impact & Achievement Quality (quantified results, CAR method): 25 points
+- Relevance to Target Role (skill alignment, experience match): 25 points
+- Professional Polish (summary strength, consistency, clarity): 25 points
+
+ANALYSIS REQUIREMENTS:
+- strengths: List 3-5 specific things this resume does well (be precise, reference actual content)
+- gaps: List 3-5 specific weaknesses or missing elements (actionable, not vague)
+- recommendations: List 4-6 concrete, prioritized steps to improve (most impactful first)
+- summary: 2-3 sentence overall assessment — be honest but constructive
+
 Return:
-{"analysis":{"score":85,"strengths":["..."],"gaps":["..."],"recommendations":["..."],"summary":"..."}}`;
+{"analysis":{"score":0,"strengths":["..."],"gaps":["..."],"recommendations":["..."],"summary":"..."}}`;
   }
 
   const refText = body.text || "";
-  return `You are an expert resume data extractor.
-Given the following text from a reference document (old CV, cover letter, LinkedIn export, etc.), extract all resume-relevant information into structured JSON.
-Extract as much as you can find. Use empty strings for fields you cannot determine. Generate unique IDs for each experience and education entry (e.g. "exp_1", "edu_1").
-For bullet points, extract individual achievements or responsibilities.
+  return `You are an expert resume data extractor with deep experience parsing CVs, LinkedIn profiles, and career documents.
+
+Given the following text from a reference document, extract ALL resume-relevant information into structured JSON.
+
+EXTRACTION RULES:
+- Extract every piece of information you can find — names, titles, contact info, experiences, education, skills
+- For experience bullets, split compound sentences into individual achievement statements
+- Infer job dates from context clues if not explicitly stated
+- Clean up formatting: fix capitalization, remove extra whitespace, standardize date formats
+- Generate unique IDs for each entry (e.g., "exp_1", "edu_1")
+- Use empty strings for fields you truly cannot determine
 
 Reference text:
 ${refText}

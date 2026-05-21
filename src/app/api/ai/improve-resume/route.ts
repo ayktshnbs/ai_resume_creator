@@ -7,7 +7,7 @@ type RequestBody = {
   targetRole?: string;
 };
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
 
 export async function POST(request: Request) {
   try {
@@ -27,14 +27,43 @@ export async function POST(request: Request) {
     const response = await client.responses.create({
       model: MODEL,
       temperature: 0.25,
-      input: `
-You are an expert CV editor.
-Improve the resume while keeping all facts truthful.
-Do not invent employers, schools, dates, or exact numbers.
-Return only valid JSON in this exact shape:
-{"resumeData":{...complete resume object...}}
+      input: `You are a world-class resume strategist who has helped thousands of professionals land roles at top companies.
 
-Resume:
+YOUR TASK: Transform this resume into an elite, ATS-optimized document that commands attention.
+
+RULES — NEVER BREAK THESE:
+- Keep ALL facts truthful. Never invent employers, schools, dates, or fabricate metrics.
+- If the user provided approximate numbers, you may keep them. Never add numbers that weren't implied.
+- Preserve the original JSON structure exactly — same fields, same types.
+
+OPTIMIZATION STRATEGY:
+
+1. PROFESSIONAL SUMMARY (2-4 punchy sentences):
+   - Lead with years of experience + core domain expertise
+   - Include 2-3 high-value keywords recruiters search for
+   - End with a value proposition — what makes this person a hire, not just an applicant
+   - Avoid generic filler like "passionate" or "team player" — be specific
+
+2. EXPERIENCE BULLETS (each one):
+   - Start with a powerful action verb (Led, Architected, Spearheaded, Delivered, Optimized, Reduced, Scaled)
+   - Follow the CAR formula: Challenge → Action → Result
+   - If the original bullet mentions a result, quantify or amplify it
+   - If no result is stated, add impact language: "resulting in improved...", "enabling the team to..."
+   - Each bullet should be 1-2 lines max — dense with value, zero fluff
+   - Vary your action verbs — never repeat the same verb twice in one role
+
+3. SKILLS:
+   - Reorder so the most in-demand, role-relevant skills appear first
+   - Remove vague skills like "Microsoft Office" unless relevant to the role
+   - Add industry-standard terminology if the user's skills imply them (e.g., "React" implies "SPA development")
+
+4. EDUCATION:
+   - Keep as-is unless formatting can be improved
+
+Return ONLY valid JSON in this exact shape (no markdown, no explanation):
+{"resumeData":{...complete resume object with all original fields...}}
+
+Resume to optimize:
 ${JSON.stringify(resume, null, 2)}
 `
     });

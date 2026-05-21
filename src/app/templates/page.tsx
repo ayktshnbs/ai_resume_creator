@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
+import { useI18n } from "@/lib/i18n";
 import { saveSelectedTemplate } from "@/lib/resume-storage";
 import type { SelectedTemplate, TemplateLayout } from "@/types/resume";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
@@ -58,6 +59,7 @@ const CATEGORIES = ["All", ...Array.from(new Set(ALL_TEMPLATES.map((t) => t.cate
 
 export default function TemplatesPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [filter, setFilter] = useState("All");
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
 
@@ -77,16 +79,16 @@ export default function TemplatesPage() {
         <header className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div className="max-w-2xl">
             <p className="mb-3 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
-              CV Template Gallery
+              {t("templates.badge")}
             </p>
-            <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">Choose a Template</h1>
+            <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">{t("templates.title")}</h1>
             <p className="mt-3 text-lg leading-8 text-muted">
               {ALL_TEMPLATES.length} ATS-optimized layouts designed to highlight your professional story.
             </p>
           </div>
           <div className="rounded-2xl border border-outline/50 bg-surface-soft px-5 py-4 text-sm leading-6 text-muted">
-            <strong className="block text-ink">Tip:</strong>
-            Pick a style now — you can edit content after choosing.
+            <strong className="block text-ink">{t("templates.tip")}</strong>
+            {t("templates.tipText")}
           </div>
         </header>
 
@@ -138,7 +140,7 @@ export default function TemplatesPage() {
                 <div className="absolute inset-0 flex items-center justify-center bg-surface/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
                   <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5">
                     <Icon name="edit" />
-                    Use Template
+                    {t("templates.useTemplate")}
                   </div>
                 </div>
               </div>

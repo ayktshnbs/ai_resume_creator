@@ -7,6 +7,7 @@ import { Icon } from "@/components/icon";
 import { useSession, signOut } from "next-auth/react";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useTheme } from "@/lib/use-theme";
+import { useI18n } from "@/lib/i18n";
 
 type AppShellProps = {
   children: ReactNode;
@@ -15,16 +16,17 @@ type AppShellProps = {
 };
 
 const navItems = [
-  { href: "/dashboard", id: "dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/resume", id: "resume", label: "Resume Builder", icon: "resume" },
-  { href: "/templates", id: "templates", label: "CV Templates", icon: "template" },
-  { href: "/cover-letter", id: "cover-letter", label: "Cover Letters", icon: "document" },
+  { href: "/dashboard", id: "dashboard", labelKey: "nav.dashboard", icon: "dashboard" },
+  { href: "/resume", id: "resume", labelKey: "nav.resume", icon: "resume" },
+  { href: "/templates", id: "templates", labelKey: "nav.templates", icon: "template" },
+  { href: "/cover-letter", id: "cover-letter", labelKey: "nav.coverLetter", icon: "document" },
 ] as const;
 
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {
   const { data: session } = useSession();
   const { isPro } = useProStatus();
   const { dark, toggle: toggleTheme } = useTheme();
+  const { t, lang, setLang } = useI18n();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -37,7 +39,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
             </div>
             <div>
               <p className="font-label text-lg font-bold text-ink">CVForge AI</p>
-              <p className="text-xs text-muted">Resume workspace</p>
+              <p className="text-xs text-muted">{t("common.workspace")}</p>
             </div>
           </Link>
 
@@ -55,7 +57,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                   }`}
                 >
                   <Icon name={item.icon} className="text-[20px]" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
@@ -63,13 +65,21 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
         </div>
 
         <div className="mt-auto space-y-4 pt-6 border-t border-outline/40">
-          <button
-            onClick={toggleTheme}
-            className="flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
-          >
-            <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
-            {dark ? "Light Mode" : "Dark Mode"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={toggleTheme}
+              className="flex flex-1 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
+            >
+              <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
+              {dark ? t("nav.lightMode") : t("nav.darkMode")}
+            </button>
+            <button
+              onClick={() => setLang(lang === "en" ? "tr" : "en")}
+              className="flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-bold text-muted transition hover:bg-surface-soft hover:text-ink"
+            >
+              {lang === "en" ? "TR" : "EN"}
+            </button>
+          </div>
           {session ? (
             <div className="flex items-center justify-between gap-3 px-2">
               <div className="flex items-center gap-3">
@@ -86,7 +96,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                     {isPro && <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-black text-primary">PRO</span>}
                   </div>
                   <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
-                    Sign Out
+                    {t("nav.signOut")}
                   </button>
                 </div>
               </div>
@@ -97,7 +107,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
               className="mx-2 flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
             >
               <Icon name="user" className="text-[20px]" />
-              Sign In
+              {t("nav.signIn")}
             </Link>
           )}
         </div>
@@ -133,7 +143,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                 </div>
                 <div>
                   <p className="font-label text-lg font-bold text-ink">CVForge AI</p>
-                  <p className="text-xs text-muted">Resume workspace</p>
+                  <p className="text-xs text-muted">{t("common.workspace")}</p>
                 </div>
               </Link>
             </div>
@@ -152,19 +162,27 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                     }`}
                   >
                     <Icon name={item.icon} className="text-[20px]" />
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 );
               })}
             </nav>
             <div className="mt-auto space-y-4 border-t border-outline/40 pt-6">
-              <button
-                onClick={toggleTheme}
-                className="flex w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
-              >
-                <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
-                {dark ? "Light Mode" : "Dark Mode"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={toggleTheme}
+                  className="flex flex-1 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
+                >
+                  <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
+                  {dark ? t("nav.lightMode") : t("nav.darkMode")}
+                </button>
+                <button
+                  onClick={() => setLang(lang === "en" ? "tr" : "en")}
+                  className="flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-bold text-muted transition hover:bg-surface-soft hover:text-ink"
+                >
+                  {lang === "en" ? "TR" : "EN"}
+                </button>
+              </div>
               {session ? (
                 <div className="flex items-center justify-between gap-3 px-2">
                   <div className="flex items-center gap-3">
@@ -174,7 +192,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
                       <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
-                        Sign Out
+                        {t("nav.signOut")}
                       </button>
                     </div>
                   </div>
@@ -186,7 +204,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                   className="flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
                 >
                   <Icon name="user" className="text-[20px]" />
-                  Sign In
+                  {t("nav.signIn")}
                 </Link>
               )}
             </div>

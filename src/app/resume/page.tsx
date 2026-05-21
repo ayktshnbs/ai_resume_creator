@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
+import { useI18n } from "@/lib/i18n";
 import { PaymentButton } from "@/components/payment-button";
 import {
   clearResumeData,
@@ -63,6 +64,7 @@ const initialHelperState: HelperState = {
 export default function ResumeBuilderPage() {
   const { data: session, status } = useSession();
   const { isPro } = useProStatus();
+  const { t } = useI18n();
   const [resume, setResume] = useState<ResumeData>(emptyResumeData);
   const [template, setTemplate] = useState<SelectedTemplate>({ name: "Modern Minimalist", layout: "single", accent: "primary" });
   const [skillDraft, setSkillDraft] = useState("");
@@ -86,11 +88,11 @@ export default function ResumeBuilderPage() {
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Icon name="resume" className="text-[32px]" />
           </div>
-          <h1 className="text-2xl font-bold text-ink">Sign in to build your resume</h1>
-          <p className="max-w-md text-muted">Create an account or sign in to start building your professional resume with our AI-powered tools.</p>
+          <h1 className="text-2xl font-bold text-ink">{t("gate.signInResume")}</h1>
+          <p className="max-w-md text-muted">{t("gate.signInResumeDesc")}</p>
           <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
           </div>
         </div>
       </AppShell>
@@ -520,8 +522,8 @@ export default function ResumeBuilderPage() {
         <section className="h-full w-full overflow-y-auto border-r border-outline/30 bg-surface p-4 md:w-1/2 md:p-8 lg:w-5/12">
           <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-normal text-ink">New Resume</h1>
-              <p className="mt-1 text-sm text-muted">Autosaves locally and syncs to your account when signed in.</p>
+              <h1 className="text-3xl font-bold tracking-normal text-ink">{t("resume.title")}</h1>
+              <p className="mt-1 text-sm text-muted">{t("resume.autosave")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {isPro ? (
@@ -532,7 +534,7 @@ export default function ResumeBuilderPage() {
                   type="button"
                 >
                   <Icon name="sparkle" />
-                  {ai.full ? "Optimizing..." : "AI-Powered Optimization"}
+                  {ai.full ? t("resume.optimizing") : t("resume.aiOptimize")}
                 </button>
               ) : (
                 <PaymentButton
@@ -540,7 +542,7 @@ export default function ResumeBuilderPage() {
                   className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-bold text-primary"
                 >
                   <Icon name="sparkle" />
-                  Upgrade for AI Features
+                  {t("resume.upgradeAi")}
                 </PaymentButton>
               )}
             </div>
@@ -563,7 +565,7 @@ export default function ResumeBuilderPage() {
               />
             )}
 
-            <FormSection icon="person" title="Profile Details">
+            <FormSection icon="person" title={t("resume.profileDetails")}>
               <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row">
                 <div className="relative h-24 w-24 overflow-hidden rounded-2xl border-2 border-dashed border-outline/70 bg-surface-soft">
                   {resume.photoUrl ? (
@@ -651,17 +653,17 @@ export default function ResumeBuilderPage() {
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <Field label="First Name" onChange={(value) => updateResume("firstName", value)} value={resume.firstName} />
-                <Field label="Last Name" onChange={(value) => updateResume("lastName", value)} value={resume.lastName} />
-                <Field className="md:col-span-2" label="Executive Title" onChange={(value) => updateResume("title", value)} value={resume.title} />
-                <Field label="Professional Email" onChange={(value) => updateResume("email", value)} type="email" value={resume.email} />
-                <Field label="Contact Number" onChange={(value) => updateResume("phone", value)} value={resume.phone} />
-                <Field label="Current Location" onChange={(value) => updateResume("location", value)} value={resume.location} />
-                <Field label="Professional Portfolio / LinkedIn" onChange={(value) => updateResume("website", value)} value={resume.website} />
+                <Field label={t("resume.firstName")} onChange={(value) => updateResume("firstName", value)} value={resume.firstName} />
+                <Field label={t("resume.lastName")} onChange={(value) => updateResume("lastName", value)} value={resume.lastName} />
+                <Field className="md:col-span-2" label={t("resume.jobTitle")} onChange={(value) => updateResume("title", value)} value={resume.title} />
+                <Field label={t("resume.email")} onChange={(value) => updateResume("email", value)} type="email" value={resume.email} />
+                <Field label={t("resume.phone")} onChange={(value) => updateResume("phone", value)} value={resume.phone} />
+                <Field label={t("resume.currentLocation")} onChange={(value) => updateResume("location", value)} value={resume.location} />
+                <Field label={t("resume.website")} onChange={(value) => updateResume("website", value)} value={resume.website} />
               </div>
             </FormSection>
 
-            <FormSection icon="subject" title="Executive Summary">
+            <FormSection icon="subject" title={t("resume.execSummary")}>
               <textarea
                 className="field min-h-32 resize-none"
                 onChange={(event) => updateResume("summary", event.target.value)}
@@ -669,7 +671,7 @@ export default function ResumeBuilderPage() {
                 value={resume.summary}
               />
               <div className="mt-3 flex items-center justify-between gap-3">
-                <p className="text-xs font-medium text-muted">A compelling summary captures recruiter attention in seconds.</p>
+                <p className="text-xs font-medium text-muted">{t("resume.summaryHint")}</p>
                 {isPro && (
                   <button
                     className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
@@ -678,13 +680,13 @@ export default function ResumeBuilderPage() {
                     type="button"
                   >
                     <Icon className="h-4 w-4" name="sparkle" />
-                    {ai.summary ? "Refining..." : "AI-Refine Summary"}
+                    {ai.summary ? t("resume.refining") : t("resume.aiRefineSummary")}
                   </button>
                 )}
               </div>
             </FormSection>
 
-            <FormSection icon="work" title="Professional History">
+            <FormSection icon="work" title={t("resume.profHistory")}>
               <div className="space-y-4">
                 {resume.experiences.length === 0 && <EmptyHint text="Add your professional roles to showcase your career trajectory." />}
                 {resume.experiences.map((experience) => (
@@ -702,12 +704,12 @@ export default function ResumeBuilderPage() {
                 ))}
                 <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-bold text-primary hover:bg-primary/5" onClick={addExperience} type="button">
                   <Icon name="add" />
-                  Add Professional Role
+                  {t("resume.addRole")}
                 </button>
               </div>
             </FormSection>
 
-            <FormSection icon="document" title="Academic Credentials">
+            <FormSection icon="document" title={t("resume.academics")}>
               <div className="space-y-4">
                 {resume.education.length === 0 && <EmptyHint text="Highlight your academic achievements and certifications." />}
                 {resume.education.map((education) => (
@@ -720,12 +722,12 @@ export default function ResumeBuilderPage() {
                 ))}
                 <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-bold text-primary hover:bg-primary/5" onClick={addEducation} type="button">
                   <Icon name="add" />
-                  Add Academic Degree
+                  {t("resume.addEducation")}
                 </button>
               </div>
             </FormSection>
 
-            <FormSection icon="sparkle" title="Core Competencies">
+            <FormSection icon="sparkle" title={t("resume.skills")}>
               <div className="flex gap-2">
                 <input
                   className="field"
@@ -740,7 +742,7 @@ export default function ResumeBuilderPage() {
                   value={skillDraft}
                 />
                 <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-60" disabled={!skillDraft.trim()} onClick={addSkill} type="button">
-                  Add Competency
+                  {t("resume.addSkill")}
                 </button>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
@@ -753,7 +755,7 @@ export default function ResumeBuilderPage() {
               </div>
             </FormSection>
 
-            <FormSection icon="upload" title="Reference Materials">
+            <FormSection icon="upload" title={t("resume.references")}>
               <p className="text-sm leading-6 text-muted">
                 Upload an old CV, cover letter, or text file — the AI will extract your details and fill the form automatically.
               </p>
@@ -804,7 +806,7 @@ export default function ResumeBuilderPage() {
             </Link>
             <div className="flex gap-3">
               <button className="rounded-xl border border-outline/50 bg-surface px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
-                Share
+                {t("resume.share")}
               </button>
               {isPro ? (
                 <button
@@ -813,14 +815,14 @@ export default function ResumeBuilderPage() {
                   onClick={() => void exportPdf()}
                   type="button"
                 >
-                  {exporting ? "Exporting..." : "Export PDF"}
+                  {exporting ? t("resume.exporting") : t("resume.exportPdf")}
                 </button>
               ) : (
                 <PaymentButton
                   price="149"
                   className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white"
                 >
-                  Export PDF (Pro)
+                  {t("resume.exportPdfPro")}
                 </PaymentButton>
               )}
             </div>

@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
+import { useI18n } from "@/lib/i18n";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -110,11 +112,11 @@ export default function SignUpPage() {
         <section className="flex items-center">
           <div className="soft-card w-full rounded-2xl p-6 shadow-panel md:p-8 lg:p-10">
             <div className="mb-8">
-              <h1 className="text-3xl font-extrabold tracking-normal text-ink">Create account</h1>
+              <h1 className="text-3xl font-extrabold tracking-normal text-ink">{t("auth.createAccount")}</h1>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Already have an account?{" "}
+                {t("auth.hasAccount")}{" "}
                 <Link className="font-semibold text-primary hover:underline" href="/signin">
-                  Sign in
+                  {t("auth.signInBtn")}
                 </Link>
               </p>
             </div>
@@ -128,7 +130,7 @@ export default function SignUpPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="fullName">
-                  Full name
+                  {t("auth.name")}
                 </label>
                 <input
                   autoComplete="name"
@@ -143,7 +145,7 @@ export default function SignUpPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="email">
-                  Email
+                  {t("auth.email")}
                 </label>
                 <input
                   autoComplete="email"
@@ -158,7 +160,7 @@ export default function SignUpPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="password">
-                  Password
+                  {t("auth.password")}
                 </label>
                 <div className="relative">
                   <input
@@ -203,7 +205,7 @@ export default function SignUpPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="confirmPassword">
-                  Confirm password
+                  {t("auth.confirmPassword")}
                 </label>
                 <input
                   autoComplete="new-password"
@@ -236,14 +238,14 @@ export default function SignUpPage() {
                 disabled={loading}
                 type="submit"
               >
-                {loading ? "Creating account..." : "Create account"}
+                {loading ? t("auth.creating") : t("auth.createAccount")}
               </button>
 
               <Divider />
 
               <div className="grid gap-3">
                 <SocialButton
-                  label="Sign up with Google"
+                  label={t("auth.googleSignUp")}
                   onClick={() => void signIn("google", { callbackUrl: "/dashboard" })}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">

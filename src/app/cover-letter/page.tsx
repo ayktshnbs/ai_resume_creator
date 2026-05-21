@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
+import { useI18n } from "@/lib/i18n";
 import { PaymentButton } from "@/components/payment-button";
 import Link from "next/link";
 
@@ -79,6 +80,7 @@ const sampleContent = {
 
 export default function CoverLetterPage() {
   const { data: session, status } = useSession();
+  const { t } = useI18n();
   const [selected, setSelected] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
@@ -102,11 +104,11 @@ export default function CoverLetterPage() {
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Icon name="document" className="text-[32px]" />
           </div>
-          <h1 className="text-2xl font-bold text-ink">Sign in to create cover letters</h1>
-          <p className="max-w-md text-muted">Create an account or sign in to generate professional cover letters with AI.</p>
+          <h1 className="text-2xl font-bold text-ink">{t("gate.signInCover")}</h1>
+          <p className="max-w-md text-muted">{t("gate.signInCoverDesc")}</p>
           <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
           </div>
         </div>
       </AppShell>
@@ -165,13 +167,13 @@ export default function CoverLetterPage() {
         <header className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div className="max-w-2xl">
             <p className="mb-3 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
-              Cover Letter Gallery
+              {t("coverLetter.gallery")}
             </p>
             <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">
-              Cover Letter Templates
+              {t("coverLetter.title")}
             </h1>
             <p className="mt-3 text-lg leading-8 text-muted">
-              Choose a professionally designed layout. AI fills it with your resume data — ready to send in seconds.
+              {t("coverLetter.subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-surface-soft px-5 py-4 text-sm">
@@ -179,8 +181,8 @@ export default function CoverLetterPage() {
               <Icon name="sparkle" />
             </span>
             <span className="leading-6 text-muted">
-              <strong className="text-ink">AI-powered.</strong>{" "}
-              {isPro ? "Pulls from your saved resume automatically." : "Upgrade to Pro to generate cover letters with AI."}
+              <strong className="text-ink">{t("coverLetter.aiPowered")}</strong>{" "}
+              {isPro ? t("coverLetter.aiDesc") : t("coverLetter.aiUpgradeDesc")}
             </span>
           </div>
         </header>
@@ -223,7 +225,7 @@ export default function CoverLetterPage() {
                 <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
                   <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel">
                     <Icon name="edit" />
-                    Use Template
+                    {t("coverLetter.useTemplate")}
                   </div>
                 </div>
               </div>
@@ -256,14 +258,14 @@ export default function CoverLetterPage() {
           <div className="mt-12 flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-6">
             <Icon className="h-7 w-7 shrink-0 text-primary" name="sparkle" />
             <div className="flex-1">
-              <p className="text-lg font-bold text-ink">Pro Feature</p>
-              <p className="mt-1 text-sm text-muted">AI-powered cover letter generation is available for Pro users. Upgrade to create personalized cover letters from your resume data.</p>
+              <p className="text-lg font-bold text-ink">{t("coverLetter.proFeature")}</p>
+              <p className="mt-1 text-sm text-muted">{t("coverLetter.proDesc")}</p>
             </div>
             <PaymentButton
               price="149"
               className="primary-gradient shrink-0 rounded-xl px-6 py-3 text-sm font-bold text-white"
             >
-              Upgrade to Pro
+              {t("coverLetter.upgradePro")}
             </PaymentButton>
           </div>
         )}
@@ -271,7 +273,7 @@ export default function CoverLetterPage() {
         {(generating || generatedText) && (
           <div className="mt-12 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
             <div className="mb-6 flex items-center justify-between gap-4">
-              <h2 className="text-xl font-bold text-ink">Generated Cover Letter</h2>
+              <h2 className="text-xl font-bold text-ink">{t("coverLetter.generated")}</h2>
               {generatedText && (
                 <div className="flex gap-3">
                   <button
@@ -279,7 +281,7 @@ export default function CoverLetterPage() {
                     onClick={() => void navigator.clipboard.writeText(generatedText)}
                     type="button"
                   >
-                    Copy Text
+                    {t("coverLetter.copyText")}
                   </button>
                   {isPro ? (
                     <button
@@ -288,14 +290,14 @@ export default function CoverLetterPage() {
                       onClick={() => void exportPdf()}
                       type="button"
                     >
-                      {exporting ? "Exporting..." : "Export PDF"}
+                      {exporting ? t("resume.exporting") : t("resume.exportPdf")}
                     </button>
                   ) : (
                     <PaymentButton
                       price="149"
                       className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white"
                     >
-                      Export PDF (Pro)
+                      {t("resume.exportPdfPro")}
                     </PaymentButton>
                   )}
                 </div>

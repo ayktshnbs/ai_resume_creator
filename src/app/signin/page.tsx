@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { useI18n } from "@/lib/i18n";
 
 export default function SignInPage() {
   const router = useRouter();
   const { status } = useSession();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,8 +90,8 @@ export default function SignInPage() {
         <section className="flex items-center">
           <div className="soft-card w-full rounded-2xl p-6 shadow-panel md:p-8 lg:p-10">
             <div className="mb-8">
-              <h1 className="text-3xl font-extrabold tracking-normal text-ink">Welcome back</h1>
-              <p className="mt-2 text-sm leading-6 text-muted">Sign in to continue building your resume.</p>
+              <h1 className="text-3xl font-extrabold tracking-normal text-ink">{t("auth.welcomeBack")}</h1>
+              <p className="mt-2 text-sm leading-6 text-muted">{t("auth.signInContinue")}</p>
             </div>
 
             <form className="space-y-5" onSubmit={(event) => void handleSubmit(event)}>
@@ -101,7 +103,7 @@ export default function SignInPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="email">
-                  Email
+                  {t("auth.email")}
                 </label>
                 <input
                   autoComplete="email"
@@ -116,7 +118,7 @@ export default function SignInPage() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="password">
-                  Password
+                  {t("auth.password")}
                 </label>
                 <div className="relative">
                   <input
@@ -142,10 +144,10 @@ export default function SignInPage() {
               <div className="flex items-center justify-between gap-4 text-sm">
                 <label className="flex items-center gap-2 text-muted">
                   <input className="h-4 w-4 rounded border-outline/70 text-primary focus:ring-primary" type="checkbox" />
-                  Remember me
+                  {t("auth.rememberMe")}
                 </label>
                 <Link className="font-semibold text-primary hover:underline" href="/forgot-password">
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Link>
               </div>
 
@@ -154,13 +156,13 @@ export default function SignInPage() {
                 disabled={loading}
                 type="submit"
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? t("auth.signingIn") : t("auth.signInBtn")}
               </button>
 
               <Divider />
 
               <div className="grid gap-3">
-                <SocialButton label="Sign in with Google" onClick={() => void signIn("google", { callbackUrl: "/dashboard" })}>
+                <SocialButton label={t("auth.googleSignIn")} onClick={() => void signIn("google", { callbackUrl: "/dashboard" })}>
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -183,9 +185,9 @@ export default function SignInPage() {
               </div>
 
               <p className="pt-2 text-center text-sm text-muted">
-                Don't have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <Link className="font-semibold text-primary hover:underline" href="/signup">
-                  Create one
+                  {t("auth.createOne")}
                 </Link>
               </p>
             </form>

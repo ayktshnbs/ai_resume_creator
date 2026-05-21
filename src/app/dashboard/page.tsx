@@ -2,13 +2,14 @@
 
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
+import { useProStatus } from "@/lib/use-pro-status";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { PaymentButton } from "@/components/payment-button";
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
-  const isPro = false; // TODO: Connect to backend status
+  const { isPro, resumeCount, coverLetterCount, loaded } = useProStatus();
+  const totalDocs = resumeCount + coverLetterCount;
+  const maxFree = 2;
 
   return (
     <AppShell active="dashboard">
@@ -18,7 +19,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">Elevate Your Professional Narrative</h1>
             <p className="mt-2 text-lg text-muted">Your executive workspace for high-impact resumes and strategic career documents.</p>
           </div>
-          {!isPro && (
+          {!isPro && loaded && (
             <PaymentButton
               price="149"
               className="primary-gradient rounded-xl px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105"
@@ -27,6 +28,16 @@ export default function DashboardPage() {
             </PaymentButton>
           )}
         </header>
+
+        {!isPro && loaded && (
+          <div className="flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+            <Icon className="h-6 w-6 shrink-0 text-primary" name="sparkle" />
+            <div className="flex-1">
+              <p className="font-bold text-ink">Free Plan — {totalDocs}/{maxFree} documents used</p>
+              <p className="mt-0.5 text-sm text-muted">Upgrade to Pro for unlimited resumes, cover letters, and AI-powered features.</p>
+            </div>
+          </div>
+        )}
 
         <section className="grid gap-6 lg:grid-cols-3">
           <Link
@@ -54,12 +65,17 @@ export default function DashboardPage() {
               <h3 className="font-bold text-ink">Portfolio Overview</h3>
             </div>
             <div className="flex items-end gap-2">
-              <span className="text-5xl font-extrabold text-primary">0</span>
+              <span className="text-5xl font-extrabold text-primary">{loaded ? totalDocs : "—"}</span>
               <span className="mb-2 text-sm font-bold text-muted">Documents</span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-muted">Your curated documents will appear here once you authenticate and save your first executive draft.</p>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              {resumeCount} resume{resumeCount !== 1 ? "s" : ""} · {coverLetterCount} cover letter{coverLetterCount !== 1 ? "s" : ""}
+            </p>
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-outline/30">
-              <div className="h-full w-0 rounded-full bg-primary" />
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: isPro ? "100%" : `${Math.min((totalDocs / maxFree) * 100, 100)}%` }}
+              />
             </div>
           </div>
         </section>
@@ -76,7 +92,7 @@ export default function DashboardPage() {
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-soft text-primary">
                 <Icon className="h-7 w-7" name="document" />
               </div>
-              <h3 className="font-bold text-ink">No documents yet</h3>
+              <h3 className="font-bold text-ink">{totalDocs === 0 ? "No documents yet" : "Create new resume"}</h3>
               <p className="mt-2 max-w-64 text-sm leading-6 text-muted">Begin by creating a new professional resume or selecting a high-fidelity template.</p>
               <span className="primary-gradient mt-6 rounded-xl px-4 py-2 text-sm font-bold text-white">New Resume</span>
             </Link>

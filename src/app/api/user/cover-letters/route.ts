@@ -59,6 +59,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ id: updated.id });
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { plan: true, planExpiresAt: true },
+  });
+  const isPro = user?.plan === "pro" && (!user.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+
+  if (!isPro) {
+    const count = await prisma.coverLetter.count({ where: { userId: session.user.id } });
+    if (count >= 1) {
+      return NextResponse.json(
+        { error: "Free plan allows 1 cover letter. Upgrade to Pro for unlimited." },
+        { status: 403 },
+      );
+    }
+  }
+
   const created = await prisma.coverLetter.create({
     data: {
       userId: session.user.id,

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
+import { useProStatus } from "@/lib/use-pro-status";
 import {
   clearResumeData,
   createId,
@@ -60,6 +61,7 @@ const initialHelperState: HelperState = {
 
 export default function ResumeBuilderPage() {
   const { data: session } = useSession();
+  const { isPro } = useProStatus();
   const [resume, setResume] = useState<ResumeData>(emptyResumeData);
   const [template, setTemplate] = useState<SelectedTemplate>({ name: "Modern Minimalist", layout: "single", accent: "primary" });
   const [skillDraft, setSkillDraft] = useState("");
@@ -493,15 +495,25 @@ export default function ResumeBuilderPage() {
               <p className="mt-1 text-sm text-muted">Autosaves locally and syncs to your account when signed in.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                className="primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
-                disabled={ai.full}
-                onClick={improveFullResume}
-                type="button"
-              >
-                <Icon name="sparkle" />
-                {ai.full ? "Optimizing..." : "AI-Powered Optimization"}
-              </button>
+              {isPro ? (
+                <button
+                  className="primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
+                  disabled={ai.full}
+                  onClick={improveFullResume}
+                  type="button"
+                >
+                  <Icon name="sparkle" />
+                  {ai.full ? "Optimizing..." : "AI-Powered Optimization"}
+                </button>
+              ) : (
+                <Link
+                  className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-bold text-primary"
+                  href="/signup?plan=pro"
+                >
+                  <Icon name="sparkle" />
+                  Upgrade for AI Features
+                </Link>
+              )}
             </div>
           </header>
 
@@ -509,16 +521,18 @@ export default function ResumeBuilderPage() {
           {referenceMessage && <p className="mb-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary">{referenceMessage}</p>}
 
           <div className="space-y-5">
-            <AiHelperPanel
-              helper={helper}
-              isAnalyzing={helper.action === "analyze_resume"}
-              isGeneratingCover={helper.action === "generate_cover_letter"}
-              isSuggestingSkills={helper.action === "suggest_skills"}
-              onAnalyze={() => void runHelperAction("analyze_resume")}
-              onGenerateCover={() => void runHelperAction("generate_cover_letter")}
-              onSuggestSkills={() => void runHelperAction("suggest_skills")}
-              onAddSuggestedSkills={addSuggestedSkills}
-            />
+            {isPro && (
+              <AiHelperPanel
+                helper={helper}
+                isAnalyzing={helper.action === "analyze_resume"}
+                isGeneratingCover={helper.action === "generate_cover_letter"}
+                isSuggestingSkills={helper.action === "suggest_skills"}
+                onAnalyze={() => void runHelperAction("analyze_resume")}
+                onGenerateCover={() => void runHelperAction("generate_cover_letter")}
+                onSuggestSkills={() => void runHelperAction("suggest_skills")}
+                onAddSuggestedSkills={addSuggestedSkills}
+              />
+            )}
 
             <FormSection icon="person" title="Profile Details">
               <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row">
@@ -627,15 +641,17 @@ export default function ResumeBuilderPage() {
               />
               <div className="mt-3 flex items-center justify-between gap-3">
                 <p className="text-xs font-medium text-muted">A compelling summary captures recruiter attention in seconds.</p>
-                <button
-                  className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
-                  disabled={ai.summary || !resume.summary.trim()}
-                  onClick={improveSummary}
-                  type="button"
-                >
-                  <Icon className="h-4 w-4" name="sparkle" />
-                  {ai.summary ? "Refining..." : "AI-Refine Summary"}
-                </button>
+                {isPro && (
+                  <button
+                    className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
+                    disabled={ai.summary || !resume.summary.trim()}
+                    onClick={improveSummary}
+                    type="button"
+                  >
+                    <Icon className="h-4 w-4" name="sparkle" />
+                    {ai.summary ? "Refining..." : "AI-Refine Summary"}
+                  </button>
+                )}
               </div>
             </FormSection>
 
@@ -650,7 +666,7 @@ export default function ResumeBuilderPage() {
                     onAddBullet={() => addBullet(experience.id)}
                     onDelete={() => deleteExperience(experience.id)}
                     onDeleteBullet={(index) => deleteBullet(experience.id, index)}
-                    onImproveBullet={(index, text) => improveBullet(experience.id, index, text)}
+                    onImproveBullet={isPro ? (index, text) => improveBullet(experience.id, index, text) : undefined}
                     onUpdate={(patch) => updateExperience(experience.id, patch)}
                     onUpdateBullet={(index, value) => updateBullet(experience.id, index, value)}
                   />
@@ -899,7 +915,7 @@ function ExperienceEditor({
   onAddBullet: () => void;
   onDelete: () => void;
   onDeleteBullet: (index: number) => void;
-  onImproveBullet: (index: number, text: string) => void;
+  onImproveBullet?: (index: number, text: string) => void;
   onUpdate: (patch: Partial<ExperienceItem>) => void;
   onUpdateBullet: (index: number, value: string) => void;
 }) {
@@ -928,14 +944,16 @@ function ExperienceEditor({
         {experience.bullets.map((bullet, index) => (
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]" key={`${experience.id}-${index}`}>
             <input className="field" onChange={(event) => onUpdateBullet(index, event.target.value)} placeholder="Led, built, improved, reduced..." value={bullet} />
-            <button
-              className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
-              disabled={isImproving(index) || !bullet.trim()}
-              onClick={() => onImproveBullet(index, bullet)}
-              type="button"
-            >
-              {isImproving(index) ? "Refining..." : "AI-Refine Achievement"}
-            </button>
+            {onImproveBullet && (
+              <button
+                className="rounded-xl bg-primary/10 px-3 py-2 text-sm font-bold text-primary disabled:opacity-60"
+                disabled={isImproving(index) || !bullet.trim()}
+                onClick={() => onImproveBullet(index, bullet)}
+                type="button"
+              >
+                {isImproving(index) ? "Refining..." : "AI-Refine Achievement"}
+              </button>
+            )}
             <button className="rounded-xl border border-outline/70 bg-white px-3 py-2 text-sm font-bold text-ink" onClick={() => onDeleteBullet(index)} type="button">
               Delete
             </button>

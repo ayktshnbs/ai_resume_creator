@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "@/components/icon";
 import { useSession, signOut } from "next-auth/react";
+import { useProStatus } from "@/lib/use-pro-status";
 
 type AppShellProps = {
   children: ReactNode;
@@ -21,6 +22,7 @@ const navItems = [
 
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {
   const { data: session } = useSession();
+  const { isPro } = useProStatus();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -72,7 +74,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-black text-primary">PRO</span>
+                    {isPro && <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-black text-primary">PRO</span>}
                   </div>
                   <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
                     Sign Out

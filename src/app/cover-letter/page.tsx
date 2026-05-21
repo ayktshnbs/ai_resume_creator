@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
+import { useProStatus } from "@/lib/use-pro-status";
+import Link from "next/link";
 
 type CoverLetterTemplate = {
   id: string;
@@ -78,9 +80,16 @@ export default function CoverLetterPage() {
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const letterRef = useRef<HTMLDivElement>(null);
+  const { isPro } = useProStatus();
 
   async function generateCoverLetter(templateId: string) {
+    if (!isPro) {
+      setShowUpgrade(true);
+      return;
+    }
+    setShowUpgrade(false);
     setSelected(templateId);
     setGenerating(true);
     setGeneratedText("");
@@ -139,7 +148,8 @@ export default function CoverLetterPage() {
               <Icon name="sparkle" />
             </span>
             <span className="leading-6 text-muted">
-              <strong className="text-ink">AI-powered.</strong> Pulls from your saved resume automatically.
+              <strong className="text-ink">AI-powered.</strong>{" "}
+              {isPro ? "Pulls from your saved resume automatically." : "Upgrade to Pro to generate cover letters with AI."}
             </span>
           </div>
         </header>
@@ -210,6 +220,19 @@ export default function CoverLetterPage() {
             </article>
           ))}
         </div>
+
+        {showUpgrade && !isPro && (
+          <div className="mt-12 flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-6">
+            <Icon className="h-7 w-7 shrink-0 text-primary" name="sparkle" />
+            <div className="flex-1">
+              <p className="text-lg font-bold text-ink">Pro Feature</p>
+              <p className="mt-1 text-sm text-muted">AI-powered cover letter generation is available for Pro users. Upgrade to create personalized cover letters from your resume data.</p>
+            </div>
+            <Link className="primary-gradient shrink-0 rounded-xl px-6 py-3 text-sm font-bold text-white" href="/signup?plan=pro">
+              Upgrade to Pro
+            </Link>
+          </div>
+        )}
 
         {(generating || generatedText) && (
           <div className="mt-12 rounded-3xl border border-outline/30 bg-white p-8 shadow-panel">

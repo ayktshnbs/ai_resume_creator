@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
@@ -76,11 +77,40 @@ const sampleContent = {
 };
 
 export default function CoverLetterPage() {
+  const { data: session, status } = useSession();
   const [selected, setSelected] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
   const [exporting, setExporting] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+
+  if (status === "loading") {
+    return (
+      <AppShell active="cover-letter">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!session) {
+    return (
+      <AppShell active="cover-letter">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon name="document" className="text-[32px]" />
+          </div>
+          <h1 className="text-2xl font-bold text-ink">Sign in to create cover letters</h1>
+          <p className="max-w-md text-muted">Create an account or sign in to generate professional cover letters with AI.</p>
+          <div className="flex gap-3">
+            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
   const letterRef = useRef<HTMLDivElement>(null);
   const { isPro } = useProStatus();
 

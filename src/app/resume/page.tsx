@@ -60,13 +60,41 @@ const initialHelperState: HelperState = {
 };
 
 export default function ResumeBuilderPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { isPro } = useProStatus();
   const [resume, setResume] = useState<ResumeData>(emptyResumeData);
   const [template, setTemplate] = useState<SelectedTemplate>({ name: "Modern Minimalist", layout: "single", accent: "primary" });
   const [skillDraft, setSkillDraft] = useState("");
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
+
+  if (status === "loading") {
+    return (
+      <AppShell active="resume" fullHeight>
+        <div className="flex h-full items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!session) {
+    return (
+      <AppShell active="resume">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon name="resume" className="text-[32px]" />
+          </div>
+          <h1 className="text-2xl font-bold text-ink">Sign in to build your resume</h1>
+          <p className="max-w-md text-muted">Create an account or sign in to start building your professional resume with our AI-powered tools.</p>
+          <div className="flex gap-3">
+            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">Sign In</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-white px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">Sign Up</Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
   const [extracting, setExtracting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [ai, setAi] = useState<AiState>(initialAiState);

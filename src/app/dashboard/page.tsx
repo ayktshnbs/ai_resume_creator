@@ -53,7 +53,7 @@ export default function DashboardPage() {
           </div>
           {!isPro && loaded && (
             <PaymentButton
-              price="149"
+              price="6"
               className="primary-gradient rounded-xl px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105"
             >
               {t("dashboard.upgrade")}

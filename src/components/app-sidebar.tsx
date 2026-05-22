@@ -38,7 +38,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
               <Icon name="sparkle" className="text-[22px]" />
             </div>
             <div>
-              <p className="font-label text-lg font-bold text-ink">CVForge AI</p>
+              <p className="font-label text-lg font-bold text-ink">CV with AI</p>
               <p className="text-xs text-muted">{t("common.workspace")}</p>
             </div>
           </Link>
@@ -116,7 +116,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
       <header className="sticky top-0 z-20 border-b border-outline bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between">
           <Link href="/" className="font-label text-lg font-bold text-ink">
-            CVForge AI
+            CV with AI
           </Link>
           <button
             className="flex h-10 w-10 items-center justify-center rounded-xl text-ink transition hover:bg-surface-soft"
@@ -142,7 +142,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                   <Icon name="sparkle" className="text-[22px]" />
                 </div>
                 <div>
-                  <p className="font-label text-lg font-bold text-ink">CVForge AI</p>
+                  <p className="font-label text-lg font-bold text-ink">CV with AI</p>
                   <p className="text-xs text-muted">{t("common.workspace")}</p>
                 </div>
               </Link>

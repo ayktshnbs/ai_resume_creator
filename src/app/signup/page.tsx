@@ -84,7 +84,7 @@ export default function SignUpPage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-ambient">
                 CV
               </span>
-              AI CV Builder
+              CV with AI
             </Link>
             <p className="mt-8 max-w-xl text-4xl font-extrabold leading-tight tracking-normal text-ink md:text-5xl">
               Start building your career story today.

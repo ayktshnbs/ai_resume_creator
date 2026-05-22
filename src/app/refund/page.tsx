@@ -6,7 +6,7 @@ export default function RefundPage() {
       <header className="border-b border-outline/50 bg-surface/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link className="text-xl font-bold tracking-tight text-ink" href="/">
-            <span className="text-primary">AI</span> CV Builder
+            CV with AI
           </Link>
           <Link className="text-sm font-bold text-primary hover:underline" href="/">Ana Sayfa</Link>
         </nav>
@@ -20,7 +20,7 @@ export default function RefundPage() {
           <section>
             <h2 className="text-xl font-bold text-ink">1. Genel İade Politikası</h2>
             <p className="mt-3">
-              CVForge AI olarak müşteri memnuniyetini ön planda tutuyoruz. Pro abonelik planımız için
+              CV with AI olarak müşteri memnuniyetini ön planda tutuyoruz. Pro abonelik planımız için
               aşağıda belirtilen koşullar dahilinde iade hakkı sunmaktayız.
             </p>
           </section>

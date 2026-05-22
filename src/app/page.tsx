@@ -92,7 +92,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-outline/50 bg-surface/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
           <a className="text-xl font-bold tracking-tight text-ink" href="#">
-            <span className="text-primary">AI</span> CV Builder
+            CV with AI
           </a>
           <div className="hidden items-center gap-8 text-sm font-medium text-muted md:flex">
             <a className="transition-colors hover:text-primary" href="#features">Features</a>
@@ -321,7 +321,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-10">
           <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
             <a className="text-xl font-bold tracking-tight text-ink" href="#">
-              <span className="text-primary">AI</span> CV Builder
+              CV with AI
             </a>
             <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-muted">
               <a className="hover:text-primary" href="/resume">Builder</a>
@@ -336,7 +336,7 @@ export default function Home() {
             <a className="hover:text-primary" href="/refund">İade Koşulları</a>
           </div>
           <div className="flex flex-col items-center justify-between gap-4 text-xs text-muted md:flex-row">
-            <p>© 2026 AI CV Builder. All rights reserved.</p>
+            <p>© 2026 CV with AI. All rights reserved.</p>
             <p>Made with precision for modern professionals.</p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
@@ -56,6 +56,40 @@ const parametricCards: TemplateCard[] = PARAMETRIC_CONFIGS.map((c) => ({
 const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards];
 
 const CATEGORIES = ["All", ...Array.from(new Set(ALL_TEMPLATES.map((t) => t.category)))];
+
+const A4_W = 793;
+
+function TemplateCardPreview({ templateName }: { templateName: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setScale(el.clientWidth / A4_W);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="relative aspect-[1/1.38] overflow-hidden bg-surface">
+      {scale > 0 && (
+        <div
+          style={{
+            width: A4_W,
+            minHeight: Math.round(A4_W * 1.414),
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          <TemplateRenderer resume={sampleResume} templateName={templateName} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TemplatesPage() {
   const router = useRouter();
@@ -120,23 +154,8 @@ export default function TemplatesPage() {
               key={template.name}
               onClick={() => useTemplate(template)}
             >
-              {/* Real CV preview — rendered at A4 size, scaled down */}
-              <div className="relative aspect-[1/1.38] overflow-hidden bg-surface">
-                <div className="absolute inset-0 overflow-hidden">
-                  <div
-                    style={{
-                      width: "210mm",
-                      minHeight: "297mm",
-                      transform: "scale(0.38)",
-                      transformOrigin: "top left",
-                    }}
-                  >
-                    <TemplateRenderer
-                      resume={sampleResume}
-                      templateName={template.name}
-                    />
-                  </div>
-                </div>
+              <div className="relative">
+                <TemplateCardPreview templateName={template.name} />
                 <div className="absolute inset-0 flex items-center justify-center bg-surface/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
                   <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5">
                     <Icon name="edit" />

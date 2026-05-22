@@ -559,7 +559,7 @@ export default function ResumeBuilderPage() {
                 </button>
               ) : (
                 <PaymentButton
-                  price="149"
+                  price="6"
                   className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-bold text-primary"
                 >
                   <Icon name="sparkle" />
@@ -840,7 +840,7 @@ export default function ResumeBuilderPage() {
                 </button>
               ) : (
                 <PaymentButton
-                  price="149"
+                  price="6"
                   className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background"
                 >
                   {t("resume.exportPdfPro")}

@@ -262,7 +262,7 @@ export default function CoverLetterPage() {
               <p className="mt-1 text-sm text-muted">{t("coverLetter.proDesc")}</p>
             </div>
             <PaymentButton
-              price="149"
+              price="6"
               className="primary-gradient shrink-0 rounded-xl px-6 py-3 text-sm font-bold text-white"
             >
               {t("coverLetter.upgradePro")}
@@ -294,7 +294,7 @@ export default function CoverLetterPage() {
                     </button>
                   ) : (
                     <PaymentButton
-                      price="149"
+                      price="6"
                       className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background"
                     >
                       {t("resume.exportPdfPro")}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
@@ -55,6 +55,15 @@ export default function Home() {
   const router = useRouter();
   const { lang, setLang } = useI18n();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    setMouse({ x, y });
+  }, []);
 
   function selectTemplate(t: TemplateCard) {
     saveSelectedTemplate({ name: t.name, layout: t.layout, accent: t.accent, themeColor: t.themeColor });
@@ -64,7 +73,7 @@ export default function Home() {
   const marqueeTemplates = [...ALL_TEMPLATES, ...ALL_TEMPLATES];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-background">
+    <main className="min-h-screen overflow-x-hidden bg-[#f9fafb]" data-theme="light">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -89,56 +98,172 @@ export default function Home() {
           transform: translateY(-6px) scale(1.015);
           box-shadow: 0 20px 60px rgba(99,102,241,0.15), 0 8px 24px rgba(0,0,0,0.08);
         }
-        @keyframes blob-drift-1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(80px, -60px) scale(1.15); }
-          50% { transform: translate(-40px, 40px) scale(0.9); }
-          75% { transform: translate(60px, 80px) scale(1.1); }
+        @keyframes balloon-float-1 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          20% { transform: translate(70px, -50px) rotate(4deg) scale(1.04); }
+          40% { transform: translate(-30px, -90px) rotate(-3deg) scale(0.97); }
+          60% { transform: translate(50px, -40px) rotate(2deg) scale(1.03); }
+          80% { transform: translate(-50px, -20px) rotate(-2deg) scale(0.98); }
         }
-        @keyframes blob-drift-2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(-100px, 50px) scale(1.1); }
-          50% { transform: translate(60px, -70px) scale(0.95); }
-          75% { transform: translate(-50px, -40px) scale(1.05); }
+        @keyframes balloon-float-2 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          25% { transform: translate(-60px, -70px) rotate(-5deg) scale(1.06); }
+          50% { transform: translate(40px, -30px) rotate(3deg) scale(0.95); }
+          75% { transform: translate(-20px, -80px) rotate(-2deg) scale(1.02); }
         }
-        @keyframes blob-drift-3 {
-          0%, 100% { transform: translate(0, 0) scale(1.05); }
-          33% { transform: translate(70px, 60px) scale(0.9); }
-          66% { transform: translate(-60px, -50px) scale(1.15); }
+        @keyframes balloon-float-3 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.02); }
+          33% { transform: translate(90px, -60px) rotate(6deg) scale(0.94); }
+          66% { transform: translate(-50px, -100px) rotate(-4deg) scale(1.05); }
         }
-        .blob-1 { animation: blob-drift-1 18s ease-in-out infinite; }
-        .blob-2 { animation: blob-drift-2 22s ease-in-out infinite; }
-        .blob-3 { animation: blob-drift-3 26s ease-in-out infinite; }
+        @keyframes balloon-float-4 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(0.98); }
+          30% { transform: translate(-80px, -40px) rotate(-3deg) scale(1.05); }
+          60% { transform: translate(60px, -70px) rotate(4deg) scale(0.96); }
+        }
+        @keyframes balloon-float-5 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          20% { transform: translate(40px, -80px) rotate(3deg) scale(1.03); }
+          50% { transform: translate(-60px, -50px) rotate(-5deg) scale(0.97); }
+          80% { transform: translate(30px, -30px) rotate(2deg) scale(1.01); }
+        }
+        @keyframes balloon-float-6 {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.01); }
+          35% { transform: translate(-40px, -60px) rotate(-4deg) scale(0.95); }
+          70% { transform: translate(70px, -40px) rotate(3deg) scale(1.04); }
+        }
+        @keyframes balloon-wobble {
+          0%, 100% { border-radius: 50% 50% 50% 50%; }
+          25% { border-radius: 48% 52% 53% 47%; }
+          50% { border-radius: 52% 48% 47% 53%; }
+          75% { border-radius: 47% 53% 52% 48%; }
+        }
+        .balloon {
+          position: absolute;
+          border-radius: 50%;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+        .balloon::before {
+          content: '';
+          position: absolute;
+          top: 12%;
+          left: 18%;
+          width: 35%;
+          height: 30%;
+          background: radial-gradient(ellipse, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
+          border-radius: 50%;
+          transform: rotate(-30deg);
+        }
+        .balloon::after {
+          content: '';
+          position: absolute;
+          bottom: 15%;
+          right: 20%;
+          width: 15%;
+          height: 12%;
+          background: radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 70%);
+          border-radius: 50%;
+        }
+        .balloon-1 { animation: balloon-float-1 18s ease-in-out infinite, balloon-wobble 8s ease-in-out infinite; }
+        .balloon-2 { animation: balloon-float-2 22s ease-in-out infinite, balloon-wobble 10s ease-in-out infinite 1s; }
+        .balloon-3 { animation: balloon-float-3 20s ease-in-out infinite, balloon-wobble 9s ease-in-out infinite 2s; }
+        .balloon-4 { animation: balloon-float-4 24s ease-in-out infinite, balloon-wobble 11s ease-in-out infinite 0.5s; }
+        .balloon-5 { animation: balloon-float-5 19s ease-in-out infinite, balloon-wobble 7s ease-in-out infinite 1.5s; }
+        .balloon-6 { animation: balloon-float-6 21s ease-in-out infinite, balloon-wobble 12s ease-in-out infinite 3s; }
+        @keyframes hero-fade-up {
+          0% { opacity: 0; transform: translateY(30px); filter: blur(6px); }
+          100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes letter-drop {
+          0%, 100% { opacity: 0; transform: translateY(-60px); }
+          8% { opacity: 1; transform: translateY(5px); }
+          11% { transform: translateY(-2px); }
+          14%, 68% { opacity: 1; transform: translateY(0); }
+          80% { opacity: 0; transform: translateY(14px); }
+        }
+        @keyframes hero-slide-in {
+          0% { opacity: 0; transform: translateX(-40px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes hero-scale-in {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .hero-fade-up { animation: hero-fade-up 0.8s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
+        .letter-drop { display: inline-block; animation: letter-drop 6s ease-in-out infinite; opacity: 0; }
+        .letter-accent { color: #6366f1; }
+        .hero-delay-1 { animation-delay: 0.1s; }
+        .hero-delay-2 { animation-delay: 0.25s; }
+        .hero-delay-3 { animation-delay: 0.45s; }
+        .hero-delay-4 { animation-delay: 0.65s; }
+        .hero-delay-5 { animation-delay: 0.85s; }
+        .hero-slide-in { animation: hero-slide-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
+        .hero-scale-in { animation: hero-scale-in 0.6s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
+        .shimmer-text {
+          background: linear-gradient(90deg, #2563eb 0%, #6366f1 30%, #0ea5e9 50%, #6366f1 70%, #2563eb 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: shimmer 4s linear infinite;
+        }
       `}</style>
 
       <header className="sticky top-0 z-50">
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-2xl dark:bg-[#0f172a]/60" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        {/* Glassmorphic background with color tint */}
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.75),rgba(239,246,255,0.7),rgba(238,242,255,0.7))] backdrop-blur-2xl" />
+        {/* Rainbow gradient bottom border */}
+        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-[#3b82f6]/0 via-[#6366f1]/40 to-[#ec4899]/0" />
+        {/* Subtle top glow */}
+        <div className="absolute inset-x-0 -bottom-8 h-8 bg-gradient-to-b from-[#6366f1]/[0.04] to-transparent" />
         <nav className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
-          <a className="text-xl font-bold tracking-tight text-ink" href="#">
-            CV with AI
+          <a className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#111827]" href="#">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#3b82f6] text-xs font-extrabold text-white shadow-lg shadow-[#6366f1]/25">
+              CV
+            </span>
+            <span className="bg-gradient-to-r from-[#111827] to-[#6366f1] bg-clip-text text-transparent">
+              CV with AI
+            </span>
           </a>
-          <div className="hidden items-center gap-8 text-sm font-medium text-muted md:flex">
-            <a className="transition-colors hover:text-primary" href="#features">Features</a>
-            <a className="transition-colors hover:text-primary" href="/resume">Builder</a>
-            <a className="transition-colors hover:text-primary" href="/templates">Templates</a>
-            <a className="transition-colors hover:text-primary" href="#pricing">Pricing</a>
+          <div className="hidden items-center md:flex">
+            <div className="flex items-center gap-1 rounded-full border border-white/60 bg-white/40 px-2 py-1.5 shadow-sm backdrop-blur-sm">
+              {[
+                { label: "Features", href: "#features" },
+                { label: "Builder", href: "/resume" },
+                { label: "Templates", href: "/templates" },
+                { label: "Pricing", href: "#pricing" },
+              ].map((link) => (
+                <a
+                  key={link.label}
+                  className="rounded-full px-4 py-1.5 text-sm font-medium text-[#4b5563] transition-all hover:bg-white/80 hover:text-[#111827] hover:shadow-sm"
+                  href={link.href}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => setLang(lang === "en" ? "tr" : "en")}
-              className="rounded-xl px-3 py-2 text-sm font-bold text-muted transition-all hover:bg-surface-soft hover:text-ink"
+              className="rounded-full border border-white/50 bg-white/30 px-3 py-1.5 text-xs font-bold text-[#6b7280] backdrop-blur-sm transition-all hover:bg-white/60 hover:text-[#111827]"
             >
               {lang === "en" ? "TR" : "EN"}
             </button>
-            <a className="hidden rounded-xl px-4 py-2 text-sm font-bold text-ink transition-all hover:bg-surface-soft md:block" href="/signin">
+            <a className="hidden rounded-full px-4 py-2 text-sm font-bold text-[#4b5563] transition-all hover:text-[#111827] md:block" href="/signin">
               Sign in
             </a>
-            <a className="hidden primary-gradient rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-ambient transition-all hover:shadow-panel hover:brightness-105 active:scale-[0.98] sm:inline-flex" href="/signup">
+            <a className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:shadow-xl hover:shadow-[#6366f1]/30 hover:brightness-105 active:scale-[0.97] sm:inline-flex" href="/signup">
               Get started free
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
             </a>
             <button
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-ink transition hover:bg-surface-soft md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/50 bg-white/30 text-[#111827] backdrop-blur-sm transition hover:bg-white/60 md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -151,7 +276,7 @@ export default function Home() {
           </div>
         </nav>
         {mobileMenuOpen && (
-          <div className="border-t border-outline/30 bg-surface/95 backdrop-blur-xl md:hidden">
+          <div className="border-t border-white/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(239,246,255,0.9))] backdrop-blur-2xl md:hidden">
             <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4">
               {[
                 { label: "Features", href: "#features" },
@@ -161,18 +286,18 @@ export default function Home() {
               ].map((link) => (
                 <a
                   key={link.label}
-                  className="rounded-xl px-4 py-3 text-sm font-semibold text-ink transition hover:bg-surface-soft"
+                  className="rounded-xl px-4 py-3 text-sm font-semibold text-[#111827] transition hover:bg-white/60"
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
                 </a>
               ))}
-              <div className="mt-3 flex flex-col gap-2 border-t border-outline/30 pt-4">
-                <a className="rounded-xl px-4 py-3 text-center text-sm font-bold text-ink transition hover:bg-surface-soft" href="/signin">
+              <div className="mt-3 flex flex-col gap-2 border-t border-white/30 pt-4">
+                <a className="rounded-xl px-4 py-3 text-center text-sm font-bold text-[#111827] transition hover:bg-white/60" href="/signin">
                   Sign in
                 </a>
-                <a className="primary-gradient rounded-xl px-4 py-3 text-center text-sm font-bold text-white" href="/signup">
+                <a className="rounded-xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-[#6366f1]/20" href="/signup">
                   Get started free
                 </a>
               </div>
@@ -182,16 +307,81 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-8 pb-20 bg-[#f8faff]">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="blob-1 absolute -left-32 -top-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.18),transparent_70%)] blur-3xl" />
-          <div className="blob-2 absolute -right-20 top-10 h-[450px] w-[450px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.15),transparent_70%)] blur-3xl" />
-          <div className="blob-3 absolute bottom-0 left-1/3 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.12),transparent_70%)] blur-3xl" />
+      <section
+        ref={heroRef}
+        className="relative overflow-hidden pt-8 pb-20 bg-[#f8faff]"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setMouse({ x: 0, y: 0 })}
+      >
+        {/* 3D Water Balloons */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          {/* Blue balloon — large */}
+          <div
+            className="balloon balloon-1"
+            style={{
+              left: "5%", top: "8%", width: 200, height: 200,
+              background: "radial-gradient(circle at 38% 30%, rgba(147,197,253,0.9), rgba(59,130,246,0.7) 50%, rgba(29,78,216,0.5) 80%, rgba(30,64,175,0.3))",
+              boxShadow: "inset 0 -20px 40px rgba(30,64,175,0.25), 0 20px 60px rgba(59,130,246,0.2)",
+              transform: `translate(${mouse.x * 20}px, ${mouse.y * 15}px)`,
+            }}
+          />
+          {/* Indigo balloon — medium */}
+          <div
+            className="balloon balloon-2"
+            style={{
+              right: "8%", top: "5%", width: 160, height: 160,
+              background: "radial-gradient(circle at 35% 28%, rgba(199,210,254,0.9), rgba(129,140,248,0.7) 45%, rgba(99,102,241,0.5) 75%, rgba(79,70,229,0.3))",
+              boxShadow: "inset 0 -18px 36px rgba(79,70,229,0.25), 0 18px 50px rgba(99,102,241,0.2)",
+              transform: `translate(${mouse.x * -15}px, ${mouse.y * 20}px)`,
+            }}
+          />
+          {/* Cyan balloon — large */}
+          <div
+            className="balloon balloon-3"
+            style={{
+              left: "25%", bottom: "5%", width: 180, height: 180,
+              background: "radial-gradient(circle at 36% 32%, rgba(165,243,252,0.9), rgba(34,211,238,0.65) 48%, rgba(6,182,212,0.45) 78%, rgba(8,145,178,0.25))",
+              boxShadow: "inset 0 -18px 38px rgba(8,145,178,0.2), 0 18px 55px rgba(6,182,212,0.18)",
+              transform: `translate(${mouse.x * 25}px, ${mouse.y * -18}px)`,
+            }}
+          />
+          {/* Pink balloon — small */}
+          <div
+            className="balloon balloon-4"
+            style={{
+              right: "20%", bottom: "15%", width: 120, height: 120,
+              background: "radial-gradient(circle at 38% 30%, rgba(251,207,232,0.9), rgba(244,114,182,0.65) 48%, rgba(236,72,153,0.45) 78%, rgba(219,39,119,0.25))",
+              boxShadow: "inset 0 -14px 30px rgba(219,39,119,0.2), 0 14px 40px rgba(236,72,153,0.15)",
+              transform: `translate(${mouse.x * -30}px, ${mouse.y * 25}px)`,
+            }}
+          />
+          {/* Purple balloon — medium */}
+          <div
+            className="balloon balloon-5"
+            style={{
+              left: "55%", top: "12%", width: 140, height: 140,
+              background: "radial-gradient(circle at 36% 28%, rgba(233,213,255,0.9), rgba(192,132,252,0.65) 48%, rgba(168,85,247,0.45) 78%, rgba(147,51,234,0.25))",
+              boxShadow: "inset 0 -16px 34px rgba(147,51,234,0.2), 0 16px 45px rgba(168,85,247,0.18)",
+              transform: `translate(${mouse.x * -20}px, ${mouse.y * 30}px)`,
+            }}
+          />
+          {/* Green balloon — small */}
+          <div
+            className="balloon balloon-6"
+            style={{
+              left: "12%", top: "50%", width: 100, height: 100,
+              background: "radial-gradient(circle at 38% 30%, rgba(187,247,208,0.9), rgba(74,222,128,0.65) 48%, rgba(34,197,94,0.45) 78%, rgba(22,163,74,0.25))",
+              boxShadow: "inset 0 -12px 26px rgba(22,163,74,0.2), 0 12px 35px rgba(34,197,94,0.15)",
+              transform: `translate(${mouse.x * 18}px, ${mouse.y * -22}px)`,
+            }}
+          />
         </div>
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(113,119,134,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.04)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
-        <div className="mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
+
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(113,119,134,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.03)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
           <div className="flex flex-col justify-center py-10">
-            <div className="mb-6 flex items-center gap-3">
+            <div className="hero-fade-up hero-delay-1 mb-6 flex items-center gap-3">
               <span className="rounded-full bg-primary/10 px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.15em] text-primary">
                 New: AI Power-Up
               </span>
@@ -199,12 +389,41 @@ export default function Home() {
               <span className="text-xs font-medium text-[#6b7280]">Trusted by 50k+ job seekers</span>
             </div>
             <h1 className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-[#111827] sm:text-5xl md:text-7xl">
-              The <span className="gradient-text">smarter</span> way to build your resume.
+              {(() => {
+                const words = [
+                  { text: "The", accent: false },
+                  { text: "smarter", accent: true },
+                  { text: "way", accent: false },
+                  { text: "to", accent: false },
+                  { text: "build", accent: false },
+                  { text: "your", accent: false },
+                  { text: "resume.", accent: false },
+                ];
+                let charIndex = 0;
+                return words.map((word, wi) => (
+                  <span key={wi} className="inline-block whitespace-nowrap">
+                    {wi > 0 && <span className="inline-block">&nbsp;</span>}
+                    {word.text.split("").map((char, ci) => {
+                      const delay = charIndex * 0.045;
+                      charIndex++;
+                      return (
+                        <span
+                          key={ci}
+                          className={`letter-drop ${word.accent ? "letter-accent" : ""}`}
+                          style={{ animationDelay: `${delay}s` }}
+                        >
+                          {char}
+                        </span>
+                      );
+                    })}
+                  </span>
+                ));
+              })()}
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-[#6b7280]">
+            <p className="hero-fade-up hero-delay-3 mt-8 max-w-xl text-lg leading-relaxed text-[#6b7280]">
               Stop fighting with Word. Use professional templates, AI-powered rewrites, and one-click export to land your next interview.
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <div className="hero-fade-up hero-delay-4 mt-10 flex flex-col gap-4 sm:flex-row">
               <a
                 className="primary-gradient group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-center text-base font-bold text-white shadow-panel transition-all hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] hover:brightness-105 active:scale-[0.98]"
                 href="/resume"
@@ -219,7 +438,7 @@ export default function Home() {
                 Browse templates
               </a>
             </div>
-            <div className="mt-12 flex items-center gap-8 border-t border-[#e5e7eb]/60 pt-8">
+            <div className="hero-fade-up hero-delay-5 mt-12 flex items-center gap-8 border-t border-[#e5e7eb]/60 pt-8">
               <div className="flex -space-x-3">
                 {["SM", "JK", "AR", "LW"].map((initials, i) => (
                   <div key={i} className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#f8faff] bg-primary/10 text-[11px] font-bold text-primary shadow-sm">
@@ -270,7 +489,7 @@ export default function Home() {
                 className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[240px]"
                 onClick={() => selectTemplate(tmpl)}
               >
-                <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-surface transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
+                <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
                   <div className="absolute inset-0 overflow-hidden">
                     <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.302)", transformOrigin: "top left" }}>
                       <TemplateRenderer resume={sampleResume} templateName={tmpl.name} />
@@ -291,21 +510,21 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="bg-surface-soft py-24" id="features">
+      <section className="bg-[#f3f4f6] py-24" id="features">
         <div className="mx-auto max-w-7xl px-4 md:px-10">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Everything you need</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">Built for precision and speed.</h2>
-            <p className="mt-4 text-lg text-muted">A streamlined workflow from draft to download.</p>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Built for precision and speed.</h2>
+            <p className="mt-4 text-lg text-[#6b7280]">A streamlined workflow from draft to download.</p>
           </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <article className="card-hover group rounded-3xl bg-surface p-8 shadow-ambient" key={feature.title}>
+              <article className="card-hover group rounded-3xl bg-white p-8 shadow-ambient" key={feature.title}>
                 <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} transition-transform group-hover:scale-110`}>
                   <SvgIcon className="h-6 w-6 text-primary" name={feature.icon} />
                 </div>
-                <h3 className="text-xl font-bold text-ink">{feature.title}</h3>
-                <p className="mt-4 text-sm leading-relaxed text-muted">{feature.text}</p>
+                <h3 className="text-xl font-bold text-[#111827]">{feature.title}</h3>
+                <p className="mt-4 text-sm leading-relaxed text-[#6b7280]">{feature.text}</p>
               </article>
             ))}
           </div>
@@ -316,30 +535,30 @@ export default function Home() {
       <section className="py-24" id="management">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 md:grid-cols-[1fr_1.5fr] md:px-10">
           <div className="flex flex-col justify-center">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-muted">Management</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">Keep your career history in one place.</h2>
-            <p className="mt-6 text-lg leading-relaxed text-muted">Save multiple versions of your CV for different roles. Our dashboard makes it easy to manage, update, and export your documents.</p>
+            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-[#6b7280]">Management</p>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Keep your career history in one place.</h2>
+            <p className="mt-6 text-lg leading-relaxed text-[#6b7280]">Save multiple versions of your CV for different roles. Our dashboard makes it easy to manage, update, and export your documents.</p>
             <div className="mt-10 flex gap-4">
               <a className="primary-gradient rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-panel" href="/resume">
                 Create new CV
               </a>
             </div>
           </div>
-          <div className="space-y-4 rounded-3xl border border-outline/30 bg-surface-soft p-6 shadow-panel">
+          <div className="space-y-4 rounded-3xl border border-[#e5e7eb]/30 bg-[#f3f4f6] p-6 shadow-panel">
             {savedCvs.map(([title, date, score]) => (
-              <div className="flex flex-col justify-between gap-4 rounded-2xl bg-surface p-5 shadow-ambient sm:flex-row sm:items-center" key={title}>
+              <div className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5 shadow-ambient sm:flex-row sm:items-center" key={title}>
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <SvgIcon name="document" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-ink">{title}</h3>
-                    <p className="text-xs text-muted">{date}</p>
+                    <h3 className="text-base font-bold text-[#111827]">{title}</h3>
+                    <p className="text-xs text-[#6b7280]">{date}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">ATS {score}</span>
-                  <div className="h-8 w-px bg-outline/30" />
+                  <div className="h-8 w-px bg-[#e5e7eb]/30" />
                   <a className="text-sm font-bold text-primary hover:underline" href="/resume">Edit</a>
                 </div>
               </div>
@@ -351,25 +570,25 @@ export default function Home() {
       {/* Pricing */}
       <PricingSection />
 
-      <footer className="border-t border-outline/20 bg-surface py-12">
+      <footer className="border-t border-[#e5e7eb]/20 bg-white py-12">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-10">
           <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-            <a className="text-xl font-bold tracking-tight text-ink" href="#">
+            <a className="text-xl font-bold tracking-tight text-[#111827]" href="#">
               CV with AI
             </a>
-            <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-muted">
+            <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-[#6b7280]">
               <a className="hover:text-primary" href="/resume">Builder</a>
               <a className="hover:text-primary" href="/templates">Templates</a>
               <a className="hover:text-primary" href="/signin">Sign in</a>
               <a className="hover:text-primary" href="/signup">Sign up</a>
             </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-6 border-t border-outline/20 pt-8 text-xs font-medium text-muted">
-            <a className="hover:text-primary" href="/privacy">Gizlilik Politikası</a>
-            <a className="hover:text-primary" href="/terms">Kullanım Şartları</a>
-            <a className="hover:text-primary" href="/refund">İade Koşulları</a>
+          <div className="flex flex-wrap justify-center gap-6 border-t border-[#e5e7eb]/20 pt-8 text-xs font-medium text-[#6b7280]">
+            <a className="hover:text-primary" href="/privacy">Privacy Policy</a>
+            <a className="hover:text-primary" href="/terms">Terms of Service</a>
+            <a className="hover:text-primary" href="/refund">Refund Policy</a>
           </div>
-          <div className="flex flex-col items-center justify-between gap-4 text-xs text-muted md:flex-row">
+          <div className="flex flex-col items-center justify-between gap-4 text-xs text-[#6b7280] md:flex-row">
             <p>© 2026 CV with AI. All rights reserved.</p>
             <p>Made with precision for modern professionals.</p>
           </div>
@@ -426,18 +645,18 @@ function PricingSection() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:px-10" id="pricing">
       <div className="mx-auto mb-12 max-w-2xl text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Simple, honest pricing.</h2>
-        <p className="mt-4 text-lg text-muted">Start for free, upgrade when you need the competitive edge.</p>
-        <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-outline/40 bg-surface-soft p-1.5">
+        <h2 className="text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Simple, honest pricing.</h2>
+        <p className="mt-4 text-lg text-[#6b7280]">Start for free, upgrade when you need the competitive edge.</p>
+        <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#e5e7eb]/40 bg-[#f3f4f6] p-1.5">
           <button
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${!yearly ? "bg-surface text-ink shadow-sm" : "text-muted"}`}
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${!yearly ? "bg-white text-[#111827] shadow-sm" : "text-[#6b7280]"}`}
             onClick={() => setYearly(false)}
             type="button"
           >
             Monthly
           </button>
           <button
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${yearly ? "bg-surface text-ink shadow-sm" : "text-muted"}`}
+            className={`rounded-full px-5 py-2 text-sm font-bold transition ${yearly ? "bg-white text-[#111827] shadow-sm" : "text-[#6b7280]"}`}
             onClick={() => setYearly(true)}
             type="button"
           >
@@ -471,20 +690,20 @@ function PricingSection() {
 
 function PricingCard({ cta, featured = false, features, href, name, price, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; period: string }) {
   return (
-    <article className={`card-hover relative flex flex-col rounded-3xl bg-surface p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-outline/30"}`}>
+    <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-[#e5e7eb]/30"}`}>
       {featured && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
           Recommended
         </div>
       )}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-ink">{name}</h3>
+        <h3 className="text-xl font-bold text-[#111827]">{name}</h3>
         <div className="mt-4 flex items-baseline gap-1">
-          <span className="text-4xl font-extrabold text-ink">{price}</span>
-          <span className="text-sm font-medium text-muted">{period || "/month"}</span>
+          <span className="text-4xl font-extrabold text-[#111827]">{price}</span>
+          <span className="text-sm font-medium text-[#6b7280]">{period || "/month"}</span>
         </div>
       </div>
-      <ul className="mb-10 flex-1 space-y-4 text-sm text-muted">
+      <ul className="mb-10 flex-1 space-y-4 text-sm text-[#6b7280]">
         {features.map((feature) => (
           <li className="flex items-center gap-3" key={feature}>
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -497,7 +716,7 @@ function PricingCard({ cta, featured = false, features, href, name, price, perio
       <a
         href={href}
         className={`block w-full rounded-2xl px-6 py-4 text-center text-sm font-bold transition-all ${
-          featured ? "primary-gradient text-white shadow-lg hover:brightness-105" : "bg-surface-soft text-ink hover:bg-outline/20"
+          featured ? "primary-gradient text-white shadow-lg hover:brightness-105" : "bg-[#f3f4f6] text-[#111827] hover:bg-[#e5e7eb]/20"
         }`}
       >
         {cta}

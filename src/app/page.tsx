@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/lib/i18n";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 import { sampleResume } from "@/components/cv-templates/sample-data";
@@ -52,6 +53,7 @@ const savedCvs = [
 
 export default function Home() {
   const router = useRouter();
+  const { lang, setLang } = useI18n();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function selectTemplate(t: TemplateCard) {
@@ -101,6 +103,12 @@ export default function Home() {
             <a className="transition-colors hover:text-primary" href="#pricing">Pricing</a>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setLang(lang === "en" ? "tr" : "en")}
+              className="rounded-xl px-3 py-2 text-sm font-bold text-muted transition-all hover:bg-surface-soft hover:text-ink"
+            >
+              {lang === "en" ? "TR" : "EN"}
+            </button>
             <a className="hidden rounded-xl px-4 py-2 text-sm font-bold text-ink transition-all hover:bg-surface-soft md:block" href="/signin">
               Sign in
             </a>

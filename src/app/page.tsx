@@ -416,7 +416,7 @@ function PricingSection() {
             type="button"
           >
             Yearly
-            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">Save 37%</span>
+            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">Save 30%</span>
           </button>
         </div>
       </div>
@@ -435,8 +435,8 @@ function PricingSection() {
           featured
           features={["Unlimited CVs & cover letters", "AI rewrite & optimization", "AI cover letter generator", "Resume analysis & scoring", "High-res PDF exports", "Priority support"]}
           name="Pro"
-          price={yearly ? "$5" : "$8"}
-          period={yearly ? "/mo — billed $60/year" : "/month"}
+          price={yearly ? "€4.20" : "€6"}
+          period={yearly ? "/mo — billed €50.40/year" : "/month"}
         />
       </div>
     </section>

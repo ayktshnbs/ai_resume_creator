@@ -67,7 +67,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-bold text-ink">5. Ödeme Koşulları</h2>
               <ul className="mt-3 list-disc space-y-2 pl-6">
-                <li>Pro plan ücretleri Türk Lirası veya ABD Doları olarak tahsil edilir</li>
+                <li>Pro plan ücretleri Euro olarak tahsil edilir</li>
                 <li>Abonelikler otomatik olarak yenilenmez; süre dolduğunda hesap ücretsiz plana geçer</li>
                 <li>Fiyat değişiklikleri en az 30 gün önceden bildirilir</li>
                 <li>İade koşulları için <Link href="/refund" className="font-bold text-primary hover:underline">İade Koşulları</Link> sayfamızı inceleyiniz</li>
@@ -174,7 +174,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-bold text-ink">5. Payment Terms</h2>
               <ul className="mt-3 list-disc space-y-2 pl-6">
-                <li>Pro plan fees are charged in Turkish Lira or US Dollars</li>
+                <li>Pro plan fees are charged in Euros</li>
                 <li>Subscriptions do not auto-renew; when expired, the account reverts to the free plan</li>
                 <li>Price changes will be communicated at least 30 days in advance</li>
                 <li>See our <Link href="/refund" className="font-bold text-primary hover:underline">Refund Policy</Link> for details</li>

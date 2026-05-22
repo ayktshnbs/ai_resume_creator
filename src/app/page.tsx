@@ -466,48 +466,7 @@ export default function Home() {
       </section>
 
       {/* All templates showcase — dark background */}
-      <section className="overflow-hidden bg-[#0f1117] py-20" id="templates">
-        <div className="mx-auto max-w-7xl px-4 md:px-10">
-          <div className="mb-12 flex flex-col items-end justify-between gap-6 md:flex-row">
-            <div className="max-w-xl">
-              <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Templates</p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">Designed for every career stage.</h2>
-              <p className="mt-3 text-sm text-white/50">{ALL_TEMPLATES.length} professionally crafted templates, ready to use.</p>
-            </div>
-            <a className="group flex items-center gap-2 text-sm font-bold text-white/70 hover:text-primary" href="/templates">
-              View all {ALL_TEMPLATES.length} templates
-              <SvgIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" name="arrow-right" />
-            </a>
-          </div>
-        </div>
-
-        <div className="relative mt-8">
-          <div className="flex animate-marquee gap-6" style={{ width: "max-content" }}>
-            {marqueeTemplates.map((tmpl, i) => (
-              <div
-                key={`${tmpl.name}-${i}`}
-                className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[240px]"
-                onClick={() => selectTemplate(tmpl)}
-              >
-                <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
-                  <div className="absolute inset-0 overflow-hidden">
-                    <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.302)", transformOrigin: "top left" }}>
-                      <TemplateRenderer resume={sampleResume} templateName={tmpl.name} />
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <div className="absolute inset-x-0 bottom-0 translate-y-full p-4 transition-transform duration-300 group-hover:translate-y-0">
-                    <p className="text-sm font-bold text-white drop-shadow-lg">{tmpl.name}</p>
-                    <p className="mt-1 text-xs font-semibold text-primary">Use this template →</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-[#0f1117] to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-[#0f1117] to-transparent" />
-        </div>
-      </section>
+      <LazyTemplateMarquee templates={marqueeTemplates} onSelect={selectTemplate} totalCount={ALL_TEMPLATES.length} />
 
       {/* Features */}
       <section className="bg-[#f3f4f6] py-24" id="features">
@@ -741,6 +700,71 @@ export default function Home() {
         </div>
       </footer>
     </main>
+  );
+}
+
+function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: TemplateCard[]; onSelect: (t: TemplateCard) => void; totalCount: number }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="overflow-hidden bg-[#0f1117] py-20" id="templates">
+      <div className="mx-auto max-w-7xl px-4 md:px-10">
+        <div className="mb-12 flex flex-col items-end justify-between gap-6 md:flex-row">
+          <div className="max-w-xl">
+            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Templates</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">Designed for every career stage.</h2>
+            <p className="mt-3 text-sm text-white/50">{totalCount} professionally crafted templates, ready to use.</p>
+          </div>
+          <a className="group flex items-center gap-2 text-sm font-bold text-white/70 hover:text-primary" href="/templates">
+            View all {totalCount} templates
+            <SvgIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" name="arrow-right" />
+          </a>
+        </div>
+      </div>
+
+      <div className="relative mt-8" style={{ minHeight: 340 }}>
+        {visible ? (
+          <>
+            <div className="flex animate-marquee gap-6" style={{ width: "max-content" }}>
+              {templates.map((tmpl, i) => (
+                <div key={`${tmpl.name}-${i}`} className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[240px]" onClick={() => onSelect(tmpl)}>
+                  <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.302)", transformOrigin: "top left" }}>
+                        <TemplateRenderer resume={sampleResume} templateName={tmpl.name} />
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="absolute inset-x-0 bottom-0 translate-y-full p-4 transition-transform duration-300 group-hover:translate-y-0">
+                      <p className="text-sm font-bold text-white drop-shadow-lg">{tmpl.name}</p>
+                      <p className="mt-1 text-xs font-semibold text-primary">Use this template →</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-[#0f1117] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-[#0f1117] to-transparent" />
+          </>
+        ) : (
+          <div className="flex items-center justify-center py-16">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

@@ -105,11 +105,13 @@ export default function ResumeBuilderPage() {
   const [loaded, setLoaded] = useState(false);
   const resumeDocId = useRef<string | null>(null);
 
+  const uid = session.user?.id;
+
   useEffect(() => {
-    setResume(loadResumeData());
+    setResume(loadResumeData(uid));
     setTemplate(loadSelectedTemplate());
     setLoaded(true);
-  }, []);
+  }, [uid]);
 
   // Load from DB if logged in (DB data takes priority)
   useEffect(() => {
@@ -124,9 +126,9 @@ export default function ResumeBuilderPage() {
 
   useEffect(() => {
     if (loaded) {
-      saveResumeData(resume);
+      saveResumeData(resume, uid);
     }
-  }, [loaded, resume]);
+  }, [loaded, resume, uid]);
 
   // Auto-save to DB when logged in (debounced)
   useAutoSaveToDb("/api/user/resumes", resume, loaded, resumeDocId);

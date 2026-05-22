@@ -33,7 +33,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
     <div className={`min-h-screen bg-background text-ink ${fullHeight ? "h-screen overflow-hidden" : ""}`}>
       <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 border-r border-outline bg-surface/90 px-5 py-6 shadow-ambient backdrop-blur lg:flex flex-col">
         <div className="flex-1">
-          <Link href="/dashboard" className="flex items-center gap-3">
+          <Link href={session ? "/dashboard" : "/"} className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-ambient">
               <Icon name="sparkle" className="text-[22px]" />
             </div>

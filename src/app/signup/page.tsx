@@ -95,11 +95,11 @@ export default function SignUpPage() {
 
             <ul className="mt-8 grid gap-3 text-sm font-medium text-ink sm:grid-cols-2">
               <FeatureItem text="Free forever — no credit card" />
-              <FeatureItem text="AI-powered CV optimization" />
-              <FeatureItem text="8 professional templates" />
-              <FeatureItem text="Cover letter generator" />
-              <FeatureItem text="Clean PDF exports" />
-              <FeatureItem text="ATS score checker" />
+              <FeatureItem text="50+ professional templates" />
+              <FeatureItem text="1 CV + 1 cover letter free" />
+              <FeatureItem text="Live preview & editing" />
+              <FeatureItem text="AI tools & PDF export (Pro)" />
+              <FeatureItem text="ATS score checker (Pro)" />
             </ul>
           </div>
 
@@ -223,11 +223,11 @@ export default function SignUpPage() {
 
               <p className="text-xs leading-5 text-muted">
                 By creating an account you agree to our{" "}
-                <a className="text-primary hover:underline" href="#">
+                <a className="text-primary hover:underline" href="/terms">
                   Terms of Service
                 </a>{" "}
                 and{" "}
-                <a className="text-primary hover:underline" href="#">
+                <a className="text-primary hover:underline" href="/privacy">
                   Privacy Policy
                 </a>
                 .

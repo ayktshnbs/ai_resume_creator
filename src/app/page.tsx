@@ -152,7 +152,7 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-8 pb-20">
+      <section className="relative overflow-hidden pt-8 pb-20 bg-[#f8faff]">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(0,112,235,0.08),transparent_40%),radial-gradient(circle_at_78%_10%,rgba(70,72,212,0.07),transparent_35%)]" />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(113,119,134,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.04)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
         <div className="mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
@@ -161,13 +161,13 @@ export default function Home() {
               <span className="rounded-full bg-primary/10 px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.15em] text-primary">
                 New: AI Power-Up
               </span>
-              <span className="h-1 w-1 rounded-full bg-outline" />
-              <span className="text-xs font-medium text-muted">Trusted by 50k+ job seekers</span>
+              <span className="h-1 w-1 rounded-full bg-[#d1d5db]" />
+              <span className="text-xs font-medium text-[#6b7280]">Trusted by 50k+ job seekers</span>
             </div>
-            <h1 className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-ink sm:text-5xl md:text-7xl">
+            <h1 className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-[#111827] sm:text-5xl md:text-7xl">
               The <span className="gradient-text">smarter</span> way to build your resume.
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted">
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-[#6b7280]">
               Stop fighting with Word. Use professional templates, AI-powered rewrites, and one-click export to land your next interview.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -179,26 +179,26 @@ export default function Home() {
                 <SvgIcon name="arrow-right" />
               </a>
               <a
-                className="flex items-center justify-center gap-2 rounded-2xl border border-outline/70 bg-surface px-8 py-4 text-center text-base font-bold text-ink transition-all hover:border-primary/40 hover:bg-surface-soft active:scale-[0.98]"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[#e5e7eb] bg-white px-8 py-4 text-center text-base font-bold text-[#111827] transition-all hover:border-primary/40 hover:bg-[#f3f4f6] active:scale-[0.98]"
                 href="/templates"
               >
                 Browse templates
               </a>
             </div>
-            <div className="mt-12 flex items-center gap-8 border-t border-outline/30 pt-8">
+            <div className="mt-12 flex items-center gap-8 border-t border-[#e5e7eb]/60 pt-8">
               <div className="flex -space-x-3">
                 {["SM", "JK", "AR", "LW"].map((initials, i) => (
-                  <div key={i} className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-background bg-primary/10 text-[11px] font-bold text-primary shadow-sm">
+                  <div key={i} className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#f8faff] bg-primary/10 text-[11px] font-bold text-primary shadow-sm">
                     {initials}
                   </div>
                 ))}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-background bg-primary text-[10px] font-bold text-white shadow-sm">50k+</div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#f8faff] bg-primary text-[10px] font-bold text-white shadow-sm">50k+</div>
               </div>
               <div>
                 <div className="flex items-center gap-1 text-warning">
                   {[1, 2, 3, 4, 5].map((i) => <SvgIcon key={i} className="h-4 w-4" name="star" />)}
                 </div>
-                <p className="mt-1 text-sm text-muted"><strong>4.9/5</strong> from our community</p>
+                <p className="mt-1 text-sm text-[#6b7280]"><strong className="text-[#111827]">4.9/5</strong> from our community</p>
               </div>
             </div>
           </div>
@@ -361,8 +361,8 @@ function HeroPreview() {
       <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
       <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/20 blur-[100px]" />
 
-      <div className="relative rounded-3xl border border-white/80 bg-surface/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
-        <div ref={containerRef} className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-outline/30 bg-surface shadow-panel">
+      <div className="relative rounded-3xl border border-white/80 bg-white/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
+        <div ref={containerRef} className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-[#e5e7eb]/30 bg-white shadow-panel">
           {scale > 0 && (
             <div
               style={{

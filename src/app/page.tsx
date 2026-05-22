@@ -195,7 +195,7 @@ export default function Home() {
             </div>
           </div>
           <div className="relative hidden perspective-1000 md:flex md:items-center md:justify-center">
-            <div className="animate-float w-full max-w-[380px] lg:max-w-[420px]">
+            <div className="animate-float w-full max-w-[420px] lg:max-w-[460px]">
               <HeroPreview />
             </div>
             <div className="absolute -left-12 bottom-12 h-32 w-32 animate-float-delay rounded-3xl bg-primary/10 blur-2xl" />

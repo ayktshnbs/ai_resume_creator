@@ -40,5 +40,6 @@ export type VerifyPaymentResult = {
   success: boolean;
   paymentId: string;
   status: "paid" | "failed";
+  userId?: string;
   error?: string;
 };

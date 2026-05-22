@@ -1,5 +1,5 @@
 import type { CreatePaymentInput, CreatePaymentResult, VerifyPaymentInput, VerifyPaymentResult } from "./types";
-import { IyzicoProvider } from "./iyzico-provider";
+import { LemonSqueezyProvider } from "./lemonsqueezy-provider";
 
 export interface PaymentProvider {
   name: string;
@@ -8,5 +8,5 @@ export interface PaymentProvider {
 }
 
 export function getPaymentProvider(): PaymentProvider {
-  return new IyzicoProvider();
+  return new LemonSqueezyProvider();
 }

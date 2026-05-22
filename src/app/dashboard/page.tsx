@@ -41,7 +41,6 @@ export default function DashboardPage() {
     );
   }
   const totalDocs = resumeCount + coverLetterCount;
-  const maxFree = 2;
 
   return (
     <AppShell active="dashboard">
@@ -65,7 +64,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-5">
             <Icon className="h-6 w-6 shrink-0 text-primary" name="sparkle" />
             <div className="flex-1">
-              <p className="font-bold text-ink">{t("dashboard.freePlan")} — {totalDocs}/{maxFree} {t("dashboard.docsUsed")}</p>
+              <p className="font-bold text-ink">{t("dashboard.freePlan")} — {resumeCount}/1 {t("dashboard.resumes")} · {coverLetterCount}/1 {t("dashboard.coverLetters")}</p>
               <p className="mt-0.5 text-sm text-muted">{t("dashboard.upgradeDesc")}</p>
             </div>
           </div>
@@ -106,7 +105,7 @@ export default function DashboardPage() {
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-outline/30">
               <div
                 className="h-full rounded-full bg-primary transition-all"
-                style={{ width: isPro ? "100%" : `${Math.min((totalDocs / maxFree) * 100, 100)}%` }}
+                style={{ width: isPro ? "100%" : `${Math.min((totalDocs / 2) * 100, 100)}%` }}
               />
             </div>
           </div>

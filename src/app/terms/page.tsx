@@ -60,7 +60,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-bold text-ink">4. Ücretsiz ve Pro Plan</h2>
               <div className="mt-3 space-y-3">
-                <p><strong>Ücretsiz Plan:</strong> 1 adet kayıtlı CV, standart şablonlar ve canlı önizleme özelliklerini içerir.</p>
+                <p><strong>Ücretsiz Plan:</strong> 1 adet CV ve 1 adet ön yazı, standart şablonlar ve canlı önizleme özelliklerini içerir.</p>
                 <p><strong>Pro Plan:</strong> Sınırsız CV ve ön yazı, yapay zeka özellikleri, tüm premium şablonlar ve yüksek çözünürlüklü PDF dışa aktarma özelliklerini içerir.</p>
               </div>
             </section>
@@ -167,7 +167,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-xl font-bold text-ink">4. Free and Pro Plans</h2>
               <div className="mt-3 space-y-3">
-                <p><strong>Free Plan:</strong> Includes 1 saved CV, standard templates, and live preview.</p>
+                <p><strong>Free Plan:</strong> Includes 1 CV and 1 cover letter, standard templates, and live preview.</p>
                 <p><strong>Pro Plan:</strong> Includes unlimited CVs and cover letters, AI features, all premium templates, and high-resolution PDF export.</p>
               </div>
             </section>

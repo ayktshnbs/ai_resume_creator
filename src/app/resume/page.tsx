@@ -343,6 +343,25 @@ export default function ResumeBuilderPage() {
         continue;
       }
 
+      if (kind === "pdf") {
+        const text = await extractPdfText(file);
+        const dataUrl = await readFileAsDataUrl(file);
+        if (text && text.trim().length > 20) {
+          textsToExtract.push(text);
+        }
+        importedReferences.push({
+          id: createId("ref"),
+          name: file.name,
+          kind,
+          mimeType: file.type || "application/pdf",
+          size: file.size,
+          addedAt,
+          dataUrl,
+          text
+        });
+        continue;
+      }
+
       const dataUrl = await readFileAsDataUrl(file);
       importedReferences.push({
         id: createId("ref"),
@@ -1337,6 +1356,28 @@ function formatFileSize(bytes: number) {
   }
 
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+async function extractPdfText(file: File): Promise<string> {
+  try {
+    const pdfjsLib = await import("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const pages: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items
+        .filter((item) => "str" in item)
+        .map((item) => (item as { str: string }).str)
+        .join(" ");
+      pages.push(text);
+    }
+    return pages.join("\n\n");
+  } catch {
+    return "";
+  }
 }
 
 async function readFileAsDataUrl(file: File) {

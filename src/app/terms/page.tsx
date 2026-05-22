@@ -6,7 +6,7 @@ export default function TermsPage() {
       <header className="border-b border-outline/50 bg-surface/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link className="text-xl font-bold tracking-tight text-ink" href="/">
-            <span className="text-primary">AI</span> CV Builder
+            CV with AI
           </Link>
           <Link className="text-sm font-bold text-primary hover:underline" href="/">Ana Sayfa</Link>
         </nav>
@@ -20,7 +20,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-ink">1. Kabul ve Kapsam</h2>
             <p className="mt-3">
-              CVForge AI platformunu (cv-with-ai.com) kullanarak bu Kullanım Şartları&apos;nı kabul etmiş olursunuz.
+              CV with AI platformunu (cv-with-ai.com) kullanarak bu Kullanım Şartları&apos;nı kabul etmiş olursunuz.
               Bu şartlar, platform üzerinden sunulan tüm hizmetleri kapsar. Şartları kabul etmiyorsanız
               platformu kullanmayınız.
             </p>
@@ -28,7 +28,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-ink">2. Hizmet Tanımı</h2>
-            <p className="mt-3">CVForge AI aşağıdaki hizmetleri sunmaktadır:</p>
+            <p className="mt-3">CV with AI aşağıdaki hizmetleri sunmaktadır:</p>
             <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>Profesyonel CV (özgeçmiş) oluşturma ve düzenleme</li>
               <li>Hazır CV şablonları ile tasarım seçimi</li>
@@ -91,7 +91,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-ink">7. Fikri Mülkiyet</h2>
             <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>Platform tasarımı, kodu, şablonları ve markası CVForge AI&apos;a aittir</li>
+              <li>Platform tasarımı, kodu, şablonları ve markası CV with AI&apos;a aittir</li>
               <li>CV&apos;lerinizde yer alan içerik (metin, fotoğraf) tamamen size aittir</li>
               <li>Platform üzerinden oluşturduğunuz CV&apos;leri dilediğiniz şekilde kullanabilirsiniz</li>
               <li>Şablonların tek başına (CV içeriği olmadan) kopyalanması veya dağıtılması yasaktır</li>
@@ -102,7 +102,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-ink">8. Yapay Zeka Hizmetleri</h2>
             <p className="mt-3">
               Yapay zeka destekli öneriler bilgilendirme amaçlıdır. AI tarafından üretilen içeriklerin
-              doğruluğunu kontrol etmek kullanıcının sorumluluğundadır. CVForge AI, yapay zeka çıktılarının
+              doğruluğunu kontrol etmek kullanıcının sorumluluğundadır. CV with AI, yapay zeka çıktılarının
               eksiksiz veya hatasız olduğunu garanti etmez.
             </p>
           </section>
@@ -110,7 +110,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-ink">9. Hizmet Değişiklikleri</h2>
             <p className="mt-3">
-              CVForge AI, platformun özelliklerini, fiyatlandırmasını veya bu kullanım şartlarını
+              CV with AI, platformun özelliklerini, fiyatlandırmasını veya bu kullanım şartlarını
               önceden bildirimde bulunarak değiştirme hakkını saklı tutar. Önemli değişiklikler
               e-posta yoluyla bildirilir. Değişiklik sonrası platformu kullanmaya devam etmeniz,
               yeni şartları kabul ettiğiniz anlamına gelir.
@@ -120,7 +120,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-ink">10. Sorumluluk Sınırlaması</h2>
             <p className="mt-3">
-              CVForge AI, platformun kesintisiz veya hatasız çalışacağını garanti etmez. Platform
+              CV with AI, platformun kesintisiz veya hatasız çalışacağını garanti etmez. Platform
               &quot;olduğu gibi&quot; sunulmaktadır. Teknik aksaklıklar, veri kaybı veya üçüncü taraf
               hizmetlerinden kaynaklanan sorunlardan dolayı doğrudan veya dolaylı zararlardan
               sorumlu tutulamaz. Azami sorumluluk, son 12 ayda ödediğiniz toplam ücretle sınırlıdır.
@@ -130,7 +130,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-ink">11. Hesap Askıya Alma ve Fesih</h2>
             <p className="mt-3">
-              Kullanım şartlarının ihlali durumunda CVForge AI hesabınızı uyarı ile veya uyarı olmaksızın
+              Kullanım şartlarının ihlali durumunda CV with AI hesabınızı uyarı ile veya uyarı olmaksızın
               askıya alabilir veya sonlandırabilir. Hesap sonlandırma durumunda verileriniz 30 gün
               içinde silinir.
             </p>

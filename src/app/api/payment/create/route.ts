@@ -17,7 +17,7 @@ export async function POST() {
     const result = await provider.createPayment({
       userId: session.user.id,
       email: session.user.email!,
-      productName: "CVForge AI Pro Plan",
+      productName: "CV with AI Pro Plan",
       price: Number(process.env.PAYMENT_PRICE || 149),
       currency: process.env.PAYMENT_CURRENCY || "TRY",
       callbackUrl: `${siteUrl}/api/payment/callback`,

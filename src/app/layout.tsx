@@ -3,7 +3,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CVForge AI",
+  title: "CV with AI",
   description: "Build ATS-friendly CVs, improve them with AI, and export polished PDFs."
 };
 

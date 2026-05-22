@@ -13,7 +13,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${siteUrl()}/reset-password?token=${token}`;
 
   await getResend().emails.send({
-    from: `CVForge AI <${fromEmail()}>`,
+    from: `CV with AI <${fromEmail()}>`,
     to: email,
     subject: "Reset your password",
     html: `

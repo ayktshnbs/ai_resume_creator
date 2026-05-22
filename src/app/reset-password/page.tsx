@@ -162,7 +162,7 @@ export default function ResetPasswordPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-ambient">
               CV
             </span>
-            CVForge AI
+            CV with AI
           </Link>
           <Suspense fallback={<div className="py-8 text-center text-sm text-muted">Loading...</div>}>
             <ResetForm />

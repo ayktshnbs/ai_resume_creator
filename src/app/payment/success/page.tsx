@@ -44,7 +44,7 @@ export default function PaymentSuccessPage() {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 text-success">
               <Icon name="sparkle" className="text-4xl" />
             </div>
-            <h1 className="text-3xl font-bold">Welcome to CVForge AI Pro!</h1>
+            <h1 className="text-3xl font-bold">Welcome to CV with AI Pro!</h1>
             <p className="text-muted text-lg">Your account has been upgraded. You now have full access to all premium templates and AI features.</p>
             <Link href="/dashboard" className="primary-gradient rounded-xl px-8 py-3 font-bold text-white transition hover:brightness-105">
               Go to Dashboard

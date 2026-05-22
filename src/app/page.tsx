@@ -178,13 +178,21 @@ export default function Home() {
                 Create your resume — it&apos;s free
                 <SvgIcon name="arrow-right" />
               </a>
+              <a
+                className="flex items-center justify-center gap-2 rounded-2xl border border-outline/70 bg-surface px-8 py-4 text-center text-base font-bold text-ink transition-all hover:border-primary/40 hover:bg-surface-soft active:scale-[0.98]"
+                href="/templates"
+              >
+                Browse templates
+              </a>
             </div>
             <div className="mt-12 flex items-center gap-8 border-t border-outline/30 pt-8">
               <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-10 w-10 rounded-full border-4 border-white bg-surface-soft shadow-sm" />
+                {["SM", "JK", "AR", "LW"].map((initials, i) => (
+                  <div key={i} className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-background bg-primary/10 text-[11px] font-bold text-primary shadow-sm">
+                    {initials}
+                  </div>
                 ))}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-primary text-[10px] font-bold text-white shadow-sm">+</div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-background bg-primary text-[10px] font-bold text-white shadow-sm">50k+</div>
               </div>
               <div>
                 <div className="flex items-center gap-1 text-warning">
@@ -194,8 +202,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="relative hidden perspective-1000 md:flex md:items-center md:justify-center">
-            <div className="animate-float w-full max-w-[420px] lg:max-w-[460px]">
+          <div className="relative hidden md:flex md:items-center md:justify-center" style={{ perspective: "1200px" }}>
+            <div className="animate-float w-full max-w-[420px] lg:max-w-[460px]" style={{ transform: "rotateY(-6deg) rotateX(2deg)" }}>
               <HeroPreview />
             </div>
             <div className="absolute -left-12 bottom-12 h-32 w-32 animate-float-delay rounded-3xl bg-primary/10 blur-2xl" />

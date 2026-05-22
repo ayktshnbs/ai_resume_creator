@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
@@ -332,19 +332,41 @@ export default function Home() {
   );
 }
 
+const A4_W = 793;
+
 function HeroPreview() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => setScale(el.clientWidth / A4_W);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <div className="relative">
       <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
       <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/20 blur-[100px]" />
 
       <div className="relative rounded-3xl border border-white/80 bg-surface/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
-        <div className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-outline/30 bg-surface shadow-panel">
-          <div className="absolute inset-0 overflow-hidden">
-            <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.53)", transformOrigin: "top left" }}>
-              <TemplateRenderer resume={sampleResume} templateName="Modern Minimalist" />
+        <div ref={containerRef} className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-outline/30 bg-surface shadow-panel">
+          {scale > 0 && (
+            <div
+              style={{
+                width: A4_W,
+                minHeight: Math.round(A4_W * 1.414),
+                transform: `scale(${scale})`,
+                transformOrigin: "top left",
+              }}
+            >
+              <TemplateRenderer resume={sampleResume} templateName="Academic Classic" />
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

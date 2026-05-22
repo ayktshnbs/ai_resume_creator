@@ -89,10 +89,32 @@ export default function Home() {
           transform: translateY(-6px) scale(1.015);
           box-shadow: 0 20px 60px rgba(99,102,241,0.15), 0 8px 24px rgba(0,0,0,0.08);
         }
+        @keyframes blob-drift-1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(80px, -60px) scale(1.15); }
+          50% { transform: translate(-40px, 40px) scale(0.9); }
+          75% { transform: translate(60px, 80px) scale(1.1); }
+        }
+        @keyframes blob-drift-2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(-100px, 50px) scale(1.1); }
+          50% { transform: translate(60px, -70px) scale(0.95); }
+          75% { transform: translate(-50px, -40px) scale(1.05); }
+        }
+        @keyframes blob-drift-3 {
+          0%, 100% { transform: translate(0, 0) scale(1.05); }
+          33% { transform: translate(70px, 60px) scale(0.9); }
+          66% { transform: translate(-60px, -50px) scale(1.15); }
+        }
+        .blob-1 { animation: blob-drift-1 18s ease-in-out infinite; }
+        .blob-2 { animation: blob-drift-2 22s ease-in-out infinite; }
+        .blob-3 { animation: blob-drift-3 26s ease-in-out infinite; }
       `}</style>
 
-      <header className="sticky top-0 z-50 border-b border-outline/50 bg-surface/80 backdrop-blur-xl">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
+      <header className="sticky top-0 z-50">
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-2xl dark:bg-[#0f172a]/60" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <nav className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
           <a className="text-xl font-bold tracking-tight text-ink" href="#">
             CV with AI
           </a>
@@ -161,7 +183,11 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-8 pb-20 bg-[#f8faff]">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(0,112,235,0.08),transparent_40%),radial-gradient(circle_at_78%_10%,rgba(70,72,212,0.07),transparent_35%)]" />
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="blob-1 absolute -left-32 -top-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.18),transparent_70%)] blur-3xl" />
+          <div className="blob-2 absolute -right-20 top-10 h-[450px] w-[450px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.15),transparent_70%)] blur-3xl" />
+          <div className="blob-3 absolute bottom-0 left-1/3 h-[400px] w-[400px] rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.12),transparent_70%)] blur-3xl" />
+        </div>
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(113,119,134,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.04)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
         <div className="mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
           <div className="flex flex-col justify-center py-10">

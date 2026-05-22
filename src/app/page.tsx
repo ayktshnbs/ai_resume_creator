@@ -62,7 +62,7 @@ export default function Home() {
   const marqueeTemplates = [...ALL_TEMPLATES, ...ALL_TEMPLATES];
 
   return (
-    <main className="min-h-screen overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden bg-background">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -153,7 +153,7 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-8 pb-20">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(0,112,235,0.08),transparent_40%),radial-gradient(circle_at_78%_10%,rgba(70,72,212,0.07),transparent_35%),linear-gradient(180deg,#ffffff_0%,#f8faff_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_18%,rgba(0,112,235,0.08),transparent_40%),radial-gradient(circle_at_78%_10%,rgba(70,72,212,0.07),transparent_35%)]" />
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(113,119,134,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.04)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
         <div className="mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
           <div className="flex flex-col justify-center py-10">

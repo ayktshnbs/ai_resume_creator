@@ -99,6 +99,9 @@ export default function ResumeBuilderPage() {
     );
   }
   const [extracting, setExtracting] = useState(false);
+  const [linkedInModal, setLinkedInModal] = useState(false);
+  const [linkedInText, setLinkedInText] = useState("");
+  const [linkedInLoading, setLinkedInLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [ai, setAi] = useState<AiState>(initialAiState);
   const [helper, setHelper] = useState<HelperState>(initialHelperState);
@@ -251,6 +254,31 @@ export default function ResumeBuilderPage() {
     setSkillDraft("");
     setReferenceMessage("");
     setHelper(initialHelperState);
+  }
+
+  async function handleLinkedInImport() {
+    if (!linkedInText.trim()) return;
+    setLinkedInLoading(true);
+    try {
+      const res = await fetch("/api/ai/resume-helper", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "extract_from_reference", text: linkedInText }),
+      });
+      const data = (await res.json()) as { resumeData?: Partial<ResumeData> };
+      if (data.resumeData) {
+        setResume((current) => mergeImportedResume(current, data.resumeData ?? null));
+        setReferenceMessage("LinkedIn profile data was imported successfully!");
+      } else {
+        setReferenceMessage("Could not extract data from the pasted text. Try copying more of your profile.");
+      }
+    } catch {
+      setReferenceMessage("LinkedIn import failed. Please try again.");
+    } finally {
+      setLinkedInLoading(false);
+      setLinkedInModal(false);
+      setLinkedInText("");
+    }
   }
 
   async function shareResume() {
@@ -778,8 +806,16 @@ export default function ResumeBuilderPage() {
 
             <FormSection icon="upload" title={t("resume.references")}>
               <p className="text-sm leading-6 text-muted">
-                Upload an old CV, cover letter, or text file — the AI will extract your details and fill the form automatically.
+                Import from LinkedIn or upload an old CV — the AI will extract your details and fill the form automatically.
               </p>
+              <button
+                className="mt-4 flex w-full items-center justify-center gap-3 rounded-2xl border border-[#0a66c2]/30 bg-[#0a66c2]/5 px-5 py-4 text-sm font-bold text-[#0a66c2] transition hover:bg-[#0a66c2]/10"
+                onClick={() => setLinkedInModal(true)}
+                type="button"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>
+                Import from LinkedIn
+              </button>
               {extracting && (
                 <div className="mt-3 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-semibold text-primary">
                   <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -856,6 +892,58 @@ export default function ResumeBuilderPage() {
           <Icon name="visibility" />
         </Link>
       </div>
+      {/* LinkedIn Import Modal */}
+      {linkedInModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => { setLinkedInModal(false); setLinkedInText(""); }}>
+          <div className="mx-4 w-full max-w-lg rounded-3xl bg-surface p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-ink">Import from LinkedIn</h2>
+              <button className="rounded-xl p-2 text-muted hover:bg-surface-soft" onClick={() => { setLinkedInModal(false); setLinkedInText(""); }} type="button">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="mb-5 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+              <p className="text-sm font-semibold text-primary">How to import:</p>
+              <ol className="mt-2 space-y-1 text-xs text-muted">
+                <li>1. Open your LinkedIn profile in a browser</li>
+                <li>2. Select all text on the page (Ctrl+A / Cmd+A)</li>
+                <li>3. Copy it (Ctrl+C / Cmd+C)</li>
+                <li>4. Paste it in the box below (Ctrl+V / Cmd+V)</li>
+              </ol>
+            </div>
+            <textarea
+              className="field min-h-[180px] resize-none text-sm"
+              onChange={(e) => setLinkedInText(e.target.value)}
+              placeholder="Paste your LinkedIn profile text here..."
+              value={linkedInText}
+            />
+            <div className="mt-5 flex gap-3">
+              <button
+                className="flex-1 rounded-xl border border-outline/50 bg-surface px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+                onClick={() => { setLinkedInModal(false); setLinkedInText(""); }}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0a66c2] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#004182] disabled:opacity-50"
+                disabled={!linkedInText.trim() || linkedInLoading}
+                onClick={() => void handleLinkedInImport()}
+                type="button"
+              >
+                {linkedInLoading ? (
+                  <>
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Importing...
+                  </>
+                ) : (
+                  "Import Data"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

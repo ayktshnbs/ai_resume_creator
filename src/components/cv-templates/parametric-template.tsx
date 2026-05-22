@@ -242,6 +242,15 @@ function SidebarDarkLayout({ resume: r, config: c }: LP) {
   return (
     <div className={fc(c.font)} style={{ width: "210mm", minHeight: "297mm", backgroundColor: "#fff", display: "flex", overflow: "hidden" }}>
       <aside style={{ width: "72mm", backgroundColor: bg, color: "#fff", padding: "20mm 12mm" }}>
+        <div className="mb-5">
+          {r.photoUrl ? (
+            <img src={r.photoUrl} alt={fn(r)} style={{ width: "24mm", height: "24mm", borderRadius: "50%", objectFit: "cover", objectPosition: `${r.photoX ?? 50}% ${r.photoY ?? 50}%`, border: `2.5px solid ${c.color}`, marginBottom: 12 }} />
+          ) : (
+            <div style={{ width: "24mm", height: "24mm", borderRadius: "50%", backgroundColor: c.color + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 700, color: c.color, border: `2.5px solid ${c.color}40`, marginBottom: 12 }}>
+              {fn(r).split(" ").map(w => w.charAt(0)).slice(0, 2).join("").toUpperCase() || "CV"}
+            </div>
+          )}
+        </div>
         <div className="mb-6">
           <h1 className="text-[24px] font-extrabold leading-[1.05] tracking-tight text-white">{fn(r)}</h1>
           <div className="mt-2 h-[3px] w-10" style={{ backgroundColor: c.color }} />

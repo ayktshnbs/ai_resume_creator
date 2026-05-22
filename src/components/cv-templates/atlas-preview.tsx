@@ -16,6 +16,15 @@ export function AtlasPreview({ resume }: { resume: ResumeData }) {
       <aside
         style={{ width: "72mm", backgroundColor: "#0f172a", color: "#ffffff", padding: "20mm 12mm" }}
       >
+        <div className="mb-5">
+          {resume.photoUrl ? (
+            <img src={resume.photoUrl} alt={fullName} style={{ width: "24mm", height: "24mm", borderRadius: "50%", objectFit: "cover", objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%`, border: "2.5px solid #2563eb" }} />
+          ) : (
+            <div className="flex items-center justify-center rounded-full border-[2.5px] border-[#2563eb]/40 bg-[#2563eb]/15 text-[22px] font-bold text-white" style={{ width: "24mm", height: "24mm" }}>
+              {fullName.split(" ").map(w => w.charAt(0)).slice(0, 2).join("").toUpperCase() || "CV"}
+            </div>
+          )}
+        </div>
         <div className="mb-7">
           <h1 className="text-[26px] font-extrabold leading-[1.05] tracking-tight">{fullName}</h1>
           <div className="mt-2 h-[3px] w-10 bg-[#2563eb]" />

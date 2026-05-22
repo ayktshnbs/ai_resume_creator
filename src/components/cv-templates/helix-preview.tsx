@@ -28,13 +28,22 @@ export function HelixPreview({ resume }: { resume: ResumeData }) {
           padding: "18mm 12mm"
         }}
       >
-        {/* Avatar / initials placeholder */}
-        <div
-          className="flex items-center justify-center rounded-full border-[3px] border-white/40 bg-white/15 text-[22px] font-bold text-white shadow-[0_8px_18px_-6px_rgba(0,0,0,0.35)]"
-          style={{ height: "26mm", width: "26mm" }}
-        >
-          {initials}
-        </div>
+        {/* Avatar / photo */}
+        {resume.photoUrl ? (
+          <img
+            src={resume.photoUrl}
+            alt={fullName}
+            className="rounded-full border-[3px] border-white/40 shadow-[0_8px_18px_-6px_rgba(0,0,0,0.35)]"
+            style={{ width: "26mm", height: "26mm", objectFit: "cover", objectPosition: `${resume.photoX ?? 50}% ${resume.photoY ?? 50}%` }}
+          />
+        ) : (
+          <div
+            className="flex items-center justify-center rounded-full border-[3px] border-white/40 bg-white/15 text-[22px] font-bold text-white shadow-[0_8px_18px_-6px_rgba(0,0,0,0.35)]"
+            style={{ height: "26mm", width: "26mm" }}
+          >
+            {initials}
+          </div>
+        )}
 
         <div className="mt-5">
           <h1 className="text-[22px] font-extrabold leading-[1.1] tracking-tight text-white">

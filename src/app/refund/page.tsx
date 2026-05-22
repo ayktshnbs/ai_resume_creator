@@ -1,60 +1,125 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Abonelik ve İptal Politikası | CV With AI",
+  description:
+    "CV With AI abonelik, otomatik yenileme ve kullanım koşulları.",
+};
+
+const LAST_UPDATED = "22 Mayıs 2026";
+
 export default function RefundPage() {
   return (
     <main className="min-h-screen bg-background">
       <header className="border-b border-outline/50 bg-surface/80 backdrop-blur-xl">
         <nav className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link className="text-xl font-bold tracking-tight text-ink" href="/">
-            <span className="text-primary">AI</span> CV Builder
+            <span className="text-primary">CV</span> With AI
           </Link>
-          <Link className="text-sm font-bold text-primary hover:underline" href="/">Ana Sayfa</Link>
+
+          <Link
+            className="text-sm font-bold text-primary hover:underline"
+            href="/"
+          >
+            Ana Sayfa
+          </Link>
         </nav>
       </header>
 
       <article className="mx-auto max-w-4xl px-4 py-16 md:px-10">
-        <h1 className="text-3xl font-bold text-ink md:text-4xl">İade ve Kullanım Koşulları</h1>
-        <p className="mt-2 text-sm text-muted">Son güncelleme: 22 Mayıs 2026</p>
+        <h1 className="text-3xl font-bold text-ink md:text-4xl">
+          Abonelik ve İptal Politikası
+        </h1>
+
+        <p className="mt-2 text-sm text-muted">
+          Son güncelleme: {LAST_UPDATED}
+        </p>
 
         <div className="mt-10 space-y-8 text-[15px] leading-7 text-ink/80">
           <section>
-            <h2 className="text-xl font-bold text-ink">1. Genel Politika</h2>
+            <h2 className="text-xl font-bold text-ink">
+              1. Abonelik Süresi
+            </h2>
+
             <p className="mt-3">
-              AI CV Builder olarak müşteri memnuniyetini ön planda tutuyoruz. Platformumuzda sunulan hizmetler dijital içerik niteliğinde olup, kullanım hakları ve iade süreçleri aşağıda belirtilen koşullara tabidir.
+              CV With AI üzerinden satın alınan abonelikler, satın alınan paket
+              süresi boyunca aktif kalır.
+            </p>
+
+            <p className="mt-3">
+              Kullanıcı, aktif abonelik süresi boyunca Pro özelliklerden,
+              oluşturduğu içeriklerden ve platform hizmetlerinden yararlanmaya
+              devam edebilir.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-ink">2. Kullanım Hakkı ve Yenileme</h2>
+            <h2 className="text-xl font-bold text-ink">
+              2. Otomatik Yenileme ve İptal
+            </h2>
+
             <p className="mt-3">
-              Satın aldığınız paket veya ürün için <strong>otomatik yenileme yapılmaz</strong>. Kullanıcı, satın aldığı ürünü kullanım süresi veya hakkı dolana kadar dilediği gibi kullanmaya devam eder. Ay sonunda veya kullanım dönemi bitiminde kartınızdan otomatik olarak hiçbir ücret tahsil edilmez.
+              Kullanıcı aboneliğini istediği zaman iptal edebilir.
+            </p>
+
+            <p className="mt-3">
+              İptal işlemi yalnızca otomatik yenilemeyi durdurur.
+            </p>
+
+            <p className="mt-3">
+              Mevcut abonelik süresi sona erene kadar Pro erişimi devam eder.
+            </p>
+
+            <p className="mt-3">
+              Kullanım süresi sona erdiğinde abonelik otomatik olarak
+              yenilenmez ve hesap ücretsiz plana geçirilir.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-ink">3. İade Koşulları</h2>
-            <p className="mt-3">Dijital hizmet söz konusu olduğundan, iade taleplerinin kabul edilebilmesi için aşağıdaki şartların sağlanması gerekmektedir:</p>
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>Satın alma tarihinden itibaren <strong>14 gün</strong> içinde talepte bulunulmalıdır.</li>
-              <li>Hizmetin esaslı şekilde kullanılmamış olması (PDF dışa aktarma, yapay zeka özelliklerinin yoğun kullanımı vb. işlemler yapılmamış olmalıdır).</li>
-              <li>İade talebi <a href="mailto:info@cv-with-ai.com" className="text-primary font-medium hover:underline">info@cv-with-ai.com</a> adresine, hesabınıza kayıtlı e-posta üzerinden yazılı olarak iletilmelidir.</li>
-            </ul>
-          </section>
+            <h2 className="text-xl font-bold text-ink">
+              3. Ücret İadesi Politikası
+            </h2>
 
-          <section>
-            <h2 className="text-xl font-bold text-ink">4. İade Süreci</h2>
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>İade talebiniz ulaştıktan sonra en geç <strong>3 iş günü</strong> içinde değerlendirilir.</li>
-              <li>Onaylanan iadeler, ödemenin yapıldığı yönteme <strong>10 iş günü</strong> içinde geri yansıtılır.</li>
-              <li>İade gerçekleştiğinde Pro özelliklere erişiminiz durdurulur ve hesabınız ücretsiz plana geçirilir.</li>
-              <li>Oluşturduğunuz CV&apos;ler sistemde saklanmaya devam eder, ücretsiz plan limitleri dahilinde erişebilirsiniz.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-ink">5. İletişim</h2>
             <p className="mt-3">
-              Kullanım haklarınız veya iade süreçleriyle ilgili her türlü sorunuz için <a href="mailto:info@cv-with-ai.com" className="text-primary font-medium hover:underline">info@cv-with-ai.com</a> adresinden bizimle iletişime geçebilirsiniz.
+              Satın alınan dijital abonelikler ve hizmetler için ücret iadesi
+              yapılmamaktadır.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-ink">
+              4. Hizmet Kullanımı
+            </h2>
+
+            <p className="mt-3">
+              Kullanıcı, platformu yürürlükteki yasalara ve kullanım koşullarına
+              uygun şekilde kullanmayı kabul eder.
+            </p>
+
+            <p className="mt-3">
+              Platform kurallarının ihlal edilmesi durumunda hesap erişimi
+              geçici veya kalıcı olarak sınırlandırılabilir.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-ink">
+              5. İletişim
+            </h2>
+
+            <p className="mt-3">
+              Sorularınız için bizimle aşağıdaki e-posta adresi üzerinden
+              iletişime geçebilirsiniz:
+            </p>
+
+            <p className="mt-4">
+              <a
+                href="mailto:info@cv-with-ai.com"
+                className="font-semibold text-primary hover:underline"
+              >
+                info@cv-with-ai.com
+              </a>
             </p>
           </section>
         </div>

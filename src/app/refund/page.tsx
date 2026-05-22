@@ -13,80 +13,77 @@ export default function RefundPage() {
       </header>
 
       <article className="mx-auto max-w-4xl px-4 py-16 md:px-10">
-        <h1 className="text-3xl font-bold text-ink md:text-4xl">İade Koşulları</h1>
+        <h1 className="text-3xl font-bold text-ink md:text-4xl">İade ve İptal Koşulları</h1>
         <p className="mt-2 text-sm text-muted">Son güncelleme: 22 Mayıs 2026</p>
 
         <div className="mt-10 space-y-8 text-[15px] leading-7 text-ink/80">
           <section>
-            <h2 className="text-xl font-bold text-ink">1. Genel İade Politikası</h2>
+            <h2 className="text-xl font-bold text-ink">1. İade Politikası</h2>
             <p className="mt-3">
-              CV with AI olarak müşteri memnuniyetini ön planda tutuyoruz. Pro abonelik planımız için
-              aşağıda belirtilen koşullar dahilinde iade hakkı sunmaktayız.
+              CV with AI Pro planı dijital bir hizmet olup, satın alma işlemi tamamlandığında
+              tüm Pro özelliklere anında erişim sağlanmaktadır. Bu nedenle, satın alma işlemi
+              gerçekleştikten sonra <strong>iade yapılmamaktadır</strong>.
+            </p>
+            <p className="mt-3">
+              6502 sayılı Tüketicinin Korunması Hakkında Kanun&apos;un 53. maddesi ve Mesafeli
+              Sözleşmeler Yönetmeliği&apos;nin 15/ğ maddesi uyarınca, cayma hakkı süresi dolmadan
+              önce tüketicinin onayı ile ifasına başlanan dijital içerik ve hizmetlerde cayma
+              hakkı kullanılamaz. Satın alma sırasında bu husus onayınıza sunulmaktadır.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-ink">2. İade Hakkı Süresi</h2>
+            <h2 className="text-xl font-bold text-ink">2. Abonelik Süresi ve Kullanım</h2>
             <p className="mt-3">
-              Pro aboneliğinizi satın aldıktan sonra <strong>14 gün</strong> içinde iade talebinde bulunabilirsiniz.
-              Bu süre, 6502 sayılı Tüketicinin Korunması Hakkında Kanun&apos;un mesafeli sözleşmelere ilişkin
-              cayma hakkı düzenlemesiyle uyumludur.
+              Pro plan satın aldığınızda, seçtiğiniz plana göre belirlenen süre boyunca
+              (aylık veya yıllık) tüm Pro özelliklerden yararlanırsınız:
             </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-ink">3. İade Koşulları</h2>
-            <p className="mt-3">İade talebinizin kabul edilebilmesi için:</p>
             <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>Satın alma tarihinden itibaren 14 gün içinde talepte bulunulmalıdır</li>
-              <li>İade talebi <strong>info@cv-with-ai.com</strong> adresine yazılı olarak iletilmelidir</li>
-              <li>Talep, hesabınıza kayıtlı e-posta adresinden gönderilmelidir</li>
+              <li><strong>Aylık plan:</strong> Satın alma tarihinden itibaren 30 gün boyunca aktif</li>
+              <li><strong>Yıllık plan:</strong> Satın alma tarihinden itibaren 365 gün boyunca aktif</li>
+            </ul>
+            <p className="mt-3">
+              Abonelik süreniz boyunca sınırsız CV ve ön yazı oluşturma, yapay zeka özellikleri,
+              tüm premium şablonlar ve yüksek çözünürlüklü PDF dışa aktarma dahil tüm Pro
+              özelliklerden faydalanabilirsiniz.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-ink">3. Otomatik Yenileme Yoktur</h2>
+            <p className="mt-3">
+              CV with AI abonelikleri <strong>otomatik olarak yenilenmez</strong>. Abonelik
+              süreniz dolduğunda Pro planınız sona erer ve hesabınız otomatik olarak ücretsiz
+              plana geçer. Bir sonraki dönem için ücret tahsil edilmez. Pro özelliklere tekrar
+              erişmek isterseniz yeni bir satın alma işlemi yapmanız gerekmektedir.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-bold text-ink">4. Süre Dolduğunda Ne Olur?</h2>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
+              <li>Hesabınız ücretsiz plana düşürülür</li>
+              <li>Daha önce oluşturduğunuz CV&apos;ler ve ön yazılar <strong>silinmez</strong></li>
+              <li>Ücretsiz plan limitleri dahilinde (1 kayıtlı CV, standart şablonlar) erişiminiz devam eder</li>
+              <li>Yapay zeka özellikleri ve PDF dışa aktarma gibi Pro özellikler devre dışı kalır</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-ink">4. İade Süreci</h2>
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>İade talebiniz en geç <strong>3 iş günü</strong> içinde değerlendirilir</li>
-              <li>Onaylanan iadeler, ödemenin yapıldığı yönteme <strong>10 iş günü</strong> içinde iade edilir</li>
-              <li>İade sonrası Pro aboneliğiniz iptal edilir ve hesabınız ücretsiz plana düşürülür</li>
-              <li>İade işlemi sırasında oluşturduğunuz CV&apos;ler ve ön yazılar silinmez; ücretsiz plan limitleri dahilinde erişiminiz devam eder</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-ink">5. İade Yapılmayan Durumlar</h2>
-            <p className="mt-3">Aşağıdaki durumlarda iade talebi kabul edilmez:</p>
-            <ul className="mt-3 list-disc space-y-2 pl-6">
-              <li>14 günlük cayma süresi dolduktan sonra yapılan talepler</li>
-              <li>Hizmetin esaslı şekilde kullanılması (birden fazla PDF dışa aktarma, AI özelliklerinin kapsamlı kullanımı)</li>
-              <li>Platform kurallarının ihlali nedeniyle hesabın askıya alınması durumunda</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-ink">6. Yıllık Abonelik İadeleri</h2>
+            <h2 className="text-xl font-bold text-ink">5. Teknik Sorunlar</h2>
             <p className="mt-3">
-              Yıllık plan satın alan kullanıcılar için de 14 günlük cayma hakkı geçerlidir.
-              14 gün sonrasında yıllık abonelik için kısmi iade yapılmaz; abonelik dönem sonuna
-              kadar aktif kalır.
+              Ödeme işlemi sırasında teknik bir sorun yaşanması (çift ödeme, işlem hatası vb.)
+              durumunda, durumu <strong>info@cv-with-ai.com</strong> adresine bildirmeniz halinde
+              sorun en kısa sürede incelenip çözülecektir. Teknik kaynaklı mükerrer ödemeler
+              iade edilir.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-ink">7. Abonelik İptali</h2>
+            <h2 className="text-xl font-bold text-ink">6. İletişim</h2>
             <p className="mt-3">
-              İade talep etmeksizin aboneliğinizi istediğiniz zaman iptal edebilirsiniz.
-              İptal sonrası mevcut dönem sonuna kadar Pro özelliklerine erişiminiz devam eder.
-              Otomatik yenileme durdurulur ve bir sonraki dönemde ücret tahsil edilmez.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold text-ink">8. İletişim</h2>
-            <p className="mt-3">
-              İade talepleriniz ve sorularınız için <strong>info@cv-with-ai.com</strong> adresinden
-              bizimle iletişime geçebilirsiniz.
+              Aboneliğiniz ve ödeme işlemleriniz hakkında sorularınız için
+              <strong> info@cv-with-ai.com</strong> adresinden bizimle iletişime geçebilirsiniz.
             </p>
           </section>
         </div>

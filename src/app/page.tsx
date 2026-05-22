@@ -330,7 +330,12 @@ export default function Home() {
               <a className="hover:text-primary" href="/signup">Sign up</a>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-between gap-4 border-t border-outline/20 pt-8 text-xs text-muted md:flex-row">
+          <div className="flex flex-wrap justify-center gap-6 border-t border-outline/20 pt-8 text-xs font-medium text-muted">
+            <a className="hover:text-primary" href="/privacy">Gizlilik Politikası</a>
+            <a className="hover:text-primary" href="/terms">Kullanım Şartları</a>
+            <a className="hover:text-primary" href="/refund">İade Koşulları</a>
+          </div>
+          <div className="flex flex-col items-center justify-between gap-4 text-xs text-muted md:flex-row">
             <p>© 2026 AI CV Builder. All rights reserved.</p>
             <p>Made with precision for modern professionals.</p>
           </div>

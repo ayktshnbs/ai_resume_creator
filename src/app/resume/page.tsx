@@ -91,7 +91,7 @@ export default function ResumeBuilderPage() {
           <h1 className="text-2xl font-bold text-ink">{t("gate.signInResume")}</h1>
           <p className="max-w-md text-muted">{t("gate.signInResumeDesc")}</p>
           <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
+            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
             <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
           </div>
         </div>
@@ -741,7 +741,7 @@ export default function ResumeBuilderPage() {
                   placeholder="e.g., Strategic Leadership, React.js, Data Analysis"
                   value={skillDraft}
                 />
-                <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-60" disabled={!skillDraft.trim()} onClick={addSkill} type="button">
+                <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-60" disabled={!skillDraft.trim()} onClick={addSkill} type="button">
                   {t("resume.addSkill")}
                 </button>
               </div>
@@ -810,7 +810,7 @@ export default function ResumeBuilderPage() {
               </button>
               {isPro ? (
                 <button
-                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
                   disabled={exporting}
                   onClick={() => void exportPdf()}
                   type="button"
@@ -820,7 +820,7 @@ export default function ResumeBuilderPage() {
               ) : (
                 <PaymentButton
                   price="149"
-                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white"
+                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background"
                 >
                   {t("resume.exportPdfPro")}
                 </PaymentButton>
@@ -831,7 +831,7 @@ export default function ResumeBuilderPage() {
           <ScaledTemplatePreview resume={resume} template={template} />
         </section>
 
-        <Link className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white shadow-panel md:hidden" href="/templates">
+        <Link className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-ink text-background shadow-panel md:hidden" href="/templates">
           <Icon name="visibility" />
         </Link>
       </div>
@@ -1120,7 +1120,7 @@ function AiHelperPanel({
               <p className="font-label text-xs font-semibold uppercase tracking-[0.12em] text-muted">Suggested skills</p>
               <p className="mt-1 text-sm text-muted">Add these to your resume or pick the ones that fit best.</p>
             </div>
-            <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white" onClick={onAddSuggestedSkills} type="button">
+            <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background" onClick={onAddSuggestedSkills} type="button">
               Integrate All Competencies
             </button>
           </div>

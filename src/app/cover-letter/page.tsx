@@ -107,7 +107,7 @@ export default function CoverLetterPage() {
           <h1 className="text-2xl font-bold text-ink">{t("gate.signInCover")}</h1>
           <p className="max-w-md text-muted">{t("gate.signInCoverDesc")}</p>
           <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
+            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
             <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function CoverLetterPage() {
                   </button>
                   {isPro ? (
                     <button
-                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
                       disabled={exporting}
                       onClick={() => void exportPdf()}
                       type="button"
@@ -295,7 +295,7 @@ export default function CoverLetterPage() {
                   ) : (
                     <PaymentButton
                       price="149"
-                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-white"
+                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background"
                     >
                       {t("resume.exportPdfPro")}
                     </PaymentButton>

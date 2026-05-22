@@ -104,7 +104,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
           ) : (
             <Link
               href="/signin"
-              className="mx-2 flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+              className="mx-2 flex items-center gap-3 rounded-2xl primary-gradient px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
             >
               <Icon name="user" className="text-[20px]" />
               {t("nav.signIn")}
@@ -201,7 +201,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                 <Link
                   href="/signin"
                   onClick={() => setDrawerOpen(false)}
-                  className="flex items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+                  className="flex items-center gap-3 rounded-2xl primary-gradient px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
                 >
                   <Icon name="user" className="text-[20px]" />
                   {t("nav.signIn")}

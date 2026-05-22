@@ -33,7 +33,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-ink">{t("gate.signInDashboard")}</h1>
           <p className="max-w-md text-muted">{t("gate.signInDashboardDesc")}</p>
           <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl bg-ink px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
+            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
             <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
           </div>
         </div>

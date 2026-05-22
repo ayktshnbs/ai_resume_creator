@@ -424,7 +424,7 @@ function PricingSection() {
         <PricingCard
           cta="Start free"
           href="/signup"
-          features={["1 saved CV", "All standard templates", "Live preview"]}
+          features={["1 CV + 1 cover letter", "All standard templates", "Live preview"]}
           name="Basic"
           price="$0"
           period=""

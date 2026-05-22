@@ -71,7 +71,7 @@ export default function RefundPage() {
               <ul className="mt-3 list-disc space-y-2 pl-6">
                 <li>Hesabınız ücretsiz plana düşürülür</li>
                 <li>Daha önce oluşturduğunuz CV&apos;ler ve ön yazılar <strong>silinmez</strong></li>
-                <li>Ücretsiz plan limitleri dahilinde (1 kayıtlı CV, standart şablonlar) erişiminiz devam eder</li>
+                <li>Ücretsiz plan limitleri dahilinde (1 CV ve 1 ön yazı, standart şablonlar) erişiminiz devam eder</li>
                 <li>Yapay zeka özellikleri ve PDF dışa aktarma gibi Pro özellikler devre dışı kalır</li>
               </ul>
             </section>
@@ -135,7 +135,7 @@ export default function RefundPage() {
               <ul className="mt-3 list-disc space-y-2 pl-6">
                 <li>Your account is downgraded to the free plan</li>
                 <li>Previously created CVs and cover letters are <strong>not deleted</strong></li>
-                <li>You retain access within free plan limits (1 saved CV, standard templates)</li>
+                <li>You retain access within free plan limits (1 CV and 1 cover letter, standard templates)</li>
                 <li>Pro features such as AI tools and PDF export are disabled</li>
               </ul>
             </section>

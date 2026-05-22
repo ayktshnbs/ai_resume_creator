@@ -531,8 +531,73 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Before → After Showcase */}
+      <section className="py-24" id="before-after">
+        <div className="mx-auto max-w-7xl px-4 md:px-10">
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">AI Power</p>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">See the difference AI makes.</h2>
+            <p className="mt-4 text-lg text-[#6b7280]">One click transforms weak bullet points into professional, achievement-driven statements.</p>
+          </div>
+          <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
+            {/* Before */}
+            <div className="relative rounded-3xl border border-[#fca5a5]/30 bg-[#fef2f2] p-8">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#fecaca]/60 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#dc2626]">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                Before
+              </div>
+              <div className="space-y-5">
+                {[
+                  { title: "Work Experience", text: "Worked on marketing campaigns and helped the team with various projects and tasks." },
+                  { title: "Skills", text: "Good at communication, teamwork, and problem solving. Used Excel and PowerPoint." },
+                  { title: "Achievement", text: "Was responsible for social media accounts and posting content regularly." },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl bg-white/60 p-5">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#9ca3af]">{item.title}</p>
+                    <p className="text-sm leading-relaxed text-[#6b7280]">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-sm font-bold text-[#ef4444]">
+                <span className="rounded-full bg-[#fecaca] px-3 py-1 text-xs">ATS Score: 34</span>
+                <span className="text-xs text-[#9ca3af]">Likely filtered out</span>
+              </div>
+            </div>
+            {/* After */}
+            <div className="relative rounded-3xl border border-[#86efac]/30 bg-[#f0fdf4] p-8">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#bbf7d0]/60 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#16a34a]">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                After — AI Enhanced
+              </div>
+              <div className="space-y-5">
+                {[
+                  { title: "Work Experience", text: "Spearheaded 12 cross-channel marketing campaigns, driving a 34% increase in qualified leads and reducing CPA by 18%." },
+                  { title: "Skills", text: "Strategic communications, cross-functional leadership, data-driven decision making. Proficient in Excel (VLOOKUP, pivot tables), PowerPoint, and HubSpot CRM." },
+                  { title: "Achievement", text: "Grew organic social media engagement by 156% in 6 months, managing a content calendar of 40+ weekly posts across 4 platforms." },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl bg-white/60 p-5">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#6b7280]">{item.title}</p>
+                    <p className="text-sm leading-relaxed text-[#111827]">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-sm font-bold text-[#16a34a]">
+                <span className="rounded-full bg-[#bbf7d0] px-3 py-1 text-xs">ATS Score: 92</span>
+                <span className="text-xs text-[#6b7280]">Interview-ready</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-12 text-center">
+            <a className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:shadow-xl hover:brightness-105 active:scale-[0.98]" href="/resume">
+              Try AI enhancement free
+              <SvgIcon className="h-4 w-4" name="arrow-right" />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Dashboard preview */}
-      <section className="py-24" id="management">
+      <section className="bg-[#f3f4f6] py-24" id="management">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 md:grid-cols-[1fr_1.5fr] md:px-10">
           <div className="flex flex-col justify-center">
             <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-[#6b7280]">Management</p>
@@ -562,6 +627,87 @@ export default function Home() {
                   <a className="text-sm font-bold text-primary hover:underline" href="/resume">Edit</a>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24" id="testimonials">
+        <div className="mx-auto max-w-7xl px-4 md:px-10">
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Testimonials</p>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Loved by job seekers worldwide.</h2>
+            <p className="mt-4 text-lg text-[#6b7280]">See how professionals landed their dream jobs with CV with AI.</p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                name: "Sarah Mitchell",
+                role: "Product Manager at Spotify",
+                text: "I went from zero callbacks to 5 interviews in two weeks. The AI rewrite feature transformed my bullet points from boring to impressive.",
+                rating: 5,
+                initials: "SM",
+                color: "from-[#6366f1] to-[#3b82f6]",
+              },
+              {
+                name: "James Park",
+                role: "Software Engineer at Google",
+                text: "The ATS score checker was a game-changer. I had no idea my resume was getting filtered out. After optimizing with CV with AI, I finally heard back.",
+                rating: 5,
+                initials: "JP",
+                color: "from-[#ec4899] to-[#f43f5e]",
+              },
+              {
+                name: "Elena Rodriguez",
+                role: "Marketing Director at Shopify",
+                text: "The cover letter generator saved me hours. It perfectly matched the job description and highlighted my most relevant experience.",
+                rating: 5,
+                initials: "ER",
+                color: "from-[#14b8a6] to-[#06b6d4]",
+              },
+              {
+                name: "David Chen",
+                role: "Data Analyst at Amazon",
+                text: "I tried 4 other CV builders before this one. The templates are actually modern and the live preview makes editing so much faster.",
+                rating: 5,
+                initials: "DC",
+                color: "from-[#f59e0b] to-[#f97316]",
+              },
+              {
+                name: "Aisha Okonkwo",
+                role: "UX Designer at Meta",
+                text: "As a career changer, I struggled to present my experience. The AI suggestions helped me frame my transferable skills perfectly.",
+                rating: 5,
+                initials: "AO",
+                color: "from-[#8b5cf6] to-[#a855f7]",
+              },
+              {
+                name: "Marcus Weber",
+                role: "Finance Analyst at JPMorgan",
+                text: "Clean, professional, and incredibly fast. I built my resume during lunch break and had a PDF ready to send by end of day.",
+                rating: 5,
+                initials: "MW",
+                color: "from-[#10b981] to-[#34d399]",
+              },
+            ].map((t) => (
+              <article key={t.name} className="card-hover flex flex-col rounded-3xl bg-white p-7 shadow-ambient">
+                <div className="mb-4 flex items-center gap-1 text-[#f59e0b]">
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <SvgIcon key={i} className="h-4 w-4" name="star" />
+                  ))}
+                </div>
+                <p className="mb-6 flex-1 text-sm leading-relaxed text-[#4b5563]">&ldquo;{t.text}&rdquo;</p>
+                <div className="flex items-center gap-3 border-t border-[#e5e7eb]/40 pt-5">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${t.color} text-xs font-bold text-white shadow-sm`}>
+                    {t.initials}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[#111827]">{t.name}</p>
+                    <p className="text-xs text-[#6b7280]">{t.role}</p>
+                  </div>
+                </div>
+              </article>
             ))}
           </div>
         </div>

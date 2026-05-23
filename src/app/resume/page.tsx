@@ -900,16 +900,20 @@ export default function ResumeBuilderPage() {
                 </div>
               )}
               <label
-                className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-outline/70 bg-surface-soft px-5 py-6 text-center"
+                className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-outline/70 bg-surface-soft px-5 py-6 text-center transition hover:border-primary/50 hover:bg-primary/5"
                 onDragOver={(event: DragEvent<HTMLLabelElement>) => event.preventDefault()}
                 onDrop={(event: DragEvent<HTMLLabelElement>) => {
                   event.preventDefault();
                   void handleReferenceUpload(event.dataTransfer.files);
                 }}
               >
-                <Icon className="text-primary" name="upload" />
-                <span className="mt-3 text-sm font-bold text-ink">Upload supporting documentation</span>
+                <Icon className="text-primary text-[24px]" name="upload" />
+                <span className="mt-3 text-sm font-bold text-ink">Drag & drop or click to upload</span>
                 <span className="mt-1 text-xs text-muted">PDF, TXT, or JSON formats</span>
+                <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:brightness-110">
+                  <Icon name="upload" className="text-[14px]" />
+                  Upload & Import
+                </span>
                 <input
                   accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.txt,.md,.json,image/*,application/pdf,text/plain,application/json"
                   className="hidden"

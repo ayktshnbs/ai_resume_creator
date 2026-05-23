@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { ResumeData, SelectedTemplate } from "@/types/resume";
+import { getCvLabels, type CvLabels, type CvLang } from "@/lib/cv-labels";
 import { OnyxPreview } from "./onyx-preview";
 import { SterlingPreview } from "./sterling-preview";
 import { AtlasPreview } from "./atlas-preview";
@@ -12,7 +13,7 @@ import { ObsidianPreview } from "./obsidian-preview";
 import { HelixPreview } from "./helix-preview";
 import { parametricTemplates } from "./parametric-template";
 
-const handcrafted: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate }>> = {
+const handcrafted: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }>> = {
   "Modern Minimalist": OnyxPreview,
   "Professional Serif": SterlingPreview,
   "Creative Tech": AtlasPreview,
@@ -25,7 +26,7 @@ const handcrafted: Record<string, ComponentType<{ resume: ResumeData; settings?:
   "Helix Modern": HelixPreview,
 };
 
-const map: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate }>> = {
+const map: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }>> = {
   ...handcrafted,
   ...parametricTemplates,
 };
@@ -43,5 +44,7 @@ export function TemplateRenderer({
 }) {
   const name = templateName || template?.name || "Modern Minimalist";
   const Preview = map[name] || OnyxPreview;
-  return <Preview resume={resume} settings={settings || template} />;
+  const effectiveSettings = settings || template;
+  const labels = getCvLabels((effectiveSettings?.cvLanguage as CvLang) || "en");
+  return <Preview resume={resume} settings={effectiveSettings} labels={labels} />;
 }

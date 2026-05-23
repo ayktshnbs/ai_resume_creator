@@ -23,6 +23,7 @@ type RequestBody = {
   resumeData?: ResumeData;
   text?: string;
   targetRole?: string;
+  jobDescription?: string;
   userApiKey?: string;
 };
 
@@ -138,19 +139,24 @@ Return:
   }
 
   if (action === "generate_cover_letter") {
+    const jobDesc = body.jobDescription?.trim() || "";
+    const jobContext = jobDesc
+      ? `\n\nJOB DESCRIPTION PROVIDED BY THE USER:\n${jobDesc}\n\nIMPORTANT: Carefully analyze the job description above. Match the candidate's experience and skills to the specific requirements, responsibilities, and qualifications listed. Reference specific keywords, technologies, and values from the job posting.`
+      : "";
+
     return `${base}
-Write a compelling, professional cover letter for this candidate applying to a "${targetRole}" position.
+Write a compelling, professional cover letter for this candidate applying to a "${targetRole}" position.${jobContext}
 
 REQUIREMENTS:
 - 4 paragraphs, each with a clear purpose:
-  1. HOOK: Open with a confident, specific statement about why this role excites them. Reference the role and hint at their strongest qualification. No generic "I am writing to apply..."
-  2. VALUE PROOF: Highlight 2-3 concrete achievements from their resume that directly map to what a "${targetRole}" needs. Use specific examples with context.
-  3. CULTURAL FIT: Show understanding of what companies hiring for "${targetRole}" typically value. Connect the candidate's approach/philosophy to those values.
+  1. HOOK: Open with a confident, specific statement about why this role excites them.${jobDesc ? " Reference the company name and role from the job description." : " Reference the role and hint at their strongest qualification."} No generic "I am writing to apply..."
+  2. VALUE PROOF: Highlight 2-3 concrete achievements from their resume that directly map to ${jobDesc ? "the requirements in the job description" : `what a "${targetRole}" needs`}. Use specific examples with context.
+  3. CULTURAL FIT: ${jobDesc ? "Reference specific values, mission, or culture mentioned in the job posting." : `Show understanding of what companies hiring for "${targetRole}" typically value.`} Connect the candidate's approach/philosophy to those values.
   4. CLOSE: Confident but not arrogant. Express enthusiasm for discussing further. Include a forward-looking statement.
 - Tone: Professional yet human — avoid corporate robot language
 - Length: 250-350 words total
 - Never fabricate experiences — only reference what's in the resume
-- Address to "Dear Hiring Manager" unless a specific name is available
+- Address to "Dear Hiring Manager" unless a specific name is available in the job description
 
 Return:
 {"resultText":"...full cover letter text..."}`;

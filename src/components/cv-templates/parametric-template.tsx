@@ -1,6 +1,9 @@
 import type { ResumeData, SelectedTemplate } from "@/types/resume";
+import type { CvLabels } from "@/lib/cv-labels";
 import { formatDateRange, getFullName } from "./sample-data";
 import type { ComponentType } from "react";
+
+const defaultLabels: CvLabels = { summary: "Summary", experience: "Experience", education: "Education", skills: "Skills", languages: "Languages", references: "References", profile: "Profile", contact: "Contact", present: "Present" };
 
 export type ParametricStyle =
   | "clean"
@@ -27,7 +30,7 @@ export type ParametricConfig = {
   tags: string[];
 };
 
-type LP = { resume: ResumeData; config: ParametricConfig };
+type LP = { resume: ResumeData; config: ParametricConfig; labels: CvLabels };
 
 function fc(f: string) {
   return f === "serif" ? "font-serif" : f === "mono" ? "font-mono" : "font-sans";
@@ -214,7 +217,7 @@ function Sheet({ font, children }: { font: string; children: React.ReactNode }) 
 /* ══════════════════════════════════════
    LAYOUT 1: Clean single-column
    ══════════════════════════════════════ */
-function CleanLayout({ resume: r, config: c }: LP) {
+function CleanLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   return (
     <Sheet font={c.font}>
@@ -224,11 +227,11 @@ function CleanLayout({ resume: r, config: c }: LP) {
         <div className="mt-3 h-px w-full" style={{ backgroundColor: c.color }} />
         <div className="mt-3"><Contact items={contact} color={c.color} /></div>
       </header>
-      {r.summary && <section className="mt-5"><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-      <section className="mt-5"><SH title="Experience" color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-5"><SH title="Education" color={c.color} /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-5"><SH title="Skills" color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
-      {r.languages.length > 0 && <section className="mt-5"><SH title="Languages" color={c.color} /><Langs languages={r.languages} /></section>}
+      {r.summary && <section className="mt-5"><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+      <section className="mt-5"><SH title={L.experience} color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
+      {r.languages.length > 0 && <section className="mt-5"><SH title={L.languages} color={c.color} /><Langs languages={r.languages} /></section>}
     </Sheet>
   );
 }
@@ -236,7 +239,7 @@ function CleanLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 2: Dark sidebar
    ══════════════════════════════════════ */
-function SidebarDarkLayout({ resume: r, config: c }: LP) {
+function SidebarDarkLayout({ resume: r, config: c, labels: L }: LP) {
   const bg = c.sidebarBg || "#0f172a";
   const contact = gc(r);
   return (
@@ -258,37 +261,37 @@ function SidebarDarkLayout({ resume: r, config: c }: LP) {
         </div>
         {contact.length > 0 && (
           <div className="mb-6">
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">Contact</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">{L.contact}</p>
             <div className="h-px w-full bg-white/10 mb-2" />
             <div className="space-y-1.5">{contact.map((c) => <p key={c} className="break-words text-[9.5px] text-white/80">{c}</p>)}</div>
           </div>
         )}
         {r.skills.length > 0 && (
           <div className="mb-6">
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">Skills</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">{L.skills}</p>
             <div className="h-px w-full bg-white/10 mb-2" />
             <SkillsSidebar skills={r.skills} color={c.color} />
           </div>
         )}
         {r.education.length > 0 && (
           <div className="mb-6">
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">Education</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">{L.education}</p>
             <div className="h-px w-full bg-white/10 mb-2" />
             <EduSidebar education={r.education} />
           </div>
         )}
         {r.languages.length > 0 && (
           <div>
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">Languages</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">{L.languages}</p>
             <div className="h-px w-full bg-white/10 mb-2" />
             <div className="space-y-1">{r.languages.map((l) => <p key={l} className="text-[9px] text-white/70">{l}</p>)}</div>
           </div>
         )}
       </aside>
       <main style={{ flex: 1, padding: "20mm 18mm" }}>
-        {r.summary && <section className="mb-6"><SH title="Profile" color={c.color} /><div className="mb-3 h-[2px] w-8" style={{ backgroundColor: c.color }} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+        {r.summary && <section className="mb-6"><SH title={L.profile} color={c.color} /><div className="mb-3 h-[2px] w-8" style={{ backgroundColor: c.color }} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
         <section className="mb-6">
-          <SH title="Experience" color={c.color} />
+          <SH title={L.experience} color={c.color} />
           <div className="mb-3 h-[2px] w-8" style={{ backgroundColor: c.color }} />
           <Exp experiences={r.experiences} color={c.color} />
         </section>
@@ -300,7 +303,7 @@ function SidebarDarkLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 3: Light sidebar
    ══════════════════════════════════════ */
-function SidebarLightLayout({ resume: r, config: c }: LP) {
+function SidebarLightLayout({ resume: r, config: c, labels: L }: LP) {
   const bg = c.sidebarBg || "#f1f5f9";
   const contact = gc(r);
   return (
@@ -313,32 +316,32 @@ function SidebarLightLayout({ resume: r, config: c }: LP) {
         </div>
         {contact.length > 0 && (
           <div className="mb-5">
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>Contact</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>{L.contact}</p>
             <div className="space-y-1.5">{contact.map((ct) => <p key={ct} className="break-words text-[9.5px] text-[#475569]">{ct}</p>)}</div>
           </div>
         )}
         {r.skills.length > 0 && (
           <div className="mb-5">
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>Skills</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>{L.skills}</p>
             <SkillsSidebar skills={r.skills} light color={c.color} />
           </div>
         )}
         {r.education.length > 0 && (
           <div className="mb-5">
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>Education</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>{L.education}</p>
             <EduSidebar education={r.education} light />
           </div>
         )}
         {r.languages.length > 0 && (
           <div>
-            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>Languages</p>
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>{L.languages}</p>
             <div className="space-y-1">{r.languages.map((l) => <p key={l} className="text-[9px] text-[#64748b]">{l}</p>)}</div>
           </div>
         )}
       </aside>
       <main style={{ flex: 1, padding: "20mm 18mm" }}>
-        {r.summary && <section className="mb-6"><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-        <section className="mb-6"><SH title="Experience" color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
+        {r.summary && <section className="mb-6"><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+        <section className="mb-6"><SH title={L.experience} color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
       </main>
     </div>
   );
@@ -347,7 +350,7 @@ function SidebarLightLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 4: Centered classic
    ══════════════════════════════════════ */
-function CenteredLayout({ resume: r, config: c }: LP) {
+function CenteredLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   return (
     <Sheet font={c.font}>
@@ -357,10 +360,10 @@ function CenteredLayout({ resume: r, config: c }: LP) {
         <div className="mx-auto mt-2 h-[2px] w-14" style={{ backgroundColor: c.color }} />
         <div className="mt-3"><Contact items={contact} color={c.color} centered /></div>
       </header>
-      {r.summary && <section className="mt-5"><SH title="Profile" color={c.color} centered /><p className="text-[10px] leading-[1.7] text-[#1e293b]" style={{ textAlign: "justify" }}>{r.summary}</p></section>}
-      <section className="mt-5"><SH title="Experience" color={c.color} centered /><Exp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-5"><SH title="Education" color={c.color} centered /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-5"><SH title="Skills" color={c.color} centered /><Skills skills={r.skills} color={c.color} inline /></section>}
+      {r.summary && <section className="mt-5"><SH title={L.profile} color={c.color} centered /><p className="text-[10px] leading-[1.7] text-[#1e293b]" style={{ textAlign: "justify" }}>{r.summary}</p></section>}
+      <section className="mt-5"><SH title={L.experience} color={c.color} centered /><Exp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} centered /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} centered /><Skills skills={r.skills} color={c.color} inline /></section>}
     </Sheet>
   );
 }
@@ -368,7 +371,7 @@ function CenteredLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 5: Compact dense
    ══════════════════════════════════════ */
-function CompactLayout({ resume: r, config: c }: LP) {
+function CompactLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   return (
     <div className={fc(c.font) + " text-[#0f172a]"} style={{ width: "210mm", minHeight: "297mm", padding: "14mm 16mm", backgroundColor: "#fff", overflow: "hidden" }}>
@@ -382,10 +385,10 @@ function CompactLayout({ resume: r, config: c }: LP) {
         </div>
       </header>
       <div className="mb-3"><Contact items={contact} color={c.color} /></div>
-      {r.summary && <section className="mt-3"><SH title="Summary" color={c.color} underline /><p className="text-[9.5px] leading-[1.55] text-[#1e293b]">{r.summary}</p></section>}
-      <section className="mt-3"><SH title="Experience" color={c.color} underline /><Exp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-3"><SH title="Education" color={c.color} underline /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-3"><SH title="Skills" color={c.color} underline /><Skills skills={r.skills} color={c.color} /></section>}
+      {r.summary && <section className="mt-3"><SH title={L.summary} color={c.color} underline /><p className="text-[9.5px] leading-[1.55] text-[#1e293b]">{r.summary}</p></section>}
+      <section className="mt-3"><SH title={L.experience} color={c.color} underline /><Exp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-3"><SH title={L.education} color={c.color} underline /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-3"><SH title={L.skills} color={c.color} underline /><Skills skills={r.skills} color={c.color} /></section>}
     </div>
   );
 }
@@ -393,7 +396,7 @@ function CompactLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 6: Accent bar
    ══════════════════════════════════════ */
-function AccentBarLayout({ resume: r, config: c }: LP) {
+function AccentBarLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   return (
     <Sheet font={c.font}>
@@ -408,23 +411,23 @@ function AccentBarLayout({ resume: r, config: c }: LP) {
       {r.summary && (
         <section className="mt-5 flex gap-4">
           <div className="w-[4px] shrink-0 rounded-full" style={{ backgroundColor: c.color + "30" }} />
-          <div><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></div>
+          <div><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></div>
         </section>
       )}
       <section className="mt-5 flex gap-4">
         <div className="w-[4px] shrink-0 rounded-full" style={{ backgroundColor: c.color + "30" }} />
-        <div className="flex-1"><SH title="Experience" color={c.color} /><Exp experiences={r.experiences} color={c.color} /></div>
+        <div className="flex-1"><SH title={L.experience} color={c.color} /><Exp experiences={r.experiences} color={c.color} /></div>
       </section>
       {r.education.length > 0 && (
         <section className="mt-5 flex gap-4">
           <div className="w-[4px] shrink-0 rounded-full" style={{ backgroundColor: c.color + "30" }} />
-          <div className="flex-1"><SH title="Education" color={c.color} /><Edu education={r.education} /></div>
+          <div className="flex-1"><SH title={L.education} color={c.color} /><Edu education={r.education} /></div>
         </section>
       )}
       {r.skills.length > 0 && (
         <section className="mt-5 flex gap-4">
           <div className="w-[4px] shrink-0 rounded-full" style={{ backgroundColor: c.color + "30" }} />
-          <div className="flex-1"><SH title="Skills" color={c.color} /><Skills skills={r.skills} color={c.color} /></div>
+          <div className="flex-1"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></div>
         </section>
       )}
     </Sheet>
@@ -434,7 +437,7 @@ function AccentBarLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 7: Band top
    ══════════════════════════════════════ */
-function BandTopLayout({ resume: r, config: c }: LP) {
+function BandTopLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   return (
     <div className={fc(c.font) + " text-[#0f172a]"} style={{ width: "210mm", minHeight: "297mm", backgroundColor: "#fff", overflow: "hidden" }}>
@@ -444,10 +447,10 @@ function BandTopLayout({ resume: r, config: c }: LP) {
         <div className="mt-3"><Contact items={contact} light /></div>
       </header>
       <div style={{ padding: "14mm 20mm 18mm" }}>
-        {r.summary && <section className="mt-2"><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-        <section className="mt-5"><SH title="Experience" color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
-        {r.education.length > 0 && <section className="mt-5"><SH title="Education" color={c.color} /><Edu education={r.education} /></section>}
-        {r.skills.length > 0 && <section className="mt-5"><SH title="Skills" color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
+        {r.summary && <section className="mt-2"><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+        <section className="mt-5"><SH title={L.experience} color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
+        {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
+        {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
       </div>
     </div>
   );
@@ -456,7 +459,7 @@ function BandTopLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 8: Timeline
    ══════════════════════════════════════ */
-function TimelineLayout({ resume: r, config: c }: LP) {
+function TimelineLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   return (
     <Sheet font={c.font}>
@@ -469,10 +472,10 @@ function TimelineLayout({ resume: r, config: c }: LP) {
           <div className="h-px flex-1" style={{ backgroundColor: c.color + "40" }} />
         </div>
       </header>
-      {r.summary && <section className="mt-5"><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-      <section className="mt-5"><SH title="Experience" color={c.color} /><TimelineExp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-5"><SH title="Education" color={c.color} /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-5"><SH title="Skills" color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
+      {r.summary && <section className="mt-5"><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+      <section className="mt-5"><SH title={L.experience} color={c.color} /><TimelineExp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
     </Sheet>
   );
 }
@@ -480,7 +483,7 @@ function TimelineLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 9: Split header (name left, photo right)
    ══════════════════════════════════════ */
-function SplitHeaderLayout({ resume: r, config: c }: LP) {
+function SplitHeaderLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   const name = fn(r);
   return (
@@ -496,11 +499,11 @@ function SplitHeaderLayout({ resume: r, config: c }: LP) {
         <div className="mt-3 h-[2px] w-full" style={{ backgroundColor: c.color }} />
         <div className="mt-3"><Contact items={contact} color={c.color} /></div>
       </header>
-      {r.summary && <section className="mt-5"><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-      <section className="mt-5"><SH title="Experience" color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-5"><SH title="Education" color={c.color} /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-5"><SH title="Skills" color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
-      {r.languages.length > 0 && <section className="mt-5"><SH title="Languages" color={c.color} /><Langs languages={r.languages} /></section>}
+      {r.summary && <section className="mt-5"><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+      <section className="mt-5"><SH title={L.experience} color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
+      {r.languages.length > 0 && <section className="mt-5"><SH title={L.languages} color={c.color} /><Langs languages={r.languages} /></section>}
     </Sheet>
   );
 }
@@ -508,7 +511,7 @@ function SplitHeaderLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 10: Minimal line (bold name, thick rule)
    ══════════════════════════════════════ */
-function MinimalLineLayout({ resume: r, config: c }: LP) {
+function MinimalLineLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   function LineSH({ title }: { title: string }) {
     return (
@@ -528,10 +531,10 @@ function MinimalLineLayout({ resume: r, config: c }: LP) {
           <Contact items={contact} color={c.color} />
         </div>
       </header>
-      {r.summary && <section className="mt-5"><LineSH title="Summary" /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-      <section className="mt-5"><LineSH title="Experience" /><Exp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-5"><LineSH title="Education" /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-5"><LineSH title="Skills" /><Skills skills={r.skills} color={c.color} /></section>}
+      {r.summary && <section className="mt-5"><LineSH title={L.summary} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+      <section className="mt-5"><LineSH title={L.experience} /><Exp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-5"><LineSH title={L.education} /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-5"><LineSH title={L.skills} /><Skills skills={r.skills} color={c.color} /></section>}
     </Sheet>
   );
 }
@@ -539,7 +542,7 @@ function MinimalLineLayout({ resume: r, config: c }: LP) {
 /* ══════════════════════════════════════
    LAYOUT 11: Card header (rounded header card with photo)
    ══════════════════════════════════════ */
-function CardHeaderLayout({ resume: r, config: c }: LP) {
+function CardHeaderLayout({ resume: r, config: c, labels: L }: LP) {
   const contact = gc(r);
   const name = fn(r);
   return (
@@ -554,11 +557,11 @@ function CardHeaderLayout({ resume: r, config: c }: LP) {
           </div>
         </div>
       </header>
-      {r.summary && <section className="mt-5"><SH title="Summary" color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
-      <section className="mt-5"><SH title="Experience" color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
-      {r.education.length > 0 && <section className="mt-5"><SH title="Education" color={c.color} /><Edu education={r.education} /></section>}
-      {r.skills.length > 0 && <section className="mt-5"><SH title="Skills" color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
-      {r.languages.length > 0 && <section className="mt-5"><SH title="Languages" color={c.color} /><Langs languages={r.languages} /></section>}
+      {r.summary && <section className="mt-5"><SH title={L.summary} color={c.color} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
+      <section className="mt-5"><SH title={L.experience} color={c.color} /><Exp experiences={r.experiences} color={c.color} /></section>
+      {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
+      {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
+      {r.languages.length > 0 && <section className="mt-5"><SH title={L.languages} color={c.color} /><Langs languages={r.languages} /></section>}
     </div>
   );
 }
@@ -631,7 +634,7 @@ export const PARAMETRIC_CONFIGS: ParametricConfig[] = [
 /* ══════════════════════════════════════
    FACTORY
    ══════════════════════════════════════ */
-export function makeParametric(config: ParametricConfig): ComponentType<{ resume: ResumeData; settings?: SelectedTemplate }> {
+export function makeParametric(config: ParametricConfig): ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }> {
   const layouts: Record<ParametricStyle, React.FC<LP>> = {
     "clean": CleanLayout,
     "sidebar-dark": SidebarDarkLayout,
@@ -646,14 +649,14 @@ export function makeParametric(config: ParametricConfig): ComponentType<{ resume
     "card-header": CardHeaderLayout,
   };
   const Layout = layouts[config.style] || CleanLayout;
-  function Preview({ resume }: { resume: ResumeData }) {
-    return <Layout resume={resume} config={config} />;
+  function Preview({ resume, labels }: { resume: ResumeData; labels?: CvLabels }) {
+    return <Layout resume={resume} config={config} labels={labels || defaultLabels} />;
   }
   Preview.displayName = config.name.replace(/\s/g, "") + "Preview";
   return Preview;
 }
 
-export const parametricTemplates: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate }>> = {};
+export const parametricTemplates: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }>> = {};
 for (const config of PARAMETRIC_CONFIGS) {
   parametricTemplates[config.name] = makeParametric(config);
 }

@@ -86,6 +86,8 @@ export default function CoverLetterPage() {
   const [generatedText, setGeneratedText] = useState("");
   const [exporting, setExporting] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [jobDescription, setJobDescription] = useState("");
+  const [showJobInput, setShowJobInput] = useState(false);
 
   if (status === "loading") {
     return (
@@ -127,12 +129,23 @@ export default function CoverLetterPage() {
     setGenerating(true);
     setGeneratedText("");
 
-    await new Promise((r) => setTimeout(r, 1200));
-
-    setGeneratedText(
-      `Dear ${sampleContent.recipientName},\n\n${sampleContent.body[0]}\n\n${sampleContent.body[1]}\n\n${sampleContent.body[2]}\n\nSincerely,\n${sampleContent.name}`
-    );
-    setGenerating(false);
+    try {
+      const res = await fetch("/api/ai/resume-helper", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "generate_cover_letter",
+          targetRole: sampleContent.role,
+          jobDescription: jobDescription.trim() || undefined,
+        }),
+      });
+      const data = (await res.json()) as { resultText?: string };
+      setGeneratedText(data.resultText || "Cover letter generation failed. Please try again.");
+    } catch {
+      setGeneratedText("An error occurred. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
   }
 
   async function exportPdf() {
@@ -186,6 +199,44 @@ export default function CoverLetterPage() {
             </span>
           </div>
         </header>
+
+        {/* Job Description Input */}
+        <div className="mb-10 rounded-2xl border border-outline/30 bg-surface-soft p-6">
+          <button
+            className="flex w-full items-center justify-between text-left"
+            onClick={() => setShowJobInput(!showJobInput)}
+            type="button"
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Icon name="work" />
+              </span>
+              <div>
+                <p className="text-sm font-bold text-ink">Paste a job description for a tailored cover letter</p>
+                <p className="mt-0.5 text-xs text-muted">
+                  {jobDescription.trim() ? "Job description added — your cover letter will be tailored to it" : "Optional — AI will match your experience to the job requirements"}
+                </p>
+              </div>
+            </div>
+            <Icon name={showJobInput ? "close" : "add"} className="text-muted" />
+          </button>
+          {showJobInput && (
+            <div className="mt-5">
+              <textarea
+                className="field min-h-[140px] resize-none text-sm"
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the full job description here — include job title, requirements, responsibilities, and company info for best results..."
+                value={jobDescription}
+              />
+              {jobDescription.trim() && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-success">
+                  <Icon name="check" className="text-sm" />
+                  <span className="font-semibold">Job description will be used to tailor your cover letter</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => (

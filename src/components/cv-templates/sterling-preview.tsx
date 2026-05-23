@@ -1,7 +1,11 @@
-import type { ResumeData } from "@/types/resume";
+import type { ResumeData, SelectedTemplate } from "@/types/resume";
+import type { CvLabels } from "@/lib/cv-labels";
 import { formatDateRange, getFullName } from "./sample-data";
 
-export function SterlingPreview({ resume }: { resume: ResumeData }) {
+const defaultLabels: CvLabels = { summary: "Summary", experience: "Experience", education: "Education", skills: "Skills", languages: "Languages", references: "References", profile: "Profile", contact: "Contact", present: "Present" };
+
+export function SterlingPreview({ resume, labels }: { resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }) {
+  const L = labels || defaultLabels;
   const fullName = getFullName(resume) || "Your Name";
   const contact = [resume.email, resume.phone, resume.location, resume.website].filter(Boolean);
 
@@ -26,12 +30,12 @@ export function SterlingPreview({ resume }: { resume: ResumeData }) {
       </header>
 
       {resume.summary && (
-        <Section title="Profile">
+        <Section title={L.profile}>
           <p className="text-[10.5px] leading-[1.7] text-[#1f2937]">{resume.summary}</p>
         </Section>
       )}
 
-      <Section title="Professional Experience">
+      <Section title={L.experience}>
         {resume.experiences.length === 0 ? (
           <p className="text-[10.5px] italic text-[#94a3b8]">Experience entries will appear here.</p>
         ) : (
@@ -60,7 +64,7 @@ export function SterlingPreview({ resume }: { resume: ResumeData }) {
       </Section>
 
       {resume.education.length > 0 && (
-        <Section title="Education">
+        <Section title={L.education}>
           <div className="space-y-2">
             {resume.education.map((edu) => (
               <div key={edu.id}>
@@ -79,7 +83,7 @@ export function SterlingPreview({ resume }: { resume: ResumeData }) {
       )}
 
       {resume.skills.length > 0 && (
-        <Section title="Competencies">
+        <Section title={L.skills}>
           <p className="text-[10.5px] leading-[1.7] text-[#1f2937]">{resume.skills.join("  ·  ")}</p>
         </Section>
       )}

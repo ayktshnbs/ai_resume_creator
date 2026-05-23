@@ -308,38 +308,182 @@ function mockExtract(text: string): Partial<ResumeData> {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   const result: Partial<ResumeData> = {};
 
+  // --- Contact info ---
   const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
   if (emailMatch) result.email = emailMatch[0];
 
-  const phoneMatch = text.match(/\+?[\d\s().-]{7,}/);
+  const phoneMatch = text.match(/\+?[\d\s().-]{7,15}/);
   if (phoneMatch) result.phone = phoneMatch[0].trim();
 
-  const urlMatch = text.match(/https?:\/\/[^\s,]+/);
+  const urlMatch = text.match(/(?:https?:\/\/|www\.)[^\s,)]+/);
   if (urlMatch) result.website = urlMatch[0];
 
-  if (lines.length > 0 && !lines[0].includes("@")) {
-    const nameParts = lines[0].split(/\s+/);
-    if (nameParts.length >= 2 && nameParts[0].length < 30) {
+  // --- Name (first non-contact line) ---
+  for (const line of lines.slice(0, 3)) {
+    if (line.includes("@") || /^[\d+(\s]/.test(line) || /https?:/.test(line)) continue;
+    const nameParts = line.split(/\s+/).filter((p) => p.length > 0 && p.length < 30);
+    if (nameParts.length >= 2 && nameParts.length <= 5) {
       result.firstName = nameParts[0];
       result.lastName = nameParts.slice(1).join(" ");
+      break;
     }
   }
 
-  if (lines.length > 1 && lines[1].length < 80 && !lines[1].includes("@")) {
-    result.title = lines[1];
+  // --- Detect sections by header patterns ---
+  type Section = "title" | "summary" | "experience" | "education" | "skills" | "languages" | "unknown";
+  const sectionHeaders: { pattern: RegExp; section: Section }[] = [
+    { pattern: /^(professional\s+)?summary|^profile|^about(\s+me)?|^objective/i, section: "summary" },
+    { pattern: /^(work\s+)?experience|^employment|^career|^professional\s+history|^iş\s+deneyim/i, section: "experience" },
+    { pattern: /^education|^academic|^eğitim|^qualifications/i, section: "education" },
+    { pattern: /^(technical\s+|core\s+)?skills?|^competenc|^technologies|^tech\s+stack|^beceriler|^areas?\s+of\s+expertise/i, section: "skills" },
+    { pattern: /^languages?|^diller/i, section: "languages" },
+  ];
+
+  const datePattern = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|present|current|ongoing|devam|halen|\d{4})\b/i;
+
+  // Gather lines per section
+  const sectionLines: Record<Section, string[]> = { title: [], summary: [], experience: [], education: [], skills: [], languages: [], unknown: [] };
+  let currentSection: Section = "unknown";
+  let headerCount = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    let matched = false;
+    for (const { pattern, section } of sectionHeaders) {
+      if (pattern.test(line) && line.length < 60) {
+        currentSection = section;
+        matched = true;
+        headerCount++;
+        break;
+      }
+    }
+    if (!matched) {
+      sectionLines[currentSection].push(line);
+    }
   }
 
-  const skills: string[] = [];
-  let inSkills = false;
-  for (const line of lines) {
-    if (/^skills?\b/i.test(line)) { inSkills = true; continue; }
-    if (/^(experience|education|summary|profile|work|projects)/i.test(line)) { inSkills = false; continue; }
-    if (inSkills) {
-      const items = line.split(/[,;|•·]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 40);
+  // --- Title (second non-contact line in header area or first short line) ---
+  const headerLines = sectionLines.unknown.slice(0, 5);
+  for (const line of headerLines) {
+    if (line === `${result.firstName} ${result.lastName}`) continue;
+    if (line.includes("@") || /^\+?\d/.test(line) || /https?:/.test(line)) continue;
+    if (line.length > 5 && line.length < 80) {
+      result.title = line;
+      break;
+    }
+  }
+
+  // --- Summary ---
+  if (sectionLines.summary.length > 0) {
+    result.summary = sectionLines.summary.join(" ").slice(0, 600);
+  }
+
+  // --- Skills ---
+  if (sectionLines.skills.length > 0) {
+    const skills: string[] = [];
+    for (const line of sectionLines.skills) {
+      const items = line.split(/[,;|•·—–\-]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 50);
       skills.push(...items);
     }
+    if (skills.length > 0) result.skills = [...new Set(skills)];
   }
-  if (skills.length > 0) result.skills = skills;
+
+  // --- Languages ---
+  if (sectionLines.languages.length > 0) {
+    const langs: string[] = [];
+    for (const line of sectionLines.languages) {
+      const items = line.split(/[,;|•·—–\-]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 40);
+      langs.push(...items);
+    }
+    if (langs.length > 0) result.languages = [...new Set(langs)];
+  }
+
+  // --- Experience: group by date-containing lines ---
+  if (sectionLines.experience.length > 0) {
+    const experiences: { id: string; role: string; company: string; location: string; startDate: string; endDate: string; current: boolean; bullets: string[] }[] = [];
+    let current: typeof experiences[0] | null = null;
+
+    for (const line of sectionLines.experience) {
+      const hasDate = datePattern.test(line);
+      const isShort = line.length < 90;
+      const looksLikeHeader = (hasDate && isShort) || (!line.startsWith("•") && !line.startsWith("-") && !line.startsWith("–") && isShort && line.length > 3 && /[A-ZÇĞİÖŞÜ]/.test(line[0]));
+
+      if (looksLikeHeader && (!current || current.bullets.length > 0 || hasDate)) {
+        // Parse dates from the line
+        const dateStr = line.match(/(\w+\.?\s+\d{4}|\d{4})\s*[-–—to]+\s*(\w+\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)/i);
+        const yearOnly = line.match(/\b(20\d{2}|19\d{2})\s*[-–—]\s*(20\d{2}|19\d{2}|present|current)/i);
+
+        if (current) experiences.push(current);
+        current = {
+          id: `exp_${experiences.length + 1}`,
+          role: "",
+          company: "",
+          location: "",
+          startDate: dateStr?.[1] || yearOnly?.[1] || "",
+          endDate: dateStr?.[2] || yearOnly?.[2] || "",
+          current: /present|current|ongoing|devam|halen/i.test(line),
+          bullets: []
+        };
+
+        // Separate role/company from dates
+        const cleanLine = line.replace(/\s*[-–—|·]\s*(\w+\.?\s+\d{4}|\d{4}).*/i, "").trim();
+        const parts = cleanLine.split(/\s*[-–—|·,@]\s*/);
+        if (parts.length >= 2) {
+          current.role = parts[0].trim();
+          current.company = parts[1].trim();
+          if (parts.length >= 3) current.location = parts[2].trim();
+        } else if (cleanLine.length > 0) {
+          current.role = cleanLine;
+        }
+      } else if (current) {
+        // If previous line was a header with no company yet, this might be the company
+        if (!current.company && current.bullets.length === 0 && line.length < 80 && !line.startsWith("•") && !line.startsWith("-")) {
+          current.company = line.replace(/\s*[-–—|·]\s*$/, "").trim();
+        } else {
+          const bullet = line.replace(/^[•\-–—*]\s*/, "").trim();
+          if (bullet.length > 3) current.bullets.push(bullet);
+        }
+      }
+    }
+    if (current) experiences.push(current);
+    if (experiences.length > 0) result.experiences = experiences;
+  }
+
+  // --- Education ---
+  if (sectionLines.education.length > 0) {
+    const education: { id: string; school: string; degree: string; location: string; startDate: string; endDate: string }[] = [];
+    let current: typeof education[0] | null = null;
+
+    for (const line of sectionLines.education) {
+      const hasDate = datePattern.test(line);
+      const isShort = line.length < 120;
+
+      if (isShort && /[A-ZÇĞİÖŞÜ]/.test(line[0]) && !line.startsWith("•") && !line.startsWith("-")) {
+        const dateStr = line.match(/(\d{4})\s*[-–—]\s*(\d{4}|present|current|devam)/i);
+
+        if (current && (hasDate || current.degree)) {
+          education.push(current);
+          current = null;
+        }
+        if (!current) {
+          current = { id: `edu_${education.length + 1}`, school: "", degree: "", location: "", startDate: dateStr?.[1] || "", endDate: dateStr?.[2] || "" };
+        }
+
+        const cleanLine = line.replace(/\s*[-–—|]\s*\d{4}.*/i, "").trim();
+        if (!current.school) {
+          current.school = cleanLine;
+        } else if (!current.degree) {
+          current.degree = cleanLine;
+        }
+      } else if (current && line.length < 100) {
+        if (!current.degree) {
+          current.degree = line.replace(/^[•\-–—*]\s*/, "").trim();
+        }
+      }
+    }
+    if (current) education.push(current);
+    if (education.length > 0) result.education = education;
+  }
 
   return result;
 }

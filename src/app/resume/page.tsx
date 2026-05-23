@@ -297,11 +297,18 @@ export default function ResumeBuilderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "extract_from_reference", text }),
       });
-      const data = (await response.json()) as { resumeData?: Partial<ResumeData> };
-      if (data.resumeData) {
-        const extracted = extractResumeObject(data.resumeData);
+      const data = (await response.json()) as Record<string, unknown>;
+      console.log("[Apply] Raw API response:", JSON.stringify(data, null, 2));
+      const resumePayload = data.resumeData as Partial<ResumeData> | undefined;
+      if (resumePayload) {
+        const extracted = extractResumeObject(resumePayload);
+        console.log("[Apply] Extracted object:", JSON.stringify(extracted, null, 2));
         if (extracted) {
-          setResume((current) => mergeImportedResume(current, extracted));
+          setResume((current) => {
+            const merged = mergeImportedResume(current, extracted);
+            console.log("[Apply] Merged result:", JSON.stringify({ firstName: merged.firstName, lastName: merged.lastName, title: merged.title, expCount: merged.experiences.length, eduCount: merged.education.length, skillCount: merged.skills.length }, null, 2));
+            return merged;
+          });
           setApplyMessage({ refId: ref.id, text: "Data extracted and applied to resume!", ok: true });
         } else {
           setApplyMessage({ refId: ref.id, text: "Could not extract structured resume data.", ok: false });

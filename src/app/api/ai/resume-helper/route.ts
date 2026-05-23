@@ -30,8 +30,9 @@ type RequestBody = {
 const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
 
 export async function POST(request: Request) {
+  let body: RequestBody | null = null;
   try {
-    const body = (await request.json()) as RequestBody;
+    body = (await request.json()) as RequestBody;
     const action = body.action;
 
     if (!action) {
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
     const effectiveKey = body.userApiKey || process.env.OPENAI_API_KEY;
 
     if (!effectiveKey) {
+      console.log("[AI] No API key configured, using mock response");
       return NextResponse.json(mockResponse(action, body));
     }
 
@@ -63,7 +65,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ resultText: output });
   } catch (error) {
-    console.error("[AI] API call failed:", error);
+    console.error("[AI] API call failed, falling back to mock:", error instanceof Error ? error.message : error);
+    // Fall back to mock response so the feature still works
+    if (body?.action) {
+      return NextResponse.json(mockResponse(body.action, body));
+    }
     const message = error instanceof Error ? error.message : "Unknown AI error.";
     return NextResponse.json({ error: message }, { status: 500 });
   }

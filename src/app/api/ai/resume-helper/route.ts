@@ -316,8 +316,13 @@ function mockExtract(text: string): Partial<ResumeData> {
   const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
   if (emailMatch) result.email = emailMatch[0];
 
-  const phoneMatch = text.match(/\+?[\d\s().-]{7,15}/);
-  if (phoneMatch) result.phone = phoneMatch[0].trim();
+  const phoneMatch = text.match(/\(?\+?\d[\d\s().-]{6,15}\d/);
+  if (phoneMatch) {
+    let phone = phoneMatch[0].trim();
+    // Fix unbalanced parentheses
+    if (phone.includes(")") && !phone.includes("(")) phone = "(" + phone;
+    result.phone = phone;
+  }
 
   const urlMatch = text.match(/(?:https?:\/\/|www\.)[^\s,)]+/);
   if (urlMatch) result.website = urlMatch[0];
@@ -336,7 +341,7 @@ function mockExtract(text: string): Partial<ResumeData> {
   // --- Detect sections by header patterns ---
   type Section = "title" | "summary" | "experience" | "education" | "skills" | "languages" | "unknown";
   const sectionHeaders: { pattern: RegExp; section: Section }[] = [
-    { pattern: /^(professional\s+)?summary|^profile|^about(\s+me)?|^objective|^özet|^profil/i, section: "summary" },
+    { pattern: /^(professional\s+)?summary|^profile|^about\s*me|^about$|^objective|^özet|^profil|^personal\s+(statement|profile)/i, section: "summary" },
     { pattern: /^(work\s+)?experience|^employment|^career|^professional\s+(history|experience)|^iş\s+deneyim|^deneyim|^work\s+history|^relevant\s+experience/i, section: "experience" },
     { pattern: /^education|^academic|^eğitim|^qualifications|^certific/i, section: "education" },
     { pattern: /^(technical\s+|core\s+)?skills?|^competenc|^technologies|^tech\s*\.?\s*stack|^beceriler|^areas?\s+of\s+expertise|^tools?\s*(and|&)|^expertise/i, section: "skills" },
@@ -392,7 +397,14 @@ function mockExtract(text: string): Partial<ResumeData> {
 
   // --- Summary ---
   if (sectionLines.summary.length > 0) {
-    result.summary = sectionLines.summary.join(" ").slice(0, 600);
+    // Filter out lines that look like section headers that leaked in
+    const summaryText = sectionLines.summary
+      .filter((l) => l.length > 15 || !/^[A-Z\s]{3,}$/.test(l))
+      .join(" ")
+      .replace(/\s+[A-Z]{4,}$/g, "") // Remove trailing all-caps fragment (section header bleed)
+      .trim()
+      .slice(0, 600);
+    if (summaryText.length > 10) result.summary = summaryText;
   }
 
   // --- Skills ---
@@ -415,90 +427,166 @@ function mockExtract(text: string): Partial<ResumeData> {
     if (langs.length > 0) result.languages = [...new Set(langs)];
   }
 
-  // --- Experience: group by date-containing lines ---
+  // --- Experience: smarter parsing ---
   if (sectionLines.experience.length > 0) {
-    const experiences: { id: string; role: string; company: string; location: string; startDate: string; endDate: string; current: boolean; bullets: string[] }[] = [];
-    let current: typeof experiences[0] | null = null;
+    type ExpEntry = { id: string; role: string; company: string; location: string; startDate: string; endDate: string; current: boolean; bullets: string[] };
+    const experiences: ExpEntry[] = [];
+    let cur: ExpEntry | null = null;
+
+    // Detect if a line is a bullet (starts with number, bullet char, or dash)
+    const isBulletLine = (l: string) => /^[\d]+[\s.)]+/.test(l) || /^[•\-–—*▪►◦‣]\s*/.test(l);
+    // Strip bullet prefix
+    const cleanBullet = (l: string) => l.replace(/^[\d]+[\s.)]+/, "").replace(/^[•\-–—*▪►◦‣]\s*/, "").trim();
+    // Extract date range from a line
+    const extractDates = (l: string) => {
+      // "Jun 2022 - Dec 2025" or "2018 - 2020" or "(Jun 2022 – Present)"
+      const m = l.match(/\(?\s*(\w{3,9}\.?\s+\d{4}|\d{4})\s*[-–—]+\s*(\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i);
+      if (m) return { start: m[1], end: m[2], isCurrent: /present|current|ongoing|devam|halen/i.test(m[2]) };
+      // Single year in parens: "(2019)"
+      const y = l.match(/\((\d{4})\)/);
+      if (y) return { start: y[1], end: "", isCurrent: false };
+      return null;
+    };
+    // Strip date portion from line
+    const stripDates = (l: string) =>
+      l.replace(/\(?\s*\w{3,9}\.?\s+\d{4}\s*[-–—]+\s*(?:\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "")
+       .replace(/\(\d{4}\)/, "")
+       .replace(/\s{2,}/g, " ").trim();
 
     for (const line of sectionLines.experience) {
-      const hasDate = datePattern.test(line);
-      const isShort = line.length < 90;
-      const looksLikeHeader = (hasDate && isShort) || (!line.startsWith("•") && !line.startsWith("-") && !line.startsWith("–") && isShort && line.length > 3 && /[A-ZÇĞİÖŞÜ]/.test(line[0]));
+      // Skip empty / very short
+      if (line.length < 3) continue;
 
-      if (looksLikeHeader && (!current || current.bullets.length > 0 || hasDate)) {
-        // Parse dates from the line
-        const dateStr = line.match(/(\w+\.?\s+\d{4}|\d{4})\s*[-–—to]+\s*(\w+\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)/i);
-        const yearOnly = line.match(/\b(20\d{2}|19\d{2})\s*[-–—]\s*(20\d{2}|19\d{2}|present|current)/i);
+      // If it's a bullet, add to current entry
+      if (isBulletLine(line) && cur) {
+        const b = cleanBullet(line);
+        if (b.length > 3) cur.bullets.push(b);
+        continue;
+      }
 
-        if (current) experiences.push(current);
-        current = {
+      // Check for date in line — likely a header line (company or role with date)
+      const dates = extractDates(line);
+      const hasDate = dates !== null;
+      const isShort = line.length < 100;
+
+      if (hasDate && isShort) {
+        const cleaned = stripDates(line).replace(/[|·]/g, " ").replace(/\s{2,}/g, " ").trim();
+
+        if (!cur || cur.bullets.length > 0 || cur.company) {
+          // Start new entry — this line is likely "COMPANY (dates)"
+          if (cur) experiences.push(cur);
+          cur = {
+            id: `exp_${experiences.length + 1}`,
+            role: "",
+            company: cleaned || "",
+            location: "",
+            startDate: dates.start,
+            endDate: dates.end,
+            current: dates.isCurrent,
+            bullets: []
+          };
+        } else {
+          // cur exists but has no company yet — this line might be the role+date
+          // and the previous line was the company
+          cur.startDate = dates.start;
+          cur.endDate = dates.end;
+          cur.current = dates.isCurrent;
+          if (!cur.role && cleaned) cur.role = cleaned;
+        }
+        continue;
+      }
+
+      // Non-bullet, no-date line
+      if (isShort && cur && !isBulletLine(line)) {
+        // Try to fill role or company
+        if (!cur.role) {
+          cur.role = line;
+        } else if (!cur.company) {
+          cur.company = line;
+        } else if (!cur.location && line.length < 50) {
+          cur.location = line;
+        } else {
+          // Treat as a bullet without marker
+          if (line.length > 10) cur.bullets.push(line);
+        }
+        continue;
+      }
+
+      // Long line without a date and no current entry — might be a standalone title
+      if (!cur && isShort && /[A-ZÇĞİÖŞÜa-z]/.test(line[0])) {
+        cur = {
           id: `exp_${experiences.length + 1}`,
           role: "",
-          company: "",
+          company: line,
           location: "",
-          startDate: dateStr?.[1] || yearOnly?.[1] || "",
-          endDate: dateStr?.[2] || yearOnly?.[2] || "",
-          current: /present|current|ongoing|devam|halen/i.test(line),
+          startDate: "",
+          endDate: "",
+          current: false,
           bullets: []
         };
-
-        // Separate role/company from dates
-        const cleanLine = line.replace(/\s*[-–—|·]\s*(\w+\.?\s+\d{4}|\d{4}).*/i, "").trim();
-        const parts = cleanLine.split(/\s*[-–—|·,@]\s*/);
-        if (parts.length >= 2) {
-          current.role = parts[0].trim();
-          current.company = parts[1].trim();
-          if (parts.length >= 3) current.location = parts[2].trim();
-        } else if (cleanLine.length > 0) {
-          current.role = cleanLine;
-        }
-      } else if (current) {
-        // If previous line was a header with no company yet, this might be the company
-        if (!current.company && current.bullets.length === 0 && line.length < 80 && !line.startsWith("•") && !line.startsWith("-")) {
-          current.company = line.replace(/\s*[-–—|·]\s*$/, "").trim();
-        } else {
-          const bullet = line.replace(/^[•\-–—*]\s*/, "").trim();
-          if (bullet.length > 3) current.bullets.push(bullet);
-        }
+      } else if (cur) {
+        // Fallback: treat as bullet
+        const b = cleanBullet(line);
+        if (b.length > 3) cur.bullets.push(b);
       }
     }
-    if (current) experiences.push(current);
+    if (cur) experiences.push(cur);
+
+    // Post-process: if role looks like company and vice versa, swap
+    for (const exp of experiences) {
+      // If role is ALL CAPS and company is mixed case, swap (company names are often all-caps in CVs)
+      if (exp.role && exp.company && exp.role === exp.role.toUpperCase() && exp.company !== exp.company.toUpperCase()) {
+        const tmp = exp.role;
+        exp.role = exp.company;
+        exp.company = tmp;
+      }
+      // If company is empty but role has content, keep as is
+      // Clean trailing/leading punctuation
+      exp.role = exp.role.replace(/^[,;|·\s]+|[,;|·\s]+$/g, "").trim();
+      exp.company = exp.company.replace(/^[,;|·\s]+|[,;|·\s]+$/g, "").trim();
+    }
+
     if (experiences.length > 0) result.experiences = experiences;
   }
 
   // --- Education ---
   if (sectionLines.education.length > 0) {
-    const education: { id: string; school: string; degree: string; location: string; startDate: string; endDate: string }[] = [];
-    let current: typeof education[0] | null = null;
+    type EduEntry = { id: string; school: string; degree: string; location: string; startDate: string; endDate: string };
+    const education: EduEntry[] = [];
+    let cur: EduEntry | null = null;
+
+    const extractEduDates = (l: string) => {
+      const m = l.match(/\(?\s*(\d{4})\s*[-–—]+\s*(\d{4}|present|current|devam|halen)\s*\)?/i);
+      if (m) return { start: m[1], end: m[2] };
+      const y = l.match(/\((\d{4})\)/);
+      if (y) return { start: y[1], end: "" };
+      return null;
+    };
+    const stripEduDates = (l: string) =>
+      l.replace(/\(?\s*\d{4}\s*[-–—]+\s*(?:\d{4}|present|current|devam|halen)\s*\)?/i, "")
+       .replace(/\(\d{4}\)/, "")
+       .replace(/\s{2,}/g, " ").trim();
 
     for (const line of sectionLines.education) {
-      const hasDate = datePattern.test(line);
+      if (line.length < 3) continue;
+      const dates = extractEduDates(line);
       const isShort = line.length < 120;
+      const cleaned = dates ? stripEduDates(line) : line;
 
-      if (isShort && /[A-ZÇĞİÖŞÜ]/.test(line[0]) && !line.startsWith("•") && !line.startsWith("-")) {
-        const dateStr = line.match(/(\d{4})\s*[-–—]\s*(\d{4}|present|current|devam)/i);
-
-        if (current && (hasDate || current.degree)) {
-          education.push(current);
-          current = null;
-        }
-        if (!current) {
-          current = { id: `edu_${education.length + 1}`, school: "", degree: "", location: "", startDate: dateStr?.[1] || "", endDate: dateStr?.[2] || "" };
-        }
-
-        const cleanLine = line.replace(/\s*[-–—|]\s*\d{4}.*/i, "").trim();
-        if (!current.school) {
-          current.school = cleanLine;
-        } else if (!current.degree) {
-          current.degree = cleanLine;
-        }
-      } else if (current && line.length < 100) {
-        if (!current.degree) {
-          current.degree = line.replace(/^[•\-–—*]\s*/, "").trim();
+      if (dates && isShort) {
+        if (cur) education.push(cur);
+        cur = { id: `edu_${education.length + 1}`, school: cleaned || "", degree: "", location: "", startDate: dates.start, endDate: dates.end };
+      } else if (isShort && /[A-ZÇĞİÖŞÜa-z]/.test(line[0]) && !line.startsWith("•") && !line.startsWith("-")) {
+        if (!cur) {
+          cur = { id: `edu_${education.length + 1}`, school: cleaned, degree: "", location: "", startDate: "", endDate: "" };
+        } else if (!cur.degree) {
+          cur.degree = cleaned;
+        } else if (!cur.location && cleaned.length < 50) {
+          cur.location = cleaned;
         }
       }
     }
-    if (current) education.push(current);
+    if (cur) education.push(cur);
     if (education.length > 0) result.education = education;
   }
 

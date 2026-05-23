@@ -54,6 +54,7 @@ export async function POST(request: Request) {
     });
 
     const output = response.output_text?.trim() || "";
+    console.log("[AI] Raw output length:", output.length, "preview:", output.slice(0, 300));
     const parsed = parseJson(output);
 
     if (parsed) {
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ resultText: output });
   } catch (error) {
+    console.error("[AI] API call failed:", error);
     const message = error instanceof Error ? error.message : "Unknown AI error.";
     return NextResponse.json({ error: message }, { status: 500 });
   }

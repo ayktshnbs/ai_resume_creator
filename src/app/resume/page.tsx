@@ -297,10 +297,26 @@ export default function ResumeBuilderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "extract_from_reference", text }),
       });
+      if (!response.ok) {
+        const errBody = await response.text();
+        console.error("[Apply] API error:", response.status, errBody);
+        setApplyMessage({ refId: ref.id, text: `API error (${response.status}). Check console for details.`, ok: false });
+        setApplyingRefId(null);
+        return;
+      }
       const data = (await response.json()) as Record<string, unknown>;
       console.log("[Apply] Raw API response:", JSON.stringify(data, null, 2));
-      const resumePayload = data.resumeData as Partial<ResumeData> | undefined;
-      if (resumePayload) {
+
+      // The AI might return the resume data at top level or nested under resumeData
+      const resumePayload = (data.resumeData ?? data) as Partial<ResumeData> | undefined;
+      const hasFields = resumePayload && (
+        typeof resumePayload.firstName === "string" ||
+        typeof resumePayload.email === "string" ||
+        Array.isArray(resumePayload.experiences) ||
+        Array.isArray(resumePayload.skills)
+      );
+
+      if (hasFields) {
         const extracted = extractResumeObject(resumePayload);
         console.log("[Apply] Extracted object:", JSON.stringify(extracted, null, 2));
         if (extracted) {
@@ -313,10 +329,31 @@ export default function ResumeBuilderPage() {
         } else {
           setApplyMessage({ refId: ref.id, text: "Could not extract structured resume data.", ok: false });
         }
+      } else if (data.error) {
+        console.error("[Apply] Server error:", data.error);
+        setApplyMessage({ refId: ref.id, text: `Error: ${String(data.error).slice(0, 100)}`, ok: false });
+      } else if (data.resultText) {
+        console.log("[Apply] Got resultText instead of resumeData:", String(data.resultText).slice(0, 200));
+        // AI returned raw text instead of JSON — try to parse it
+        try {
+          const parsed = JSON.parse(String(data.resultText));
+          const payload = parsed.resumeData || parsed;
+          const extracted = extractResumeObject(payload);
+          if (extracted) {
+            setResume((current) => mergeImportedResume(current, extracted));
+            setApplyMessage({ refId: ref.id, text: "Data extracted and applied to resume!", ok: true });
+          } else {
+            setApplyMessage({ refId: ref.id, text: "AI returned data but couldn't parse it.", ok: false });
+          }
+        } catch {
+          setApplyMessage({ refId: ref.id, text: "AI returned text instead of structured data.", ok: false });
+        }
       } else {
-        setApplyMessage({ refId: ref.id, text: "No resume data found in this file.", ok: false });
+        console.warn("[Apply] Unexpected response shape:", Object.keys(data));
+        setApplyMessage({ refId: ref.id, text: "No resume data found. Check console.", ok: false });
       }
-    } catch {
+    } catch (err) {
+      console.error("[Apply] Fetch error:", err);
       setApplyMessage({ refId: ref.id, text: "Extraction failed. Please try again.", ok: false });
     } finally {
       setApplyingRefId(null);

@@ -339,7 +339,7 @@ function mockExtract(text: string): Partial<ResumeData> {
   for (const line of lines.slice(0, 5)) {
     if (line.includes("@") || /^[\d+(\s]/.test(line) || /https?:/.test(line)) continue;
     if (/^(address|email|phone|gender|date of birth|nationality|location)/i.test(line)) continue;
-    if (/^ /.test(line)) continue; // null byte prefix
+    if (line.charCodeAt(0) < 32) continue; // control char prefix
     const nameParts = line.split(/\s+/).filter((p) => p.length > 0 && p.length < 30);
     if (nameParts.length >= 2 && nameParts.length <= 5) {
       result.firstName = nameParts[0];
@@ -410,8 +410,8 @@ function mockExtract(text: string): Partial<ResumeData> {
     if (line.includes("@") || /^\+?\d/.test(line) || /https?:/.test(line)) continue;
     // Skip personal info lines (address, gender, nationality, date of birth, etc.)
     if (/address|gender|male|female|nationality|date of birth|doğum|cinsiyet|uyruk|adres|sokak|mah\.|no:|email|phone/i.test(line)) continue;
-    // Skip null byte lines
-    if (/^ /.test(line) || /^\s*$/.test(line)) continue;
+    // Skip lines with control characters or whitespace-only
+    if (line.charCodeAt(0) < 32 || /^\s*$/.test(line)) continue;
     if (line.length > 5 && line.length < 80) {
       result.title = line;
       break;
@@ -482,29 +482,35 @@ function mockExtract(text: string): Partial<ResumeData> {
     // Strip bullet prefix
     const cleanBullet = (l: string) => l.replace(/^[\d]+[\s.)]+/, "").replace(/^[•\-–—*▪►◦‣◦]\s*/, "").trim();
 
+    // Normalize all dash-like characters to regular hyphen for easier matching
+    const normDash = (s: string) => s.replace(/[‐-―−�]/g, "-");
+
     // Extract date range — supports multiple formats:
     // "Jun 2022 - Dec 2025", "2018 - 2020", "[ 01/12/2016 – 01/07/2017 ]", "[13-06-2022 - CURRENT"
     const extractDates = (l: string) => {
-      // Europass bracket format: [ DD/MM/YYYY – DD/MM/YYYY ] or [DD-MM-YYYY - CURRENT]
-      const euro = l.match(/\[?\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4})\s*[-–—]+\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i);
+      const n = normDash(l);
+      // Europass bracket format: [ DD/MM/YYYY - DD/MM/YYYY ] or [DD-MM-YYYY - CURRENT]
+      const euro = n.match(/\[?\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4})\s*-+\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i);
       if (euro) {
         return { start: euro[1], end: euro[2], isCurrent: /present|current|ongoing|devam|halen/i.test(euro[2]) };
       }
       // Standard: "Jun 2022 - Dec 2025" or "2018 - 2020"
-      const std = l.match(/\(?\s*(\w{3,9}\.?\s+\d{4}|\d{4})\s*[-–—]+\s*(\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i);
+      const std = n.match(/\(?\s*(\w{3,9}\.?\s+\d{4}|\d{4})\s*-+\s*(\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i);
       if (std) return { start: std[1], end: std[2], isCurrent: /present|current|ongoing|devam|halen/i.test(std[2]) };
       // Single year in parens: "(2019)"
-      const y = l.match(/\((\d{4})\)/);
+      const y = n.match(/\((\d{4})\)/);
       if (y) return { start: y[1], end: "", isCurrent: false };
       return null;
     };
 
     // Strip date portion from line (all formats)
-    const stripDates = (l: string) =>
-      l.replace(/\[?\s*\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}\s*[-–—]+\s*(?:\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i, "")
-       .replace(/\(?\s*\w{3,9}\.?\s+\d{4}\s*[-–—]+\s*(?:\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "")
-       .replace(/\(\d{4}\)/, "")
-       .replace(/\s{2,}/g, " ").trim();
+    const stripDates = (l: string) => {
+      let s = normDash(l);
+      s = s.replace(/\[?\s*\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}\s*-+\s*(?:\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i, "");
+      s = s.replace(/\(?\s*\w{3,9}\.?\s+\d{4}\s*-+\s*(?:\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "");
+      s = s.replace(/\(\d{4}\)/, "");
+      return s.replace(/\s{2,}/g, " ").trim();
+    };
 
     for (const line of sectionLines.experience) {
       // Skip empty / very short

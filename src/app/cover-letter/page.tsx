@@ -90,6 +90,7 @@ export default function CoverLetterPage() {
   const [generatedText, setGeneratedText] = useState("");
   const [exporting, setExporting] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [showJobInput, setShowJobInput] = useState(false);
 
@@ -110,13 +111,33 @@ export default function CoverLetterPage() {
     if (resume.phone) setUserPhone(resume.phone);
   }, [uid]);
 
+  function getGuestCoverLetterCount(): number {
+    if (typeof window === "undefined") return 0;
+    try {
+      return parseInt(localStorage.getItem("ai-cv-builder.guest-cl-count") || "0", 10);
+    } catch { return 0; }
+  }
+
+  function incrementGuestCoverLetterCount() {
+    if (typeof window === "undefined") return;
+    try {
+      const c = getGuestCoverLetterCount();
+      localStorage.setItem("ai-cv-builder.guest-cl-count", String(c + 1));
+    } catch {}
+  }
+
   async function generateCoverLetter(templateId: string) {
+    // Guest: 1 free, then sign-in modal
     if (!session) {
-      window.location.href = "/signin";
-      return;
+      const guestCount = getGuestCoverLetterCount();
+      if (guestCount >= 1) {
+        setShowSignIn(true);
+        return;
+      }
+      incrementGuestCoverLetterCount();
     }
-    // Free users get 1 cover letter; Pro users get unlimited
-    if (!isPro && coverLetterCount >= 1) {
+    // Logged-in non-Pro: 1 free, then upgrade modal
+    if (session && !isPro && coverLetterCount >= 1) {
       setShowUpgrade(true);
       return;
     }
@@ -344,6 +365,43 @@ export default function CoverLetterPage() {
           </div>
         )}
 
+        {/* Guest sign-in modal */}
+        {showSignIn && !session && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 backdrop-blur-sm" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }} onClick={() => setShowSignIn(false)}>
+            <div className="mx-4 w-full max-w-md rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-6 flex justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon name="sparkle" className="text-[32px]" />
+                </div>
+              </div>
+              <h2 className="mb-2 text-center text-xl font-bold text-ink">{t("gate.signInCover")}</h2>
+              <p className="mb-6 text-center text-sm leading-6 text-muted">
+                {t("gate.freeTrialUsedCL")}
+              </p>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/signin"
+                  className="flex items-center justify-center rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+                >
+                  {t("nav.signIn")}
+                </Link>
+                <Link
+                  href="/signup"
+                  className="flex items-center justify-center rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+                >
+                  {t("auth.signUpBtn")}
+                </Link>
+                <button
+                  onClick={() => setShowSignIn(false)}
+                  className="mt-1 text-sm text-muted transition hover:text-ink"
+                >
+                  {t("common.close")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {(generating || generatedText) && (
           <div ref={resultRef} className="mt-12 scroll-mt-8 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
             <div className="mb-6 flex items-center justify-between gap-4">
@@ -357,23 +415,14 @@ export default function CoverLetterPage() {
                   >
                     {t("coverLetter.copyText")}
                   </button>
-                  {isPro ? (
-                    <button
-                      className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
-                      disabled={exporting}
-                      onClick={() => void exportPdf()}
-                      type="button"
-                    >
-                      {exporting ? t("resume.exporting") : t("resume.exportPdf")}
-                    </button>
-                  ) : (
-                    <PaymentButton
-                      price="6"
-                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background"
-                    >
-                      {t("resume.exportPdfPro")}
-                    </PaymentButton>
-                  )}
+                  <button
+                    className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
+                    disabled={exporting}
+                    onClick={() => void exportPdf()}
+                    type="button"
+                  >
+                    {exporting ? t("resume.exporting") : t("resume.exportPdf")}
+                  </button>
                 </div>
               )}
             </div>

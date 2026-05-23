@@ -6,7 +6,9 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
+import { PaymentButton } from "@/components/payment-button";
 import { useI18n } from "@/lib/i18n";
+import { useProStatus } from "@/lib/use-pro-status";
 import { saveSelectedTemplate } from "@/lib/resume-storage";
 import type { SelectedTemplate, TemplateLayout } from "@/types/resume";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
@@ -96,21 +98,57 @@ function TemplateCardPreview({ templateName }: { templateName: string }) {
 export default function TemplatesPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { isPro, resumeCount } = useProStatus();
   const { t } = useI18n();
   const [filter, setFilter] = useState("All");
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
 
-  function useTemplate(template: TemplateCard) {
-    if (!session) {
-      router.push("/signin");
-      return;
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  function getGuestResumeCount(): number {
+    if (typeof window === "undefined") return 0;
+    try {
+      return parseInt(localStorage.getItem("ai-cv-builder.guest-resume-count") || "0", 10);
+    } catch {
+      return 0;
     }
+  }
+
+  function incrementGuestResumeCount() {
+    if (typeof window === "undefined") return;
+    try {
+      const current = getGuestResumeCount();
+      localStorage.setItem("ai-cv-builder.guest-resume-count", String(current + 1));
+    } catch {}
+  }
+
+  function useTemplate(template: TemplateCard) {
     saveSelectedTemplate({
       name: template.name,
       layout: template.layout,
       accent: template.accent,
       themeColor: template.themeColor,
     });
+
+    // Guest: 1 free, then sign-in modal
+    if (!session) {
+      const guestCount = getGuestResumeCount();
+      if (guestCount >= 1) {
+        setShowSignInModal(true);
+        return;
+      }
+      incrementGuestResumeCount();
+      router.push("/resume");
+      return;
+    }
+
+    // Logged-in non-Pro: 1 free, then upgrade modal
+    if (!isPro && resumeCount >= 1) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     router.push("/resume");
   }
 
@@ -198,6 +236,86 @@ export default function TemplatesPage() {
             </article>
           ))}
         </div>
+
+        {/* Guest sign-in modal */}
+        {showSignInModal && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 backdrop-blur-sm" onClick={() => setShowSignInModal(false)}>
+            <div className="mx-4 w-full max-w-md rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-6 flex justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon name="resume" className="text-[32px]" />
+                </div>
+              </div>
+              <h2 className="mb-2 text-center text-xl font-bold text-ink">{t("gate.signInResume")}</h2>
+              <p className="mb-6 text-center text-sm leading-6 text-muted">
+                {t("gate.freeTrialUsed")}
+              </p>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/signin"
+                  className="flex items-center justify-center rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+                >
+                  {t("nav.signIn")}
+                </Link>
+                <Link
+                  href="/signup"
+                  className="flex items-center justify-center rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+                >
+                  {t("auth.signUpBtn")}
+                </Link>
+                <button
+                  onClick={() => setShowSignInModal(false)}
+                  className="mt-1 text-sm text-muted transition hover:text-ink"
+                >
+                  {t("common.close")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Logged-in non-Pro upgrade modal */}
+        {showUpgradeModal && !isPro && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 backdrop-blur-sm" onClick={() => setShowUpgradeModal(false)}>
+            <div className="mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-surface p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg">
+                  <Icon name="sparkle" className="text-[28px] text-white" />
+                </div>
+                <button
+                  className="rounded-xl p-2 text-muted hover:bg-surface-soft"
+                  onClick={() => setShowUpgradeModal(false)}
+                  type="button"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <h3 className="text-2xl font-bold text-ink">{t("gate.upgradeResume")}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{t("gate.upgradeResumeDesc")}</p>
+              <ul className="mt-5 space-y-2.5 text-sm text-muted">
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> {t("templates.badge")}</li>
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> AI-powered resume optimization</li>
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> Unlimited resumes & cover letters</li>
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> High-res PDF export</li>
+              </ul>
+              <div className="mt-8 flex gap-3">
+                <button
+                  className="flex-1 rounded-xl border border-outline/50 bg-surface px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+                  onClick={() => setShowUpgradeModal(false)}
+                  type="button"
+                >
+                  {t("common.maybeLater")}
+                </button>
+                <PaymentButton
+                  price="6"
+                  className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white"
+                >
+                  {t("coverLetter.upgradePro")}
+                </PaymentButton>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );

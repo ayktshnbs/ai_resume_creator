@@ -85,9 +85,9 @@ export default function ResumeBuilderPage() {
   const resumeDocId = useRef<string | null>(null);
 
   const uid = session?.user?.id;
+  const isGuest = !session?.user;
 
   useEffect(() => {
-    if (!uid) return;
     setResume(loadResumeData(uid));
     setTemplate(loadSelectedTemplate());
     setLoaded(true);
@@ -105,7 +105,7 @@ export default function ResumeBuilderPage() {
   }, [session, loaded]);
 
   useEffect(() => {
-    if (loaded && uid) {
+    if (loaded) {
       saveResumeData(resume, uid);
     }
   }, [loaded, resume, uid]);
@@ -123,23 +123,7 @@ export default function ResumeBuilderPage() {
     );
   }
 
-  if (!session) {
-    return (
-      <AppShell active="resume">
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="resume" className="text-[32px]" />
-          </div>
-          <h1 className="text-2xl font-bold text-ink">{t("gate.signInResume")}</h1>
-          <p className="max-w-md text-muted">{t("gate.signInResumeDesc")}</p>
-          <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
+  /* Guest users can build 1 free resume — no login gate */
 
   function updateResume<K extends keyof ResumeData>(key: K, value: ResumeData[K]) {
     setResume((current) => ({ ...current, [key]: value }));
@@ -1036,23 +1020,14 @@ export default function ResumeBuilderPage() {
               <button className="btn-spring rounded-xl border border-outline/50 bg-surface px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
                 {t("resume.share")}
               </button>
-              {isPro ? (
-                <button
-                  className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
-                  disabled={exporting}
-                  onClick={() => void exportPdf()}
-                  type="button"
-                >
-                  {exporting ? t("resume.exporting") : t("resume.exportPdf")}
-                </button>
-              ) : (
-                <PaymentButton
-                  price="6"
-                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background"
-                >
-                  {t("resume.exportPdfPro")}
-                </PaymentButton>
-              )}
+              <button
+                className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
+                disabled={exporting}
+                onClick={() => void exportPdf()}
+                type="button"
+              >
+                {exporting ? t("resume.exporting") : t("resume.exportPdf")}
+              </button>
             </div>
           </div>
           {shareMessage && <p className="mx-auto mb-4 w-full max-w-4xl rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">{shareMessage}</p>}

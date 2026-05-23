@@ -18,6 +18,7 @@ import {
 } from "@/lib/resume-storage";
 import { useAutoSaveToDb, loadFromDb } from "@/lib/use-db-sync";
 import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
+import { cvLangList, cvLangNames, cvLangFlags, type CvLang } from "@/lib/cv-labels";
 
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 
@@ -857,10 +858,25 @@ export default function ResumeBuilderPage() {
 
         <section className="hidden h-full flex-1 flex-col bg-surface-soft p-6 md:flex lg:p-8">
           <div className="glass-panel z-10 mx-auto mb-6 flex w-full max-w-4xl items-center justify-between rounded-2xl px-5 py-3 shadow-ambient">
-            <Link className="flex items-center gap-2 text-sm font-bold text-muted hover:text-primary" href="/templates">
-              <Icon name="palette" />
-              {template.name}
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link className="flex items-center gap-2 text-sm font-bold text-muted hover:text-primary" href="/templates">
+                <Icon name="palette" />
+                {template.name}
+              </Link>
+              <div className="h-5 w-px bg-outline/30" />
+              <select
+                className="rounded-lg border border-outline/40 bg-surface px-2 py-1.5 text-xs font-bold text-ink cursor-pointer hover:border-primary/50 focus:border-primary focus:outline-none"
+                value={template.cvLanguage || "en"}
+                onChange={(e) => setTemplate((t) => ({ ...t, cvLanguage: e.target.value }))}
+                title="CV output language"
+              >
+                {cvLangList.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {cvLangFlags[lang]} {cvLangNames[lang]}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="flex gap-3">
               <button className="rounded-xl border border-outline/50 bg-surface px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
                 {t("resume.share")}

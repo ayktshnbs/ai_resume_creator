@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
@@ -12,6 +13,13 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const { isPro, resumeCount, coverLetterCount, loaded } = useProStatus();
   const { t } = useI18n();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (loaded && !localStorage.getItem("onboarding_seen")) {
+      setShowOnboarding(true);
+    }
+  }, [loaded]);
 
   if (status === "loading") {
     return (
@@ -203,8 +211,112 @@ export default function DashboardPage() {
             ))}
           </div>
         </section>
+        {/* Onboarding Modal */}
+        {showOnboarding && (
+          <OnboardingModal onClose={() => {
+            setShowOnboarding(false);
+            localStorage.setItem("onboarding_seen", "1");
+          }} />
+        )}
       </div>
     </AppShell>
+  );
+}
+
+function OnboardingModal({ onClose }: { onClose: () => void }) {
+  const [step, setStep] = useState(0);
+
+  const steps = [
+    {
+      icon: "sparkle" as IconName,
+      title: "Welcome to CV with AI",
+      description: "Build professional, ATS-optimized resumes and cover letters in minutes. Our AI helps you craft content that gets noticed by recruiters.",
+      gradient: "from-primary to-secondary",
+    },
+    {
+      icon: "edit" as IconName,
+      title: "Create Your Resume",
+      description: "Choose from 50+ templates, fill in your details, and let AI optimize your content for maximum impact. Import from LinkedIn to save time.",
+      gradient: "from-secondary to-primary",
+    },
+    {
+      icon: "subject" as IconName,
+      title: "Generate Cover Letters",
+      description: "Paste a job description and our AI generates a tailored cover letter that matches your experience to the role requirements.",
+      gradient: "from-primary to-success",
+    },
+    {
+      icon: "analytics" as IconName,
+      title: "ATS Score & Export",
+      description: "Get your resume scored for ATS compatibility, then export high-resolution PDFs ready to submit. You're all set to land your dream job!",
+      gradient: "from-success to-primary",
+    },
+  ];
+
+  const current = steps[step];
+  const isLast = step === steps.length - 1;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-surface shadow-2xl">
+        {/* Progress dots */}
+        <div className="flex justify-center gap-2 px-8 pt-8">
+          {steps.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i === step ? "w-8 bg-primary" : i < step ? "w-4 bg-primary/40" : "w-4 bg-outline/30"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="px-8 pb-4 pt-8 text-center">
+          <div className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${current.gradient} shadow-lg`}>
+            <Icon name={current.icon} className="text-[36px] text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-ink">{current.title}</h2>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
+            {current.description}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3 px-8 pb-8 pt-4">
+          {step > 0 ? (
+            <button
+              className="flex-1 rounded-xl border border-outline/50 bg-surface px-5 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+              onClick={() => setStep(step - 1)}
+              type="button"
+            >
+              Back
+            </button>
+          ) : (
+            <button
+              className="flex-1 rounded-xl border border-outline/50 bg-surface px-5 py-3 text-sm font-bold text-muted transition hover:bg-surface-soft"
+              onClick={onClose}
+              type="button"
+            >
+              Skip
+            </button>
+          )}
+          <button
+            className="flex-1 primary-gradient rounded-xl px-5 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105"
+            onClick={() => {
+              if (isLast) {
+                onClose();
+              } else {
+                setStep(step + 1);
+              }
+            }}
+            type="button"
+          >
+            {isLast ? "Get Started" : "Next"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

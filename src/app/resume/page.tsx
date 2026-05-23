@@ -74,6 +74,7 @@ export default function ResumeBuilderPage() {
   const [referenceMessage, setReferenceMessage] = useState("");
   const [extracting, setExtracting] = useState(false);
   const [applyingRefId, setApplyingRefId] = useState<string | null>(null);
+  const [applyMessage, setApplyMessage] = useState<{ refId: string; text: string; ok: boolean } | null>(null);
   const [linkedInModal, setLinkedInModal] = useState(false);
   const [linkedInText, setLinkedInText] = useState("");
   const [linkedInLoading, setLinkedInLoading] = useState(false);
@@ -261,7 +262,7 @@ export default function ResumeBuilderPage() {
 
   async function applyReference(ref: ResumeReference) {
     setApplyingRefId(ref.id);
-    setReferenceMessage("");
+    setApplyMessage(null);
 
     let text = ref.text || "";
 
@@ -271,7 +272,6 @@ export default function ResumeBuilderPage() {
         const blob = await fetch(ref.dataUrl).then((r) => r.blob());
         const file = new File([blob], ref.name, { type: "application/pdf" });
         text = await extractPdfText(file);
-        // Update the reference with extracted text for future use
         if (text.trim().length > 0) {
           setResume((current) => ({
             ...current,
@@ -286,7 +286,7 @@ export default function ResumeBuilderPage() {
     }
 
     if (text.trim().length < 20) {
-      setReferenceMessage("Could not extract enough text from this file. Try uploading a text-based PDF or TXT file.");
+      setApplyMessage({ refId: ref.id, text: "No text could be extracted. Please remove and re-upload the file.", ok: false });
       setApplyingRefId(null);
       return;
     }
@@ -302,15 +302,15 @@ export default function ResumeBuilderPage() {
         const extracted = extractResumeObject(data.resumeData);
         if (extracted) {
           setResume((current) => mergeImportedResume(current, extracted));
-          setReferenceMessage("Resume data extracted and applied to the form successfully!");
+          setApplyMessage({ refId: ref.id, text: "Data extracted and applied to resume!", ok: true });
         } else {
-          setReferenceMessage("Could not extract structured resume data from this file.");
+          setApplyMessage({ refId: ref.id, text: "Could not extract structured resume data.", ok: false });
         }
       } else {
-        setReferenceMessage("No resume data could be extracted from this file.");
+        setApplyMessage({ refId: ref.id, text: "No resume data found in this file.", ok: false });
       }
     } catch {
-      setReferenceMessage("Extraction failed. Please try again.");
+      setApplyMessage({ refId: ref.id, text: "Extraction failed. Please try again.", ok: false });
     } finally {
       setApplyingRefId(null);
     }
@@ -958,6 +958,7 @@ export default function ResumeBuilderPage() {
                       onDelete={() => removeReference(reference.id)}
                       onApply={() => void applyReference(reference)}
                       applying={applyingRefId === reference.id}
+                      message={applyMessage?.refId === reference.id ? applyMessage : null}
                     />
                   ))
                 }
@@ -1396,7 +1397,7 @@ function HelperList({ items, title }: { items: string[]; title: string }) {
   );
 }
 
-function ReferenceCard({ reference, onDelete, onApply, applying }: { reference: ResumeReference; onDelete: () => void; onApply?: () => void; applying?: boolean }) {
+function ReferenceCard({ reference, onDelete, onApply, applying, message }: { reference: ResumeReference; onDelete: () => void; onApply?: () => void; applying?: boolean; message?: { text: string; ok: boolean } | null }) {
   const label = getReferenceLabel(reference.kind);
   const canApply = reference.kind !== "image";
 
@@ -1439,6 +1440,13 @@ function ReferenceCard({ reference, onDelete, onApply, applying }: { reference: 
           </button>
         </div>
       </div>
+
+      {message && (
+        <div className={`mt-3 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${message.ok ? "border border-success/20 bg-success/10 text-success" : "border border-error/20 bg-error/10 text-error"}`}>
+          <Icon name={message.ok ? "check" : "close"} className="text-[16px]" />
+          {message.text}
+        </div>
+      )}
 
       {reference.kind === "image" && reference.dataUrl && (
         <img alt={reference.name} className="mt-4 h-40 w-full rounded-xl border border-outline/30 object-contain bg-surface-soft" src={reference.dataUrl} />

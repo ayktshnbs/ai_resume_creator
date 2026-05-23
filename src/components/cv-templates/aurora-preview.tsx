@@ -58,6 +58,21 @@ export function AuroraPreview({ resume }: { resume: ResumeData }) {
               </div>
             </ColSection>
           )}
+
+          {resume.languages.length > 0 && (
+            <ColSection title="Languages">
+              <div className="flex flex-wrap gap-1.5">
+                {resume.languages.map((lang) => (
+                  <span
+                    key={lang}
+                    className="rounded-md border border-[#e2e8f0] bg-white px-2 py-1 text-[9.5px] font-semibold text-[#1e293b]"
+                  >
+                    {lang}
+                  </span>
+                ))}
+              </div>
+            </ColSection>
+          )}
         </aside>
 
         {/* Right column - experience */}

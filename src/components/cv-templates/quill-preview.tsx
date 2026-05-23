@@ -107,6 +107,14 @@ export function QuillPreview({ resume }: { resume: ResumeData }) {
           </p>
         </Section>
       )}
+
+      {resume.languages.length > 0 && (
+        <Section title="Languages">
+          <p className="text-justify text-[11px] leading-[1.7] text-[#1f2937]">
+            {resume.languages.join("  ·  ")}
+          </p>
+        </Section>
+      )}
     </div>
   );
 }

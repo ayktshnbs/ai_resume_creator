@@ -101,6 +101,14 @@ export function MeridianPreview({ resume, labels }: { resume: ResumeData; settin
           </p>
         </Section>
       )}
+
+      {resume.languages.length > 0 && (
+        <Section title={L.languages}>
+          <p className="text-[10.5px] leading-[1.75] text-[#1f2937]">
+            {resume.languages.join("  ·  ")}
+          </p>
+        </Section>
+      )}
     </div>
   );
 }

@@ -87,6 +87,12 @@ export function SterlingPreview({ resume, labels }: { resume: ResumeData; settin
           <p className="text-[10.5px] leading-[1.7] text-[#1f2937]">{resume.skills.join("  ·  ")}</p>
         </Section>
       )}
+
+      {resume.languages.length > 0 && (
+        <Section title={L.languages}>
+          <p className="text-[10.5px] leading-[1.7] text-[#1f2937]">{resume.languages.join("  ·  ")}</p>
+        </Section>
+      )}
     </div>
   );
 }

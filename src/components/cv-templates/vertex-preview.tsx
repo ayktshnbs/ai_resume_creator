@@ -116,6 +116,23 @@ export function VertexPreview({ resume }: { resume: ResumeData }) {
               </ul>
             </section>
           )}
+
+          {resume.languages.length > 0 && (
+            <section className="mt-5">
+              <SectionTitle>Languages</SectionTitle>
+              <ul className="space-y-0.5">
+                {resume.languages.map((lang) => (
+                  <li
+                    key={lang}
+                    className="relative pl-3 text-[9.5px] leading-[1.45] text-[#1e293b]"
+                  >
+                    <span className="absolute left-0 top-[7px] h-[3px] w-[3px] rounded-full bg-[#0d9488]" />
+                    {lang}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </aside>
       </div>
     </div>

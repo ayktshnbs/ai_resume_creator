@@ -100,6 +100,12 @@ export function BeaconPreview({ resume }: { resume: ResumeData }) {
               </div>
             </Section>
           )}
+
+          {resume.languages.length > 0 && (
+            <Section title="Languages" small>
+              <p className="text-[10.5px] leading-[1.7] text-[#1f2937]">{resume.languages.join("  ·  ")}</p>
+            </Section>
+          )}
         </div>
       </div>
     </div>

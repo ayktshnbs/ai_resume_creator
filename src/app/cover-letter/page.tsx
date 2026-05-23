@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
 import { PaymentButton } from "@/components/payment-button";
+import { loadResumeData } from "@/lib/resume-storage";
 import Link from "next/link";
 
 type CoverLetterTemplate = {
@@ -91,6 +92,23 @@ export default function CoverLetterPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [showJobInput, setShowJobInput] = useState(false);
 
+  // Load user's resume data to populate cover letter fields
+  const uid = session?.user?.id;
+  const [userName, setUserName] = useState(sampleContent.name);
+  const [userTitle, setUserTitle] = useState(sampleContent.title);
+  const [userEmail, setUserEmail] = useState(sampleContent.email);
+  const [userPhone, setUserPhone] = useState(sampleContent.phone);
+
+  useEffect(() => {
+    if (!uid) return;
+    const resume = loadResumeData(uid);
+    const fullName = `${resume.firstName} ${resume.lastName}`.trim();
+    if (fullName) setUserName(fullName);
+    if (resume.title) setUserTitle(resume.title);
+    if (resume.email) setUserEmail(resume.email);
+    if (resume.phone) setUserPhone(resume.phone);
+  }, [uid]);
+
   if (status === "loading") {
     return (
       <AppShell active="cover-letter">
@@ -166,7 +184,7 @@ export default function CoverLetterPage() {
       const pdfH = (canvas.height * pdfW) / canvas.width;
       const doc = new jsPDF("p", "mm", "a4");
       doc.addImage(imgData, "PNG", 0, 0, pdfW, Math.min(pdfH, 297));
-      doc.save(`Cover_Letter_${sampleContent.name.replace(/\s+/g, "_")}.pdf`);
+      doc.save(`Cover_Letter_${userName.replace(/\s+/g, "_")}.pdf`);
     } catch {
       alert("PDF export failed. Try using your browser's Print function instead.");
     } finally {
@@ -261,10 +279,10 @@ export default function CoverLetterPage() {
                   >
                     <LetterLayout
                       template={template}
-                      name={sampleContent.name}
-                      title={sampleContent.title}
-                      email={sampleContent.email}
-                      phone={sampleContent.phone}
+                      name={userName}
+                      title={userTitle}
+                      email={userEmail}
+                      phone={userPhone}
                       date={sampleContent.date}
                       recipientName={sampleContent.recipientName}
                       recipientTitle={sampleContent.recipientTitle}
@@ -393,15 +411,15 @@ export default function CoverLetterPage() {
               <div ref={letterRef} className="mx-auto max-w-[595px]">
                 <LetterLayout
                   template={templates.find((t) => t.id === selected) || templates[0]}
-                  name={sampleContent.name}
-                  title={sampleContent.title}
-                  email={sampleContent.email}
-                  phone={sampleContent.phone}
-                  date={sampleContent.date}
+                  name={userName}
+                  title={userTitle}
+                  email={userEmail}
+                  phone={userPhone}
+                  date={new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                   recipientName={sampleContent.recipientName}
                   recipientTitle={sampleContent.recipientTitle}
                   company={sampleContent.company}
-                  body={sampleContent.body}
+                  body={generatedText ? generatedText.split("\n\n").filter(Boolean) : sampleContent.body}
                 />
               </div>
             )}

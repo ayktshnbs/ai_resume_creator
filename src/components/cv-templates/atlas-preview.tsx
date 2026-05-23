@@ -74,6 +74,16 @@ export function AtlasPreview({ resume }: { resume: ResumeData }) {
             </div>
           </SidebarSection>
         )}
+
+        {resume.languages.length > 0 && (
+          <SidebarSection title="Languages">
+            <div className="space-y-1.5">
+              {resume.languages.map((lang) => (
+                <p key={lang} className="text-[10px] text-white">{lang}</p>
+              ))}
+            </div>
+          </SidebarSection>
+        )}
       </aside>
 
       {/* Main */}

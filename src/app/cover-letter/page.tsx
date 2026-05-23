@@ -84,6 +84,7 @@ export default function CoverLetterPage() {
   const { t } = useI18n();
   const { isPro } = useProStatus();
   const letterRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
@@ -146,6 +147,7 @@ export default function CoverLetterPage() {
     setSelected(templateId);
     setGenerating(true);
     setGeneratedText("");
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
 
     try {
       const res = await fetch("/api/ai/resume-helper", {
@@ -366,7 +368,7 @@ export default function CoverLetterPage() {
         )}
 
         {(generating || generatedText) && (
-          <div className="mt-12 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
+          <div ref={resultRef} className="mt-12 scroll-mt-8 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
             <div className="mb-6 flex items-center justify-between gap-4">
               <h2 className="section-title text-2xl font-bold text-ink">{t("coverLetter.generated")}</h2>
               {generatedText && (

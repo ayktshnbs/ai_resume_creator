@@ -1639,9 +1639,8 @@ async function extractPdfText(file: File): Promise<string> {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       const items = content.items.filter(
-        (item): item is { str: string; transform: number[] } =>
-          "str" in item && "transform" in item
-      );
+        (item) => "str" in item && "transform" in item
+      ) as Array<{ str: string; transform: number[] }>;
       // Group text items into lines using Y-position
       const lineTexts: string[] = [];
       let lastY: number | null = null;

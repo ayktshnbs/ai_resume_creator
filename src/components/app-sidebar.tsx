@@ -116,7 +116,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
 
       <header className="sticky top-0 z-20 border-b border-outline bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between">
-          <Link href="/" className="font-label text-lg font-bold text-ink">
+          <Link href={session ? "/dashboard" : "/"} className="font-label text-lg font-bold text-ink">
             CV with AI
           </Link>
           <button
@@ -138,7 +138,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
           <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
           <aside className="absolute left-0 top-0 flex h-full w-72 flex-col border-r border-outline bg-surface px-5 py-6 shadow-2xl">
             <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-3" onClick={() => setDrawerOpen(false)}>
+              <Link href={session ? "/dashboard" : "/"} className="flex items-center gap-3" onClick={() => setDrawerOpen(false)}>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-ambient">
                   <Icon name="sparkle" className="text-[22px]" />
                 </div>

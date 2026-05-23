@@ -101,6 +101,10 @@ export default function TemplatesPage() {
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
 
   function useTemplate(template: TemplateCard) {
+    if (!session) {
+      router.push("/signin");
+      return;
+    }
     saveSelectedTemplate({
       name: template.name,
       layout: template.layout,
@@ -108,34 +112,6 @@ export default function TemplatesPage() {
       themeColor: template.themeColor,
     });
     router.push("/resume");
-  }
-
-  if (status === "loading") {
-    return (
-      <AppShell active="templates">
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      </AppShell>
-    );
-  }
-
-  if (!session) {
-    return (
-      <AppShell active="templates">
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="template" className="text-[32px]" />
-          </div>
-          <h1 className="text-2xl font-bold text-ink">{t("gate.signInTemplates")}</h1>
-          <p className="max-w-md text-muted">{t("gate.signInTemplatesDesc")}</p>
-          <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
-          </div>
-        </div>
-      </AppShell>
-    );
   }
 
   return (

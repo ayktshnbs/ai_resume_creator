@@ -1447,46 +1447,47 @@ function ReferenceCard({ reference, onDelete, onApply, applying, message }: { re
 
   return (
     <div className="rounded-xl border border-outline/40 bg-surface p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Icon className="text-primary" name={reference.kind === "image" ? "photo" : "document"} />
-            <h3 className="truncate font-bold text-ink">{reference.name}</h3>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon name={reference.kind === "image" ? "photo" : "document"} className="text-[18px]" />
           </div>
-          <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-muted">
-            {label} · {formatFileSize(reference.size)}
-            {reference.imported ? " · imported" : ""}
-          </p>
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-bold text-ink">{reference.name}</h3>
+            <p className="text-xs text-muted">
+              {label} · {formatFileSize(reference.size)}
+              {reference.imported ? " · imported" : ""}
+            </p>
+          </div>
         </div>
-        <div className="flex shrink-0 gap-2">
-          {canApply && onApply && (
-            <button
-              className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
-              onClick={onApply}
-              disabled={applying}
-              type="button"
-            >
-              {applying ? (
-                <>
-                  <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Applying...
-                </>
-              ) : (
-                <>
-                  <Icon name="sparkle" className="text-[14px]" />
-                  Apply to Resume
-                </>
-              )}
-            </button>
-          )}
-          <button className="rounded-xl border border-outline/70 bg-surface-soft px-3 py-2 text-sm font-bold text-ink" onClick={onDelete} type="button">
-            Remove
-          </button>
-        </div>
+        <button className="shrink-0 rounded-lg p-1.5 text-muted transition hover:bg-surface-soft hover:text-error" onClick={onDelete} type="button" title="Remove">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
       </div>
 
+      {canApply && onApply && (
+        <button
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-bold text-primary transition hover:bg-primary/10 disabled:opacity-50"
+          onClick={onApply}
+          disabled={applying}
+          type="button"
+        >
+          {applying ? (
+            <>
+              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              Extracting & applying...
+            </>
+          ) : (
+            <>
+              <Icon name="sparkle" className="text-[14px]" />
+              Apply to Resume
+            </>
+          )}
+        </button>
+      )}
+
       {message && (
-        <div className={`mt-3 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${message.ok ? "border border-success/20 bg-success/10 text-success" : "border border-error/20 bg-error/10 text-error"}`}>
+        <div className={`mt-3 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold ${message.ok ? "border border-success/20 bg-success/10 text-success" : "border border-error/20 bg-error/10 text-error"}`}>
           <Icon name={message.ok ? "check" : "close"} className="text-[16px]" />
           {message.text}
         </div>

@@ -82,7 +82,7 @@ const sampleContent = {
 export default function CoverLetterPage() {
   const { data: session, status } = useSession();
   const { t } = useI18n();
-  const { isPro } = useProStatus();
+  const { isPro, coverLetterCount } = useProStatus();
   const letterRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -110,36 +110,13 @@ export default function CoverLetterPage() {
     if (resume.phone) setUserPhone(resume.phone);
   }, [uid]);
 
-  if (status === "loading") {
-    return (
-      <AppShell active="cover-letter">
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
-      </AppShell>
-    );
-  }
-
-  if (!session) {
-    return (
-      <AppShell active="cover-letter">
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="document" className="text-[32px]" />
-          </div>
-          <h1 className="text-2xl font-bold text-ink">{t("gate.signInCover")}</h1>
-          <p className="max-w-md text-muted">{t("gate.signInCoverDesc")}</p>
-          <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
   async function generateCoverLetter(templateId: string) {
-    if (!isPro) {
+    if (!session) {
+      window.location.href = "/signin";
+      return;
+    }
+    // Free users get 1 cover letter; Pro users get unlimited
+    if (!isPro && coverLetterCount >= 1) {
       setShowUpgrade(true);
       return;
     }
@@ -326,7 +303,7 @@ export default function CoverLetterPage() {
         </div>
 
         {showUpgrade && !isPro && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowUpgrade(false)}>
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }} onClick={() => setShowUpgrade(false)}>
             <div className="mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-surface p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg">

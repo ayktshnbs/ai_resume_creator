@@ -32,8 +32,8 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
 
   return (
     <div className={`min-h-screen text-ink ${fullHeight ? "h-screen overflow-hidden" : ""}`}>
-      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 overflow-y-auto border-r border-outline bg-surface/90 px-5 py-6 shadow-ambient backdrop-blur lg:flex lg:flex-col">
-        <div className="flex-1">
+      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 border-r border-outline bg-surface/90 shadow-ambient backdrop-blur lg:flex lg:flex-col">
+        <div className="flex-1 overflow-y-auto px-5 pt-6">
           <Link href={session ? "/dashboard" : "/"} className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-ambient">
               <Icon name="sparkle" className="text-[22px]" />
@@ -65,7 +65,7 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
           </nav>
         </div>
 
-        <div className="mt-auto space-y-4 pt-6 border-t border-outline/40">
+        <div className="shrink-0 space-y-4 border-t border-outline/40 px-5 py-6">
           <div className="flex gap-2">
             <button
               onClick={toggleTheme}

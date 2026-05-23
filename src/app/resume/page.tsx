@@ -1625,13 +1625,29 @@ async function extractPdfText(file: File): Promise<string> {
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      const text = content.items
-        .filter((item) => "str" in item)
-        .map((item) => (item as { str: string }).str)
-        .join(" ");
-      pages.push(text);
+      const items = content.items.filter(
+        (item): item is { str: string; transform: number[] } =>
+          "str" in item && "transform" in item
+      );
+      // Group text items into lines using Y-position
+      const lineTexts: string[] = [];
+      let lastY: number | null = null;
+      let currentLine = "";
+      for (const item of items) {
+        const y = Math.round(item.transform[5]);
+        if (lastY !== null && Math.abs(y - lastY) > 3) {
+          if (currentLine.trim()) lineTexts.push(currentLine.trim());
+          currentLine = "";
+        }
+        currentLine += (currentLine && !currentLine.endsWith(" ") ? " " : "") + item.str;
+        lastY = y;
+      }
+      if (currentLine.trim()) lineTexts.push(currentLine.trim());
+      pages.push(lineTexts.join("\n"));
     }
-    return pages.join("\n\n");
+    const result = pages.join("\n\n");
+    console.log("[PDF extract] Extracted text preview:", result.slice(0, 500));
+    return result;
   } catch (err) {
     console.error("[PDF extract error]", err);
     return "";

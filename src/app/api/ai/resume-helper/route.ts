@@ -305,7 +305,11 @@ ${name}`
 }
 
 function mockExtract(text: string): Partial<ResumeData> {
+  console.log("[mockExtract] Input text length:", text.length);
+  console.log("[mockExtract] First 1000 chars:", text.slice(0, 1000));
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  console.log("[mockExtract] Total lines:", lines.length);
+  console.log("[mockExtract] First 30 lines:", JSON.stringify(lines.slice(0, 30)));
   const result: Partial<ResumeData> = {};
 
   // --- Contact info ---
@@ -332,10 +336,10 @@ function mockExtract(text: string): Partial<ResumeData> {
   // --- Detect sections by header patterns ---
   type Section = "title" | "summary" | "experience" | "education" | "skills" | "languages" | "unknown";
   const sectionHeaders: { pattern: RegExp; section: Section }[] = [
-    { pattern: /^(professional\s+)?summary|^profile|^about(\s+me)?|^objective/i, section: "summary" },
-    { pattern: /^(work\s+)?experience|^employment|^career|^professional\s+history|^iş\s+deneyim/i, section: "experience" },
-    { pattern: /^education|^academic|^eğitim|^qualifications/i, section: "education" },
-    { pattern: /^(technical\s+|core\s+)?skills?|^competenc|^technologies|^tech\s+stack|^beceriler|^areas?\s+of\s+expertise/i, section: "skills" },
+    { pattern: /^(professional\s+)?summary|^profile|^about(\s+me)?|^objective|^özet|^profil/i, section: "summary" },
+    { pattern: /^(work\s+)?experience|^employment|^career|^professional\s+(history|experience)|^iş\s+deneyim|^deneyim|^work\s+history|^relevant\s+experience/i, section: "experience" },
+    { pattern: /^education|^academic|^eğitim|^qualifications|^certific/i, section: "education" },
+    { pattern: /^(technical\s+|core\s+)?skills?|^competenc|^technologies|^tech\s*\.?\s*stack|^beceriler|^areas?\s+of\s+expertise|^tools?\s*(and|&)|^expertise/i, section: "skills" },
     { pattern: /^languages?|^diller/i, section: "languages" },
   ];
 
@@ -360,6 +364,19 @@ function mockExtract(text: string): Partial<ResumeData> {
     if (!matched) {
       sectionLines[currentSection].push(line);
     }
+  }
+
+  console.log("[mockExtract] Sections detected:", {
+    unknown: sectionLines.unknown.length,
+    summary: sectionLines.summary.length,
+    experience: sectionLines.experience.length,
+    education: sectionLines.education.length,
+    skills: sectionLines.skills.length,
+    languages: sectionLines.languages.length,
+    headerCount
+  });
+  if (sectionLines.experience.length > 0) {
+    console.log("[mockExtract] Experience lines:", JSON.stringify(sectionLines.experience.slice(0, 20)));
   }
 
   // --- Title (second non-contact line in header area or first short line) ---
@@ -485,5 +502,11 @@ function mockExtract(text: string): Partial<ResumeData> {
     if (education.length > 0) result.education = education;
   }
 
+  console.log("[mockExtract] Final result keys:", Object.keys(result));
+  console.log("[mockExtract] Experiences count:", result.experiences?.length ?? 0);
+  console.log("[mockExtract] Education count:", result.education?.length ?? 0);
+  if (result.experiences) {
+    console.log("[mockExtract] Experiences:", JSON.stringify(result.experiences));
+  }
   return result;
 }

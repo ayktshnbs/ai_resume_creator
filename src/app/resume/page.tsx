@@ -260,13 +260,37 @@ export default function ResumeBuilderPage() {
   }
 
   async function applyReference(ref: ResumeReference) {
-    const text = ref.text;
-    if (!text || text.trim().length < 20) {
-      setReferenceMessage("This file doesn't contain enough text to extract resume data.");
-      return;
-    }
     setApplyingRefId(ref.id);
     setReferenceMessage("");
+
+    let text = ref.text || "";
+
+    // If PDF has no text yet (extraction failed earlier), re-extract from dataUrl
+    if (text.trim().length < 20 && ref.kind === "pdf" && ref.dataUrl) {
+      try {
+        const blob = await fetch(ref.dataUrl).then((r) => r.blob());
+        const file = new File([blob], ref.name, { type: "application/pdf" });
+        text = await extractPdfText(file);
+        // Update the reference with extracted text for future use
+        if (text.trim().length > 0) {
+          setResume((current) => ({
+            ...current,
+            references: current.references.map((r) =>
+              r.id === ref.id ? { ...r, text } : r
+            ),
+          }));
+        }
+      } catch {
+        // continue with whatever text we have
+      }
+    }
+
+    if (text.trim().length < 20) {
+      setReferenceMessage("Could not extract enough text from this file. Try uploading a text-based PDF or TXT file.");
+      setApplyingRefId(null);
+      return;
+    }
+
     try {
       const response = await fetch("/api/ai/resume-helper", {
         method: "POST",
@@ -1374,7 +1398,7 @@ function HelperList({ items, title }: { items: string[]; title: string }) {
 
 function ReferenceCard({ reference, onDelete, onApply, applying }: { reference: ResumeReference; onDelete: () => void; onApply?: () => void; applying?: boolean }) {
   const label = getReferenceLabel(reference.kind);
-  const hasText = reference.text && reference.text.trim().length > 20;
+  const canApply = reference.kind !== "image";
 
   return (
     <div className="rounded-xl border border-outline/40 bg-surface p-4">
@@ -1390,7 +1414,7 @@ function ReferenceCard({ reference, onDelete, onApply, applying }: { reference: 
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
-          {hasText && onApply && (
+          {canApply && onApply && (
             <button
               className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
               onClick={onApply}
@@ -1507,6 +1531,10 @@ function extractResumeObject(value: unknown): Partial<ResumeData> | null {
     resume.skills = source.skills.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
   }
 
+  if (Array.isArray(source.languages)) {
+    resume.languages = source.languages.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
+  }
+
   if (Array.isArray(source.experiences)) {
     resume.experiences = source.experiences
       .filter(isRecord)
@@ -1554,6 +1582,7 @@ function mergeImportedResume(current: ResumeData, imported: Partial<ResumeData> 
     website: imported.website?.trim() ? imported.website : current.website,
     summary: imported.summary?.trim() ? imported.summary : current.summary,
     skills: imported.skills && imported.skills.length > 0 ? imported.skills : current.skills,
+    languages: imported.languages && imported.languages.length > 0 ? imported.languages : current.languages,
     experiences: imported.experiences && imported.experiences.length > 0 ? imported.experiences : current.experiences,
     education: imported.education && imported.education.length > 0 ? imported.education : current.education
   };

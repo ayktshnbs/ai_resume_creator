@@ -375,6 +375,15 @@ function mockExtract(text: string): Partial<ResumeData> {
       }
     }
     if (!matched) {
+      // If we're in "languages" section but the line clearly isn't a language,
+      // it means a new section started without a recognized header — push to "unknown"
+      // so it doesn't pollute languages.
+      if (currentSection === "languages") {
+        const looksLikeLang = line.length < 50 && !/\d{4}|city:|country:|activities|responsibilities|managed|handled|coordinated/i.test(line);
+        if (!looksLikeLang) {
+          currentSection = "unknown";
+        }
+      }
       sectionLines[currentSection].push(line);
     }
   }
@@ -427,10 +436,19 @@ function mockExtract(text: string): Partial<ResumeData> {
 
   // --- Languages ---
   if (sectionLines.languages.length > 0) {
+    // Common language names to validate against
+    const knownLangs = /^(english|turkish|german|french|spanish|italian|arabic|russian|chinese|japanese|korean|portuguese|dutch|swedish|norwegian|danish|finnish|polish|czech|greek|hindi|urdu|persian|hebrew|hungarian|romanian|bulgarian|croatian|serbian|slovak|slovenian|ukrainian|indonesian|malay|thai|vietnamese|bengali|swahili|tamil|telugu|marathi|gujarati|punjabi|türkçe|almanca|fransızca|ispanyolca|ingilizce|arapça|rusça|çince|japonca|korece|lehçe|fince|danca)/i;
+    const proficiencyWords = /native|fluent|advanced|intermediate|beginner|basic|proficient|conversational|mother\s*tongue|elementary|a1|a2|b1|b2|c1|c2/i;
+
     const langs: string[] = [];
     for (const line of sectionLines.languages) {
-      const items = line.split(/[,;|•·—–\-]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 40);
-      langs.push(...items);
+      const items = line.split(/[,;|•·—–\-]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 50);
+      for (const item of items) {
+        // Only keep items that look like actual languages or proficiency levels
+        if (knownLangs.test(item) || proficiencyWords.test(item)) {
+          langs.push(item);
+        }
+      }
     }
     if (langs.length > 0) result.languages = [...new Set(langs)];
   }

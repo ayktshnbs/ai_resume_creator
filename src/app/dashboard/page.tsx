@@ -8,6 +8,7 @@ import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
 import { PaymentButton } from "@/components/payment-button";
+import { MagneticButton } from "@/components/magnetic-button";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -60,28 +61,22 @@ export default function DashboardPage() {
         {/* Header */}
         <header className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-medium text-muted">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink md:text-4xl">
+            <h1 className="headline-xl mt-2 text-4xl md:text-5xl">
               Welcome back, {session.user?.name?.split(" ")[0] || "there"}
             </h1>
           </div>
           <div className="flex gap-3">
-            <Link
-              href="/resume"
-              className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105"
-            >
+            <MagneticButton as="a" href="/resume" className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-ambient">
               <Icon name="add" className="text-lg" />
               New Resume
-            </Link>
-            <Link
-              href="/cover-letter"
-              className="flex items-center gap-2 rounded-xl border border-outline/50 bg-surface px-5 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
-            >
+            </MagneticButton>
+            <MagneticButton as="a" href="/cover-letter" className="btn-spring flex items-center gap-2 rounded-xl border border-outline/50 bg-surface px-5 py-3 text-sm font-bold text-ink">
               <Icon name="subject" className="text-lg" />
               Cover Letter
-            </Link>
+            </MagneticButton>
           </div>
         </header>
 
@@ -131,7 +126,7 @@ export default function DashboardPage() {
               </div>
               <PaymentButton
                 price="6"
-                className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-lg transition hover:bg-white/90"
+                className="btn-glow badge-shimmer shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-bold text-primary shadow-lg"
               >
                 Upgrade to Pro — €6/mo
               </PaymentButton>
@@ -160,7 +155,7 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <section>
-          <h2 className="mb-5 text-xl font-bold text-ink">Quick Actions</h2>
+          <h2 className="section-title mb-7 text-2xl font-bold text-ink">Quick Actions</h2>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             <QuickActionCard
               href="/resume"
@@ -191,7 +186,7 @@ export default function DashboardPage() {
 
         {/* Getting Started Tips */}
         <section className="rounded-2xl border border-outline/30 bg-surface-soft p-6 md:p-8">
-          <h2 className="mb-5 text-lg font-bold text-ink">Getting Started</h2>
+          <h2 className="section-title mb-7 text-2xl font-bold text-ink">Getting Started</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { step: "1", title: "Choose a template", desc: "Pick from 50+ modern designs", done: totalDocs > 0 },
@@ -322,13 +317,15 @@ function OnboardingModal({ onClose }: { onClose: () => void }) {
 
 function StatCard({ icon, label, value, sub, color }: { icon: IconName; label: string; value: string; sub: string; color: string }) {
   return (
-    <div className="soft-card rounded-2xl p-5">
+    <div className="soft-card cursor-default rounded-2xl p-5">
       <div className="mb-3 flex items-center justify-between">
-        <Icon name={icon} className={`text-${color} text-xl`} />
-        <span className="text-xs font-medium text-muted">{label}</span>
+        <div className={`icon-bounce flex h-9 w-9 items-center justify-center rounded-xl bg-${color}/10`}>
+          <Icon name={icon} className={`text-${color} text-lg`} />
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted">{label}</span>
       </div>
-      <p className="text-3xl font-extrabold text-ink">{value}</p>
-      <p className="mt-1 text-xs text-muted">{sub}</p>
+      <p className="stat-value text-4xl font-black tracking-tight text-ink">{value}</p>
+      <p className="mt-1.5 text-xs font-medium text-muted">{sub}</p>
     </div>
   );
 }
@@ -337,15 +334,18 @@ function QuickActionCard({ href, icon, title, description, gradient, iconColor }
   return (
     <Link
       href={href}
-      className="soft-card group relative overflow-hidden rounded-2xl p-6 transition hover:-translate-y-1 hover:shadow-panel"
+      className="card-tilt soft-card group relative overflow-hidden rounded-2xl p-6"
     >
-      <div className={`absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br ${gradient} blur-2xl transition group-hover:scale-150`} />
+      <div className={`absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gradient-to-br ${gradient} blur-2xl transition-transform duration-700 group-hover:scale-[2]`} />
       <div className="relative z-10">
-        <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} ${iconColor}`}>
+        <div className={`icon-bounce mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} ${iconColor}`}>
           <Icon name={icon} className="text-xl" />
         </div>
-        <h3 className="text-lg font-bold text-ink">{title}</h3>
+        <h3 className="headline-lg text-xl text-ink">{title}</h3>
         <p className="mt-2 text-sm leading-relaxed text-muted">{description}</p>
+        <span className="link-arrow mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary">
+          Get started <span>→</span>
+        </span>
       </div>
     </Link>
   );

@@ -71,6 +71,44 @@ export default function ResumeBuilderPage() {
   const [skillDraft, setSkillDraft] = useState("");
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
+  const [extracting, setExtracting] = useState(false);
+  const [linkedInModal, setLinkedInModal] = useState(false);
+  const [linkedInText, setLinkedInText] = useState("");
+  const [linkedInLoading, setLinkedInLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [ai, setAi] = useState<AiState>(initialAiState);
+  const [helper, setHelper] = useState<HelperState>(initialHelperState);
+  const [loaded, setLoaded] = useState(false);
+  const resumeDocId = useRef<string | null>(null);
+
+  const uid = session?.user?.id;
+
+  useEffect(() => {
+    if (!uid) return;
+    setResume(loadResumeData(uid));
+    setTemplate(loadSelectedTemplate());
+    setLoaded(true);
+  }, [uid]);
+
+  // Load from DB if logged in (DB data takes priority)
+  useEffect(() => {
+    if (!session?.user || !loaded) return;
+    loadFromDb<ResumeData>("/api/user/resumes").then((result) => {
+      if (result) {
+        resumeDocId.current = result.id;
+        setResume((local) => ({ ...emptyResumeData, ...result.data, references: local.references }));
+      }
+    });
+  }, [session, loaded]);
+
+  useEffect(() => {
+    if (loaded && uid) {
+      saveResumeData(resume, uid);
+    }
+  }, [loaded, resume, uid]);
+
+  // Auto-save to DB when logged in (debounced)
+  useAutoSaveToDb("/api/user/resumes", resume, loaded, resumeDocId);
 
   if (status === "loading") {
     return (
@@ -99,43 +137,6 @@ export default function ResumeBuilderPage() {
       </AppShell>
     );
   }
-  const [extracting, setExtracting] = useState(false);
-  const [linkedInModal, setLinkedInModal] = useState(false);
-  const [linkedInText, setLinkedInText] = useState("");
-  const [linkedInLoading, setLinkedInLoading] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [ai, setAi] = useState<AiState>(initialAiState);
-  const [helper, setHelper] = useState<HelperState>(initialHelperState);
-  const [loaded, setLoaded] = useState(false);
-  const resumeDocId = useRef<string | null>(null);
-
-  const uid = session.user?.id;
-
-  useEffect(() => {
-    setResume(loadResumeData(uid));
-    setTemplate(loadSelectedTemplate());
-    setLoaded(true);
-  }, [uid]);
-
-  // Load from DB if logged in (DB data takes priority)
-  useEffect(() => {
-    if (!session?.user || !loaded) return;
-    loadFromDb<ResumeData>("/api/user/resumes").then((result) => {
-      if (result) {
-        resumeDocId.current = result.id;
-        setResume((local) => ({ ...emptyResumeData, ...result.data, references: local.references }));
-      }
-    });
-  }, [session, loaded]);
-
-  useEffect(() => {
-    if (loaded) {
-      saveResumeData(resume, uid);
-    }
-  }, [loaded, resume, uid]);
-
-  // Auto-save to DB when logged in (debounced)
-  useAutoSaveToDb("/api/user/resumes", resume, loaded, resumeDocId);
 
   function updateResume<K extends keyof ResumeData>(key: K, value: ResumeData[K]) {
     setResume((current) => ({ ...current, [key]: value }));
@@ -572,13 +573,13 @@ export default function ResumeBuilderPage() {
         <section className="h-full w-full overflow-y-auto border-r border-outline/30 bg-surface p-4 md:w-1/2 md:p-8 lg:w-5/12">
           <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-normal text-ink">{t("resume.title")}</h1>
+              <h1 className="headline-xl text-3xl text-ink md:text-4xl">{t("resume.title")}</h1>
               <p className="mt-1 text-sm text-muted">{t("resume.autosave")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {isPro ? (
                 <button
-                  className="primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
+                  className="btn-glow primary-gradient flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient disabled:opacity-60"
                   disabled={ai.full}
                   onClick={improveFullResume}
                   type="button"
@@ -878,12 +879,12 @@ export default function ResumeBuilderPage() {
               </select>
             </div>
             <div className="flex gap-3">
-              <button className="rounded-xl border border-outline/50 bg-surface px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
+              <button className="btn-spring rounded-xl border border-outline/50 bg-surface px-4 py-2 text-sm font-bold text-ink" onClick={shareResume} type="button">
                 {t("resume.share")}
               </button>
               {isPro ? (
                 <button
-                  className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
+                  className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
                   disabled={exporting}
                   onClick={() => void exportPdf()}
                   type="button"
@@ -1035,8 +1036,8 @@ function PhotoSlider({ label, max, min, onChange, value }: { label: string; max:
 function FormSection({ children, icon, title }: { children: ReactNode; icon: IconName; title: string }) {
   return (
     <section className="soft-card rounded-2xl p-5">
-      <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-ink">
-        <Icon className="text-primary" name={icon} />
+      <h2 className="section-title mb-5 flex items-center gap-2 text-xl font-bold text-ink">
+        <Icon className="icon-bounce text-primary" name={icon} />
         {title}
       </h2>
       {children}
@@ -1179,8 +1180,8 @@ function AiHelperPanel({
   return (
     <section className="soft-card rounded-2xl p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-xl font-bold text-ink">
-          <Icon className="text-primary" name="analytics" />
+        <h2 className="section-title flex items-center gap-2 text-xl font-bold text-ink">
+          <Icon className="icon-bounce text-primary" name="analytics" />
           AI Helper
         </h2>
         <span className="rounded-full bg-success/10 px-3 py-1 font-label text-xs font-bold text-success">
@@ -1189,7 +1190,7 @@ function AiHelperPanel({
       </div>
       <div className="grid gap-2 md:grid-cols-3">
         <button
-          className="rounded-xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary disabled:opacity-60"
+          className="btn-glow rounded-xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary disabled:opacity-60"
           disabled={helper.action !== null}
           onClick={onAnalyze}
           type="button"
@@ -1197,7 +1198,7 @@ function AiHelperPanel({
           {isAnalyzing ? "Auditing..." : "Audit Resume"}
         </button>
         <button
-          className="rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
+          className="btn-spring rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
           disabled={helper.action !== null}
           onClick={onSuggestSkills}
           type="button"
@@ -1205,7 +1206,7 @@ function AiHelperPanel({
           {isSuggestingSkills ? "Optimizing..." : "Optimize Competencies"}
         </button>
         <button
-          className="rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
+          className="btn-spring rounded-xl border border-outline/70 bg-surface px-4 py-3 text-sm font-bold text-ink disabled:opacity-60"
           disabled={helper.action !== null}
           onClick={onGenerateCover}
           type="button"

@@ -258,7 +258,7 @@ export default function Home() {
             <a className="hidden rounded-full px-4 py-2 text-sm font-bold text-[#4b5563] transition-all hover:text-[#111827] md:block" href="/signin">
               Sign in
             </a>
-            <a className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:shadow-xl hover:shadow-[#6366f1]/30 hover:brightness-105 active:scale-[0.97] sm:inline-flex" href="/signup">
+            <a className="btn-glow hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 sm:inline-flex" href="/signup">
               Get started free
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
             </a>
@@ -425,14 +425,14 @@ export default function Home() {
             </p>
             <div className="hero-fade-up hero-delay-4 mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                className="primary-gradient group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-center text-base font-bold text-white shadow-panel transition-all hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] hover:brightness-105 active:scale-[0.98]"
+                className="btn-glow primary-gradient group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-center text-base font-bold text-white shadow-panel"
                 href="/resume"
               >
                 Create your resume — it&apos;s free
                 <SvgIcon name="arrow-right" />
               </a>
               <a
-                className="flex items-center justify-center gap-2 rounded-2xl border border-[#e5e7eb] bg-white px-8 py-4 text-center text-base font-bold text-[#111827] transition-all hover:border-primary/40 hover:bg-[#f3f4f6] active:scale-[0.98]"
+                className="btn-spring flex items-center justify-center gap-2 rounded-2xl border border-[#e5e7eb] bg-white px-8 py-4 text-center text-base font-bold text-[#111827]"
                 href="/templates"
               >
                 Browse templates
@@ -468,24 +468,89 @@ export default function Home() {
       {/* All templates showcase — dark background */}
       <LazyTemplateMarquee templates={marqueeTemplates} onSelect={selectTemplate} totalCount={ALL_TEMPLATES.length} />
 
-      {/* Features */}
-      <section className="bg-[#f3f4f6] py-24" id="features">
-        <div className="mx-auto max-w-7xl px-4 md:px-10">
+      {/* Features — Bento grid */}
+      <section className="relative overflow-hidden py-28" id="features">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f8faff] via-[#eef2ff] to-[#f8faff]" />
+        <div className="absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-[#6366f1]/[0.04] blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-[#3b82f6]/[0.05] blur-[100px]" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-10">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Everything you need</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Built for precision and speed.</h2>
-            <p className="mt-4 text-lg text-[#6b7280]">A streamlined workflow from draft to download.</p>
+            <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 px-4 py-1.5">
+              <SvgIcon className="h-3.5 w-3.5 text-[#6366f1]" name="sparkle" />
+              <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-[#6366f1]">Everything you need</span>
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#111827] sm:text-5xl">Built for precision<br className="hidden sm:block" /> and speed.</h2>
+            <p className="mt-5 text-lg leading-relaxed text-[#6b7280]">A streamlined workflow from draft to download — no learning curve.</p>
           </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => (
-              <article className="card-hover group rounded-3xl bg-white p-8 shadow-ambient" key={feature.title}>
-                <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.gradient} transition-transform group-hover:scale-110`}>
-                  <SvgIcon className="h-6 w-6 text-primary" name={feature.icon} />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm lg:col-span-2">
+              <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-[#6366f1]/10 to-[#3b82f6]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+              <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#3b82f6] shadow-lg shadow-[#6366f1]/25 transition-transform group-hover:scale-110 group-hover:rotate-3">
+                  <SvgIcon className="h-7 w-7 text-white" name="sparkle" />
                 </div>
-                <h3 className="text-xl font-bold text-[#111827]">{feature.title}</h3>
-                <p className="mt-4 text-sm leading-relaxed text-[#6b7280]">{feature.text}</p>
-              </article>
-            ))}
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-[#111827]">AI CV Enhancement</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Rewrite weak bullets into professional, ATS-friendly achievements with one click. Our AI analyzes job descriptions and optimizes your content for maximum impact.</p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {["ATS Optimization", "Smart Rewrite", "Keyword Match"].map((tag) => (
+                      <span key={tag} className="rounded-full bg-[#6366f1]/5 px-3 py-1 text-[11px] font-bold text-[#6366f1]">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="relative z-10 mt-6 overflow-hidden rounded-2xl border border-[#e5e7eb]/50 bg-[#f8fafc] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5"><div className="h-2.5 w-2.5 rounded-full bg-[#ef4444]/60" /><div className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]/60" /><div className="h-2.5 w-2.5 rounded-full bg-[#22c55e]/60" /></div>
+                  <div className="h-5 flex-1 rounded bg-[#e5e7eb]/50" />
+                </div>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-xl bg-[#fef2f2] p-3"><p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[#ef4444]">Before</p><p className="text-[11px] leading-relaxed text-[#6b7280]">Managed social media accounts for the company.</p></div>
+                  <div className="rounded-xl bg-[#f0fdf4] p-3"><p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[#16a34a]">After — AI</p><p className="text-[11px] leading-relaxed text-[#111827]">Grew social engagement by 156% across 4 platforms in 6 months.</p></div>
+                </div>
+              </div>
+            </article>
+            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm">
+              <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-gradient-to-br from-[#8b5cf6]/10 to-[#6366f1]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+              <div className="relative z-10">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#6366f1] shadow-lg shadow-[#8b5cf6]/25 transition-transform group-hover:scale-110 group-hover:-rotate-3"><SvgIcon className="h-6 w-6 text-white" name="document" /></div>
+                <h3 className="text-xl font-bold text-[#111827]">Live Template Preview</h3>
+                <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Edit your details while the CV preview updates beside the form in real time. What you see is what you export.</p>
+                <div className="mt-6 flex gap-2">
+                  <div className="flex-1 rounded-xl border border-[#e5e7eb]/50 bg-[#f8fafc] p-3"><div className="space-y-2"><div className="h-2 w-3/4 rounded bg-[#e5e7eb]" /><div className="h-2 w-full rounded bg-[#6366f1]/20" /><div className="h-2 w-2/3 rounded bg-[#e5e7eb]" /></div></div>
+                  <div className="flex items-center text-[#6366f1]"><SvgIcon className="h-4 w-4" name="arrow-right" /></div>
+                  <div className="flex-1 rounded-xl border border-[#6366f1]/20 bg-white p-3 shadow-sm"><div className="space-y-2"><div className="h-2 w-1/2 rounded bg-[#111827]" /><div className="h-1.5 w-full rounded bg-[#e5e7eb]" /><div className="h-1.5 w-4/5 rounded bg-[#e5e7eb]" /><div className="h-1.5 w-3/5 rounded bg-[#e5e7eb]" /></div></div>
+                </div>
+              </div>
+            </article>
+            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm">
+              <div className="absolute -left-16 -bottom-16 h-44 w-44 rounded-full bg-gradient-to-br from-[#10b981]/10 to-[#06b6d4]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+              <div className="relative z-10">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#10b981] to-[#06b6d4] shadow-lg shadow-[#10b981]/25 transition-transform group-hover:scale-110 group-hover:rotate-3"><SvgIcon className="h-6 w-6 text-white" name="cl" /></div>
+                <h3 className="text-xl font-bold text-[#111827]">Cover Letter Generator</h3>
+                <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Generate targeted cover letters from your saved CV data in seconds. Perfectly matched to each job posting.</p>
+                <div className="mt-6 space-y-2">
+                  {["Paste job description", "AI generates draft", "Customize & export"].map((step, i) => (
+                    <div key={step} className="flex items-center gap-3 rounded-xl bg-[#f0fdf4]/80 px-3 py-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#10b981] text-[10px] font-bold text-white">{i + 1}</span><span className="text-xs font-medium text-[#111827]">{step}</span></div>
+                  ))}
+                </div>
+              </div>
+            </article>
+            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm lg:col-span-2">
+              <div className="absolute -left-20 -bottom-20 h-60 w-60 rounded-full bg-gradient-to-br from-[#f59e0b]/10 to-[#f97316]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
+              <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b] to-[#f97316] shadow-lg shadow-[#f59e0b]/25 transition-transform group-hover:scale-110 group-hover:-rotate-3"><SvgIcon className="h-7 w-7 text-white" name="pdf" /></div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-[#111827]">Pixel-perfect PDF Export</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Export polished A4 PDFs that match your chosen template exactly. High-resolution output ready for recruiters and ATS systems.</p>
+                  <div className="mt-5 grid grid-cols-3 gap-3">
+                    {[{ label: "Resolution", value: "300 DPI" },{ label: "Format", value: "A4 PDF" },{ label: "Quality", value: "Print-ready" }].map((stat) => (
+                      <div key={stat.label} className="rounded-xl bg-[#fffbeb]/80 p-3 text-center"><p className="text-lg font-extrabold text-[#f59e0b]">{stat.value}</p><p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6b7280]">{stat.label}</p></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
       </section>
@@ -495,7 +560,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 md:px-10">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">AI Power</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">See the difference AI makes.</h2>
+            <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-[#111827] sm:text-4xl">See the difference AI makes.</h2>
             <p className="mt-4 text-lg text-[#6b7280]">One click transforms weak bullet points into professional, achievement-driven statements.</p>
           </div>
           <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
@@ -547,7 +612,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-12 text-center">
-            <a className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:shadow-xl hover:brightness-105 active:scale-[0.98]" href="/resume">
+            <a className="btn-glow inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25" href="/resume">
               Try AI enhancement free
               <SvgIcon className="h-4 w-4" name="arrow-right" />
             </a>
@@ -556,37 +621,52 @@ export default function Home() {
       </section>
 
       {/* Dashboard preview */}
-      <section className="bg-[#f3f4f6] py-24" id="management">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 md:grid-cols-[1fr_1.5fr] md:px-10">
-          <div className="flex flex-col justify-center">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-[#6b7280]">Management</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Keep your career history in one place.</h2>
-            <p className="mt-6 text-lg leading-relaxed text-[#6b7280]">Save multiple versions of your CV for different roles. Our dashboard makes it easy to manage, update, and export your documents.</p>
-            <div className="mt-10 flex gap-4">
-              <a className="primary-gradient rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-panel" href="/resume">
-                Create new CV
-              </a>
+      <section className="relative overflow-hidden py-28" id="management">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#0f172a]" />
+        <div className="absolute left-0 top-1/4 h-[400px] w-[400px] rounded-full bg-[#6366f1]/10 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-[350px] w-[350px] rounded-full bg-[#3b82f6]/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-10">
+          <div className="grid gap-16 lg:grid-cols-[1fr_1.4fr] lg:items-center">
+            <div>
+              <div className="mb-5 flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5">
+                <SvgIcon className="h-3.5 w-3.5 text-[#818cf8]" name="document" />
+                <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-[#818cf8]">Smart Management</span>
+              </div>
+              <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">Your career<br />command center.</h2>
+              <p className="mt-6 text-lg leading-relaxed text-white/50">Save multiple versions of your CV for different roles. Manage, update, score, and export — all from one dashboard.</p>
+              <div className="mt-10 grid grid-cols-3 gap-4">
+                {[{ value: "50+", label: "Templates" },{ value: "92%", label: "Avg. ATS" },{ value: "2min", label: "Setup time" }].map((stat) => (
+                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm"><p className="text-2xl font-extrabold text-white">{stat.value}</p><p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-white/40">{stat.label}</p></div>
+                ))}
+              </div>
+              <div className="mt-10 flex gap-4">
+                <a className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/30 transition-all hover:shadow-xl hover:brightness-105 active:scale-[0.98]" href="/resume">Create new CV<SvgIcon className="h-4 w-4" name="arrow-right" /></a>
+                <a className="rounded-2xl border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-bold text-white/80 backdrop-blur-sm transition-all hover:bg-white/10 hover:text-white" href="/dashboard">View dashboard</a>
+              </div>
             </div>
-          </div>
-          <div className="space-y-4 rounded-3xl border border-[#e5e7eb]/30 bg-[#f3f4f6] p-6 shadow-panel">
-            {savedCvs.map(([title, date, score]) => (
-              <div className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5 shadow-ambient sm:flex-row sm:items-center" key={title}>
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <SvgIcon name="document" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-[#111827]">{title}</h3>
-                    <p className="text-xs text-[#6b7280]">{date}</p>
-                  </div>
+            <div className="relative">
+              <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#6366f1]/20 via-transparent to-[#3b82f6]/15 blur-2xl" />
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#1e293b]/80 p-6 shadow-2xl backdrop-blur-xl">
+                <div className="mb-6 flex items-center justify-between"><div className="flex items-center gap-2"><div className="h-3 w-3 rounded-full bg-[#ef4444]/60" /><div className="h-3 w-3 rounded-full bg-[#f59e0b]/60" /><div className="h-3 w-3 rounded-full bg-[#22c55e]/60" /></div><div className="rounded-lg bg-white/5 px-4 py-1"><span className="text-[10px] font-medium text-white/30">cv-with-ai.com/dashboard</span></div><div className="w-14" /></div>
+                <div className="mb-5 grid grid-cols-3 gap-3">
+                  {[{ label: "Resumes", value: "3", icon: "document", color: "from-[#6366f1] to-[#3b82f6]" },{ label: "Cover Letters", value: "2", icon: "cl", color: "from-[#10b981] to-[#06b6d4]" },{ label: "ATS Score", value: "92", icon: "sparkle", color: "from-[#f59e0b] to-[#f97316]" }].map((s) => (
+                    <div key={s.label} className="rounded-2xl border border-white/5 bg-white/5 p-4"><div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${s.color}`}><SvgIcon className="h-3.5 w-3.5 text-white" name={s.icon} /></div><p className="text-2xl font-extrabold text-white">{s.value}</p><p className="text-[10px] font-bold uppercase tracking-wider text-white/30">{s.label}</p></div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-bold text-success">ATS {score}</span>
-                  <div className="h-8 w-px bg-[#e5e7eb]/30" />
-                  <a className="text-sm font-bold text-primary hover:underline" href="/resume">Edit</a>
+                <div className="space-y-3">
+                  {[{ title: "Product Manager CV", date: "Updated today", score: 92, progress: 92 },{ title: "SaaS Founder Resume", date: "2 days ago", score: 88, progress: 88 },{ title: "Consulting Cover Letter", date: "Draft", score: null, progress: 45 }].map((doc) => (
+                    <div key={doc.title} className="group flex items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition-all hover:border-[#6366f1]/30 hover:bg-white/[0.06]">
+                      <div className="flex items-center gap-4"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1]/20 to-[#3b82f6]/10"><SvgIcon className="h-5 w-5 text-[#818cf8]" name="document" /></div><div><p className="text-sm font-bold text-white">{doc.title}</p><p className="mt-0.5 text-[11px] text-white/30">{doc.date}</p></div></div>
+                      <div className="flex items-center gap-4">
+                        {doc.score ? (<div className="flex items-center gap-2"><div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-[#22c55e] to-[#10b981]" style={{ width: `${doc.progress}%` }} /></div><span className="text-xs font-bold text-[#22c55e]">{doc.score}</span></div>) : (<span className="rounded-full bg-[#f59e0b]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#f59e0b]">In Progress</span>)}
+                        <button className="rounded-lg bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/60 transition hover:bg-white/10 hover:text-white">Edit</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -650,7 +730,7 @@ export default function Home() {
                 color: "from-[#10b981] to-[#34d399]",
               },
             ].map((t) => (
-              <article key={t.name} className="card-hover flex flex-col rounded-3xl bg-white p-7 shadow-ambient">
+              <article key={t.name} className="card-tilt flex flex-col rounded-3xl bg-white p-7 shadow-ambient">
                 <div className="mb-4 flex items-center gap-1 text-[#f59e0b]">
                   {Array.from({ length: t.rating }).map((_, i) => (
                     <SvgIcon key={i} className="h-4 w-4" name="star" />
@@ -860,7 +940,7 @@ function PricingSection() {
 
 function PricingCard({ cta, featured = false, features, href, name, price, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; period: string }) {
   return (
-    <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-[#e5e7eb]/30"}`}>
+    <article className={`card-tilt relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-[#e5e7eb]/30"}`}>
       {featured && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
           Recommended
@@ -885,8 +965,8 @@ function PricingCard({ cta, featured = false, features, href, name, price, perio
       </ul>
       <a
         href={href}
-        className={`block w-full rounded-2xl px-6 py-4 text-center text-sm font-bold transition-all ${
-          featured ? "primary-gradient text-white shadow-lg hover:brightness-105" : "bg-[#f3f4f6] text-[#111827] hover:bg-[#e5e7eb]/20"
+        className={`block w-full rounded-2xl px-6 py-4 text-center text-sm font-bold ${
+          featured ? "btn-glow primary-gradient text-white shadow-lg" : "btn-spring bg-[#f3f4f6] text-[#111827]"
         }`}
       >
         {cta}

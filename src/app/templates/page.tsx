@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import { useI18n } from "@/lib/i18n";
@@ -93,6 +95,7 @@ function TemplateCardPreview({ templateName }: { templateName: string }) {
 
 export default function TemplatesPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const { t } = useI18n();
   const [filter, setFilter] = useState("All");
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
@@ -107,6 +110,34 @@ export default function TemplatesPage() {
     router.push("/resume");
   }
 
+  if (status === "loading") {
+    return (
+      <AppShell active="templates">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!session) {
+    return (
+      <AppShell active="templates">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Icon name="template" className="text-[32px]" />
+          </div>
+          <h1 className="text-2xl font-bold text-ink">{t("gate.signInTemplates")}</h1>
+          <p className="max-w-md text-muted">{t("gate.signInTemplatesDesc")}</p>
+          <div className="flex gap-3">
+            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">{t("nav.signIn")}</Link>
+            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">{t("auth.signUpBtn")}</Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell active="templates">
       <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-10 md:py-12">
@@ -115,12 +146,12 @@ export default function TemplatesPage() {
             <p className="mb-3 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
               {t("templates.badge")}
             </p>
-            <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">{t("templates.title")}</h1>
+            <h1 className="headline-xl text-4xl text-ink md:text-5xl">{t("templates.title")}</h1>
             <p className="mt-3 text-lg leading-8 text-muted">
               {ALL_TEMPLATES.length} ATS-optimized layouts designed to highlight your professional story.
             </p>
           </div>
-          <div className="rounded-2xl border border-outline/50 bg-surface-soft px-5 py-4 text-sm leading-6 text-muted">
+          <div className="soft-card rounded-2xl px-5 py-4 text-sm leading-6 text-muted">
             <strong className="block text-ink">{t("templates.tip")}</strong>
             {t("templates.tipText")}
           </div>
@@ -131,7 +162,7 @@ export default function TemplatesPage() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              className={`btn-spring rounded-full px-4 py-2 text-sm font-semibold ${
                 filter === cat
                   ? "bg-primary text-white shadow-sm"
                   : "bg-surface-soft text-muted hover:bg-surface hover:text-ink"
@@ -150,14 +181,14 @@ export default function TemplatesPage() {
         <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered.map((template) => (
             <article
-              className="group cursor-pointer overflow-hidden rounded-3xl border border-outline/30 bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel"
+              className="card-tilt soft-card group cursor-pointer overflow-hidden rounded-3xl"
               key={template.name}
               onClick={() => useTemplate(template)}
             >
               <div className="relative">
                 <TemplateCardPreview templateName={template.name} />
                 <div className="absolute inset-0 flex items-center justify-center bg-surface/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
-                  <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5">
+                  <div className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel">
                     <Icon name="edit" />
                     {t("templates.useTemplate")}
                   </div>
@@ -167,7 +198,7 @@ export default function TemplatesPage() {
               <div className="p-5">
                 <div className="mb-3 flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <h2 className="text-lg font-bold text-ink transition-colors group-hover:text-primary">{template.name}</h2>
+                    <h2 className="headline-lg text-lg text-ink transition-colors group-hover:text-primary">{template.name}</h2>
                     <p className="font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
                       {template.category}
                     </p>

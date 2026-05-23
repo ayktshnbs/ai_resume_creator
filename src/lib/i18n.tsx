@@ -139,6 +139,8 @@ const translations = {
   "gate.signInCoverDesc": { en: "Create an account or sign in to generate professional cover letters with AI.", tr: "Yapay zeka ile profesyonel ön yazılar oluşturmak için giriş yapın." },
   "gate.signInDashboard": { en: "Sign in to your dashboard", tr: "Kontrol panelinize giriş yapın" },
   "gate.signInDashboardDesc": { en: "Create an account or sign in to access your resume workspace and manage your documents.", tr: "CV çalışma alanınıza erişmek ve belgelerinizi yönetmek için giriş yapın." },
+  "gate.signInTemplates": { en: "Sign in to browse templates", tr: "Şablonlara göz atmak için giriş yapın" },
+  "gate.signInTemplatesDesc": { en: "Create an account or sign in to choose from 50+ professionally designed resume templates.", tr: "50'den fazla profesyonel CV şablonu arasından seçim yapmak için giriş yapın." },
 
   // Forgot / Reset password
   "forgot.title": { en: "Reset your password", tr: "Şifrenizi sıfırlayın" },

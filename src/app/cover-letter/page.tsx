@@ -81,6 +81,8 @@ const sampleContent = {
 export default function CoverLetterPage() {
   const { data: session, status } = useSession();
   const { t } = useI18n();
+  const { isPro } = useProStatus();
+  const letterRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generatedText, setGeneratedText] = useState("");
@@ -116,8 +118,6 @@ export default function CoverLetterPage() {
       </AppShell>
     );
   }
-  const letterRef = useRef<HTMLDivElement>(null);
-  const { isPro } = useProStatus();
 
   async function generateCoverLetter(templateId: string) {
     if (!isPro) {
@@ -182,15 +182,15 @@ export default function CoverLetterPage() {
             <p className="mb-3 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
               {t("coverLetter.gallery")}
             </p>
-            <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">
+            <h1 className="headline-xl text-4xl text-ink md:text-5xl">
               {t("coverLetter.title")}
             </h1>
             <p className="mt-3 text-lg leading-8 text-muted">
               {t("coverLetter.subtitle")}
             </p>
           </div>
-          <div className="flex items-center gap-3 rounded-2xl border border-outline/50 bg-surface-soft px-5 py-4 text-sm">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 text-success">
+          <div className="soft-card flex items-center gap-3 rounded-2xl px-5 py-4 text-sm">
+            <span className="icon-bounce flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 text-success">
               <Icon name="sparkle" />
             </span>
             <span className="leading-6 text-muted">
@@ -242,10 +242,10 @@ export default function CoverLetterPage() {
           {templates.map((template) => (
             <article
               key={template.id}
-              className={`group cursor-pointer overflow-hidden rounded-3xl border bg-surface transition-all duration-300 hover:-translate-y-1 hover:shadow-panel ${
+              className={`card-tilt soft-card group cursor-pointer overflow-hidden rounded-3xl ${
                 selected === template.id
                   ? "border-primary ring-2 ring-primary/20"
-                  : "border-outline/30 hover:border-primary/50"
+                  : ""
               }`}
               onClick={() => void generateCoverLetter(template.id)}
             >
@@ -274,7 +274,7 @@ export default function CoverLetterPage() {
                   </div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
-                  <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel">
+                  <div className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel">
                     <Icon name="edit" />
                     {t("coverLetter.useTemplate")}
                   </div>
@@ -282,7 +282,7 @@ export default function CoverLetterPage() {
               </div>
               <div className="p-6">
                 <div className="mb-3 flex items-start justify-between gap-3">
-                  <h2 className="text-xl font-bold text-ink transition-colors group-hover:text-primary">
+                  <h2 className="headline-lg text-xl text-ink transition-colors group-hover:text-primary">
                     {template.name}
                   </h2>
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: template.accentColor + "18" }}>
@@ -306,29 +306,55 @@ export default function CoverLetterPage() {
         </div>
 
         {showUpgrade && !isPro && (
-          <div className="mt-12 flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-6">
-            <Icon className="h-7 w-7 shrink-0 text-primary" name="sparkle" />
-            <div className="flex-1">
-              <p className="text-lg font-bold text-ink">{t("coverLetter.proFeature")}</p>
-              <p className="mt-1 text-sm text-muted">{t("coverLetter.proDesc")}</p>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowUpgrade(false)}>
+            <div className="mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-surface p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg">
+                  <Icon name="sparkle" className="text-[28px] text-white" />
+                </div>
+                <button
+                  className="rounded-xl p-2 text-muted hover:bg-surface-soft"
+                  onClick={() => setShowUpgrade(false)}
+                  type="button"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <h3 className="text-2xl font-bold text-ink">{t("coverLetter.proFeature")}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted">{t("coverLetter.proDesc")}</p>
+              <ul className="mt-5 space-y-2.5 text-sm text-muted">
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> AI-powered cover letter generation</li>
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> Job description matching</li>
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> High-res PDF export</li>
+                <li className="flex items-center gap-2"><Icon name="check" className="text-success" /> Unlimited documents</li>
+              </ul>
+              <div className="mt-8 flex gap-3">
+                <button
+                  className="flex-1 rounded-xl border border-outline/50 bg-surface px-4 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+                  onClick={() => setShowUpgrade(false)}
+                  type="button"
+                >
+                  Maybe later
+                </button>
+                <PaymentButton
+                  price="6"
+                  className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white"
+                >
+                  {t("coverLetter.upgradePro")}
+                </PaymentButton>
+              </div>
             </div>
-            <PaymentButton
-              price="6"
-              className="primary-gradient shrink-0 rounded-xl px-6 py-3 text-sm font-bold text-white"
-            >
-              {t("coverLetter.upgradePro")}
-            </PaymentButton>
           </div>
         )}
 
         {(generating || generatedText) && (
           <div className="mt-12 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
             <div className="mb-6 flex items-center justify-between gap-4">
-              <h2 className="text-xl font-bold text-ink">{t("coverLetter.generated")}</h2>
+              <h2 className="section-title text-2xl font-bold text-ink">{t("coverLetter.generated")}</h2>
               {generatedText && (
                 <div className="flex gap-3">
                   <button
-                    className="rounded-xl border border-outline/70 bg-surface px-4 py-2 text-sm font-bold text-ink hover:bg-surface-soft"
+                    className="btn-spring rounded-xl border border-outline/70 bg-surface px-4 py-2 text-sm font-bold text-ink"
                     onClick={() => void navigator.clipboard.writeText(generatedText)}
                     type="button"
                   >
@@ -336,7 +362,7 @@ export default function CoverLetterPage() {
                   </button>
                   {isPro ? (
                     <button
-                      className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
+                      className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
                       disabled={exporting}
                       onClick={() => void exportPdf()}
                       type="button"

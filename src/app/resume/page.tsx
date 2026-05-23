@@ -1611,7 +1611,7 @@ function formatFileSize(bytes: number) {
 async function extractPdfText(file: File): Promise<string> {
   try {
     const pdfjsLib = await import("pdfjs-dist");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
     const buffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
     const pages: string[] = [];
@@ -1625,7 +1625,8 @@ async function extractPdfText(file: File): Promise<string> {
       pages.push(text);
     }
     return pages.join("\n\n");
-  } catch {
+  } catch (err) {
+    console.error("[PDF extract error]", err);
     return "";
   }
 }

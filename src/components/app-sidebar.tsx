@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "@/components/icon";
+import { AuroraBackground } from "@/components/aurora-background";
 import { useSession, signOut } from "next-auth/react";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useTheme } from "@/lib/use-theme";
@@ -212,7 +213,8 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
         </div>
       )}
 
-      <main className={`${fullHeight ? "h-screen overflow-hidden" : "min-h-screen"} lg:pl-72`}>
+      <main className={`${fullHeight ? "h-screen overflow-hidden" : "min-h-screen"} relative lg:pl-72`}>
+        <AuroraBackground />
         {children}
       </main>
     </div>

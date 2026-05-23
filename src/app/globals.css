@@ -173,6 +173,46 @@ select {
   animation-play-state: paused;
 }
 
+/* Aurora animated background */
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25% { transform: translate(80px, -60px) scale(1.15) rotate(5deg); }
+  50% { transform: translate(-40px, -100px) scale(0.95) rotate(-3deg); }
+  75% { transform: translate(60px, -30px) scale(1.08) rotate(2deg); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  30% { transform: translate(-70px, -50px) scale(1.12) rotate(-4deg); }
+  60% { transform: translate(50px, -80px) scale(0.92) rotate(6deg); }
+}
+@keyframes aurora-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1.05) rotate(0deg); }
+  20% { transform: translate(90px, -40px) scale(0.9) rotate(3deg); }
+  50% { transform: translate(-60px, -70px) scale(1.18) rotate(-5deg); }
+  80% { transform: translate(30px, -20px) scale(1) rotate(1deg); }
+}
+@keyframes aurora-drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(0.95); }
+  35% { transform: translate(-50px, 40px) scale(1.1) rotate(-3deg); }
+  70% { transform: translate(70px, -60px) scale(1.02) rotate(4deg); }
+}
+@keyframes aurora-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.65; }
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform;
+  pointer-events: none;
+}
+.aurora-blob-1 { animation: aurora-drift-1 20s ease-in-out infinite, aurora-pulse 8s ease-in-out infinite; }
+.aurora-blob-2 { animation: aurora-drift-2 25s ease-in-out infinite, aurora-pulse 10s ease-in-out infinite 2s; }
+.aurora-blob-3 { animation: aurora-drift-3 22s ease-in-out infinite, aurora-pulse 9s ease-in-out infinite 1s; }
+.aurora-blob-4 { animation: aurora-drift-4 28s ease-in-out infinite, aurora-pulse 12s ease-in-out infinite 3s; }
+
 @media print {
   body {
     background: #ffffff !important;

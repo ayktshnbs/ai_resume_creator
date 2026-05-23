@@ -73,6 +73,7 @@ export default function ResumeBuilderPage() {
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
   const [extracting, setExtracting] = useState(false);
+  const [applyingRefId, setApplyingRefId] = useState<string | null>(null);
   const [linkedInModal, setLinkedInModal] = useState(false);
   const [linkedInText, setLinkedInText] = useState("");
   const [linkedInLoading, setLinkedInLoading] = useState(false);
@@ -256,6 +257,39 @@ export default function ResumeBuilderPage() {
 
   function removeReference(id: string) {
     setResume((current) => ({ ...current, references: current.references.filter((item) => item.id !== id) }));
+  }
+
+  async function applyReference(ref: ResumeReference) {
+    const text = ref.text;
+    if (!text || text.trim().length < 20) {
+      setReferenceMessage("This file doesn't contain enough text to extract resume data.");
+      return;
+    }
+    setApplyingRefId(ref.id);
+    setReferenceMessage("");
+    try {
+      const response = await fetch("/api/ai/resume-helper", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "extract_from_reference", text }),
+      });
+      const data = (await response.json()) as { resumeData?: Partial<ResumeData> };
+      if (data.resumeData) {
+        const extracted = extractResumeObject(data.resumeData);
+        if (extracted) {
+          setResume((current) => mergeImportedResume(current, extracted));
+          setReferenceMessage("Resume data extracted and applied to the form successfully!");
+        } else {
+          setReferenceMessage("Could not extract structured resume data from this file.");
+        }
+      } else {
+        setReferenceMessage("No resume data could be extracted from this file.");
+      }
+    } catch {
+      setReferenceMessage("Extraction failed. Please try again.");
+    } finally {
+      setApplyingRefId(null);
+    }
   }
 
   function clearResume() {
@@ -890,7 +924,13 @@ export default function ResumeBuilderPage() {
               <div className="mt-4 grid gap-3">
                 {resume.references.length > 0 &&
                   resume.references.map((reference) => (
-                    <ReferenceCard key={reference.id} onDelete={() => removeReference(reference.id)} reference={reference} />
+                    <ReferenceCard
+                      key={reference.id}
+                      reference={reference}
+                      onDelete={() => removeReference(reference.id)}
+                      onApply={() => void applyReference(reference)}
+                      applying={applyingRefId === reference.id}
+                    />
                   ))
                 }
               </div>
@@ -1328,8 +1368,9 @@ function HelperList({ items, title }: { items: string[]; title: string }) {
   );
 }
 
-function ReferenceCard({ reference, onDelete }: { reference: ResumeReference; onDelete: () => void }) {
+function ReferenceCard({ reference, onDelete, onApply, applying }: { reference: ResumeReference; onDelete: () => void; onApply?: () => void; applying?: boolean }) {
   const label = getReferenceLabel(reference.kind);
+  const hasText = reference.text && reference.text.trim().length > 20;
 
   return (
     <div className="rounded-xl border border-outline/40 bg-surface p-4">
@@ -1344,9 +1385,31 @@ function ReferenceCard({ reference, onDelete }: { reference: ResumeReference; on
             {reference.imported ? " · imported" : ""}
           </p>
         </div>
-        <button className="rounded-xl border border-outline/70 bg-surface-soft px-3 py-2 text-sm font-bold text-ink" onClick={onDelete} type="button">
-          Remove
-        </button>
+        <div className="flex shrink-0 gap-2">
+          {hasText && onApply && (
+            <button
+              className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white transition hover:brightness-110 disabled:opacity-50"
+              onClick={onApply}
+              disabled={applying}
+              type="button"
+            >
+              {applying ? (
+                <>
+                  <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Applying...
+                </>
+              ) : (
+                <>
+                  <Icon name="sparkle" className="text-[14px]" />
+                  Apply to Resume
+                </>
+              )}
+            </button>
+          )}
+          <button className="rounded-xl border border-outline/70 bg-surface-soft px-3 py-2 text-sm font-bold text-ink" onClick={onDelete} type="button">
+            Remove
+          </button>
+        </div>
       </div>
 
       {reference.kind === "image" && reference.dataUrl && (

@@ -335,9 +335,11 @@ function mockExtract(text: string): Partial<ResumeData> {
   const urlMatch = text.match(/(?:https?:\/\/|www\.)[^\s,)]+/);
   if (urlMatch) result.website = urlMatch[0];
 
-  // --- Name (first non-contact line) ---
-  for (const line of lines.slice(0, 3)) {
+  // --- Name (first non-contact, non-label line) ---
+  for (const line of lines.slice(0, 5)) {
     if (line.includes("@") || /^[\d+(\s]/.test(line) || /https?:/.test(line)) continue;
+    if (/^(address|email|phone|gender|date of birth|nationality|location)/i.test(line)) continue;
+    if (/^ /.test(line)) continue; // null byte prefix
     const nameParts = line.split(/\s+/).filter((p) => p.length > 0 && p.length < 30);
     if (nameParts.length >= 2 && nameParts.length <= 5) {
       result.firstName = nameParts[0];
@@ -401,11 +403,15 @@ function mockExtract(text: string): Partial<ResumeData> {
     console.log("[mockExtract] Experience lines:", JSON.stringify(sectionLines.experience.slice(0, 20)));
   }
 
-  // --- Title (second non-contact line in header area or first short line) ---
-  const headerLines = sectionLines.unknown.slice(0, 5);
+  // --- Title (a short professional title line, not address/contact/personal) ---
+  const headerLines = sectionLines.unknown.slice(0, 8);
   for (const line of headerLines) {
     if (line === `${result.firstName} ${result.lastName}`) continue;
     if (line.includes("@") || /^\+?\d/.test(line) || /https?:/.test(line)) continue;
+    // Skip personal info lines (address, gender, nationality, date of birth, etc.)
+    if (/address|gender|male|female|nationality|date of birth|doğum|cinsiyet|uyruk|adres|sokak|mah\.|no:|email|phone/i.test(line)) continue;
+    // Skip null byte lines
+    if (/^ /.test(line) || /^\s*$/.test(line)) continue;
     if (line.length > 5 && line.length < 80) {
       result.title = line;
       break;
@@ -428,25 +434,37 @@ function mockExtract(text: string): Partial<ResumeData> {
   if (sectionLines.skills.length > 0) {
     const skills: string[] = [];
     for (const line of sectionLines.skills) {
-      const items = line.split(/[,;|•·—–\-]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 50);
-      skills.push(...items);
+      const items = line.split(/[,;|•·—–\\/]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 50);
+      for (const item of items) {
+        // Filter out URLs, fragments, project names, and full sentences
+        if (/https?:|www\.|github\.com/i.test(item)) continue;
+        if (/^\s*(and|or|the|a|an|in|of|to|for|with)\s/i.test(item) && item.length < 15) continue;
+        if (/^(projects?|green\s+harvest|cinemania)$/i.test(item)) continue;
+        if (item.split(/\s+/).length > 5) continue; // Skip full sentences
+        if (/\.\s*$/.test(item) && item.length > 30) continue; // Skip sentences ending with period
+        skills.push(item);
+      }
     }
     if (skills.length > 0) result.skills = [...new Set(skills)];
   }
 
   // --- Languages ---
   if (sectionLines.languages.length > 0) {
-    // Common language names to validate against
-    const knownLangs = /^(english|turkish|german|french|spanish|italian|arabic|russian|chinese|japanese|korean|portuguese|dutch|swedish|norwegian|danish|finnish|polish|czech|greek|hindi|urdu|persian|hebrew|hungarian|romanian|bulgarian|croatian|serbian|slovak|slovenian|ukrainian|indonesian|malay|thai|vietnamese|bengali|swahili|tamil|telugu|marathi|gujarati|punjabi|türkçe|almanca|fransızca|ispanyolca|ingilizce|arapça|rusça|çince|japonca|korece|lehçe|fince|danca)/i;
-    const proficiencyWords = /native|fluent|advanced|intermediate|beginner|basic|proficient|conversational|mother\s*tongue|elementary|a1|a2|b1|b2|c1|c2/i;
+    const knownLangs = /\b(english|turkish|german|french|spanish|italian|arabic|russian|chinese|japanese|korean|portuguese|dutch|swedish|norwegian|danish|finnish|polish|czech|greek|hindi|urdu|persian|hebrew|hungarian|romanian|bulgarian|croatian|serbian|slovak|slovenian|ukrainian|indonesian|malay|thai|vietnamese|bengali|swahili|tamil|telugu|marathi|gujarati|punjabi|türkçe|almanca|fransızca|ispanyolca|ingilizce|arapça|rusça|çince|japonca|korece|lehçe|fince|danca)\b/i;
+    const profLevels = /\b(native|fluent|advanced|intermediate|beginner|basic|proficient|conversational|mother\s*tongue|elementary|a1|a2|b1|b2|c1|c2)\b/i;
 
     const langs: string[] = [];
     for (const line of sectionLines.languages) {
-      const items = line.split(/[,;|•·—–\-]/).map((s) => s.trim()).filter((s) => s.length > 1 && s.length < 50);
-      for (const item of items) {
-        // Only keep items that look like actual languages or proficiency levels
-        if (knownLangs.test(item) || proficiencyWords.test(item)) {
-          langs.push(item);
+      // First try: extract "Language (Level)" or "Language - Level" patterns
+      const langMatch = line.match(knownLangs);
+      if (langMatch) {
+        const langName = langMatch[1];
+        // Try to find level nearby
+        const levelMatch = line.match(profLevels);
+        if (levelMatch) {
+          langs.push(`${langName} (${levelMatch[1]})`);
+        } else {
+          langs.push(langName);
         }
       }
     }
@@ -460,28 +478,40 @@ function mockExtract(text: string): Partial<ResumeData> {
     let cur: ExpEntry | null = null;
 
     // Detect if a line is a bullet (starts with number, bullet char, or dash)
-    const isBulletLine = (l: string) => /^[\d]+[\s.)]+/.test(l) || /^[•\-–—*▪►◦‣]\s*/.test(l);
+    const isBulletLine = (l: string) => /^[\d]+[\s.)]+/.test(l) || /^[•\-–—*▪►◦‣◦]\s*/.test(l);
     // Strip bullet prefix
-    const cleanBullet = (l: string) => l.replace(/^[\d]+[\s.)]+/, "").replace(/^[•\-–—*▪►◦‣]\s*/, "").trim();
-    // Extract date range from a line
+    const cleanBullet = (l: string) => l.replace(/^[\d]+[\s.)]+/, "").replace(/^[•\-–—*▪►◦‣◦]\s*/, "").trim();
+
+    // Extract date range — supports multiple formats:
+    // "Jun 2022 - Dec 2025", "2018 - 2020", "[ 01/12/2016 – 01/07/2017 ]", "[13-06-2022 - CURRENT"
     const extractDates = (l: string) => {
-      // "Jun 2022 - Dec 2025" or "2018 - 2020" or "(Jun 2022 – Present)"
-      const m = l.match(/\(?\s*(\w{3,9}\.?\s+\d{4}|\d{4})\s*[-–—]+\s*(\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i);
-      if (m) return { start: m[1], end: m[2], isCurrent: /present|current|ongoing|devam|halen/i.test(m[2]) };
+      // Europass bracket format: [ DD/MM/YYYY – DD/MM/YYYY ] or [DD-MM-YYYY - CURRENT]
+      const euro = l.match(/\[?\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4})\s*[-–—]+\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i);
+      if (euro) {
+        return { start: euro[1], end: euro[2], isCurrent: /present|current|ongoing|devam|halen/i.test(euro[2]) };
+      }
+      // Standard: "Jun 2022 - Dec 2025" or "2018 - 2020"
+      const std = l.match(/\(?\s*(\w{3,9}\.?\s+\d{4}|\d{4})\s*[-–—]+\s*(\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i);
+      if (std) return { start: std[1], end: std[2], isCurrent: /present|current|ongoing|devam|halen/i.test(std[2]) };
       // Single year in parens: "(2019)"
       const y = l.match(/\((\d{4})\)/);
       if (y) return { start: y[1], end: "", isCurrent: false };
       return null;
     };
-    // Strip date portion from line
+
+    // Strip date portion from line (all formats)
     const stripDates = (l: string) =>
-      l.replace(/\(?\s*\w{3,9}\.?\s+\d{4}\s*[-–—]+\s*(?:\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "")
+      l.replace(/\[?\s*\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}\s*[-–—]+\s*(?:\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i, "")
+       .replace(/\(?\s*\w{3,9}\.?\s+\d{4}\s*[-–—]+\s*(?:\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "")
        .replace(/\(\d{4}\)/, "")
        .replace(/\s{2,}/g, " ").trim();
 
     for (const line of sectionLines.experience) {
       // Skip empty / very short
       if (line.length < 3) continue;
+
+      // Skip Europass noise lines
+      if (/^(main\s+activities|city:|country:|replace\s+with)/i.test(line)) continue;
 
       // If it's a bullet, add to current entry
       if (isBulletLine(line) && cur) {
@@ -582,6 +612,10 @@ function mockExtract(text: string): Partial<ResumeData> {
     let cur: EduEntry | null = null;
 
     const extractEduDates = (l: string) => {
+      // Europass: [ DD/MM/YYYY – DD/MM/YYYY ] or 14/10/2018 – 23/12/2018
+      const euro = l.match(/\[?\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4})\s*[-–—]+\s*(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|devam)\s*\]?/i);
+      if (euro) return { start: euro[1], end: euro[2] };
+      // Standard: 2018 - 2022
       const m = l.match(/\(?\s*(\d{4})\s*[-–—]+\s*(\d{4}|present|current|devam|halen)\s*\)?/i);
       if (m) return { start: m[1], end: m[2] };
       const y = l.match(/\((\d{4})\)/);
@@ -589,7 +623,8 @@ function mockExtract(text: string): Partial<ResumeData> {
       return null;
     };
     const stripEduDates = (l: string) =>
-      l.replace(/\(?\s*\d{4}\s*[-–—]+\s*(?:\d{4}|present|current|devam|halen)\s*\)?/i, "")
+      l.replace(/\[?\s*\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}\s*[-–—]+\s*(?:\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|devam)\s*\]?/i, "")
+       .replace(/\(?\s*\d{4}\s*[-–—]+\s*(?:\d{4}|present|current|devam|halen)\s*\)?/i, "")
        .replace(/\(\d{4}\)/, "")
        .replace(/\s{2,}/g, " ").trim();
 

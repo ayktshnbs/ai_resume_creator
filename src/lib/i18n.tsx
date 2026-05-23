@@ -54,6 +54,7 @@ const translations = {
   "resume.skills": { en: "Core Competencies", tr: "Temel Yetkinlikler" },
   "resume.addSkill": { en: "Add Competency", tr: "Yetkinlik Ekle" },
   "resume.languages": { en: "Languages", tr: "Diller" },
+  "resume.addLanguage": { en: "Add", tr: "Ekle" },
   "resume.references": { en: "Reference Materials", tr: "Referans Materyalleri" },
   "resume.addReference": { en: "Add Reference", tr: "Referans Ekle" },
   "resume.share": { en: "Share", tr: "Paylaş" },

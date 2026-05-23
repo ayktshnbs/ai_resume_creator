@@ -69,6 +69,7 @@ export default function ResumeBuilderPage() {
   const [resume, setResume] = useState<ResumeData>(emptyResumeData);
   const [template, setTemplate] = useState<SelectedTemplate>({ name: "Modern Minimalist", layout: "single", accent: "primary" });
   const [skillDraft, setSkillDraft] = useState("");
+  const [langDraft, setLangDraft] = useState("");
   const [shareMessage, setShareMessage] = useState("");
   const [referenceMessage, setReferenceMessage] = useState("");
   const [extracting, setExtracting] = useState(false);
@@ -242,6 +243,17 @@ export default function ResumeBuilderPage() {
     setResume((current) => ({ ...current, skills: current.skills.filter((item) => item !== skill) }));
   }
 
+  function addLanguage() {
+    const lang = langDraft.trim();
+    if (!lang || resume.languages.includes(lang)) return;
+    setResume((current) => ({ ...current, languages: [...current.languages, lang] }));
+    setLangDraft("");
+  }
+
+  function removeLanguage(lang: string) {
+    setResume((current) => ({ ...current, languages: current.languages.filter((item) => item !== lang) }));
+  }
+
   function removeReference(id: string) {
     setResume((current) => ({ ...current, references: current.references.filter((item) => item.id !== id) }));
   }
@@ -254,6 +266,7 @@ export default function ResumeBuilderPage() {
     clearResumeData();
     setResume(emptyResumeData);
     setSkillDraft("");
+    setLangDraft("");
     setReferenceMessage("");
     setHelper(initialHelperState);
   }
@@ -801,6 +814,34 @@ export default function ResumeBuilderPage() {
                 {resume.skills.map((skill) => (
                   <button className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary" key={skill} onClick={() => removeSkill(skill)} type="button">
                     {skill} ×
+                  </button>
+                ))}
+              </div>
+            </FormSection>
+
+            <FormSection icon="language" title={t("resume.languages")}>
+              <div className="flex gap-2">
+                <input
+                  className="field"
+                  onChange={(event) => setLangDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addLanguage();
+                    }
+                  }}
+                  placeholder="e.g., English, Turkish, German"
+                  value={langDraft}
+                />
+                <button className="rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-60" disabled={!langDraft.trim()} onClick={addLanguage} type="button">
+                  {t("resume.addLanguage")}
+                </button>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {resume.languages.length === 0 && <p className="text-sm text-muted">Add the languages you speak to strengthen your profile.</p>}
+                {resume.languages.map((lang) => (
+                  <button className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary" key={lang} onClick={() => removeLanguage(lang)} type="button">
+                    {lang} ×
                   </button>
                 ))}
               </div>

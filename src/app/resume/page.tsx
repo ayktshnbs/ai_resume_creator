@@ -1465,7 +1465,6 @@ function formatFileSize(bytes: number) {
 
 async function extractPdfText(file: File): Promise<string> {
   try {
-    // @ts-expect-error -- pdfjs-dist loaded dynamically, types not bundled
     const pdfjsLib = await import("pdfjs-dist");
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
     const buffer = await file.arrayBuffer();

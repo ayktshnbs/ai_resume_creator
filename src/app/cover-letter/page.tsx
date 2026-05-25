@@ -93,6 +93,11 @@ export default function CoverLetterPage() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [showJobInput, setShowJobInput] = useState(false);
+  const [letterDate, setLetterDate] = useState(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
+  const [recipientName, setRecipientName] = useState(sampleContent.recipientName);
+  const [recipientTitle, setRecipientTitle] = useState(sampleContent.recipientTitle);
+  const [recipientCompany, setRecipientCompany] = useState(sampleContent.company);
+  const [letterBody, setLetterBody] = useState(sampleContent.body.join("\n\n"));
 
   // Load user's resume data to populate cover letter fields
   const uid = session?.user?.id;
@@ -130,6 +135,7 @@ export default function CoverLetterPage() {
     setSelected(templateId);
     setShowUpgrade(false);
     setShowSignIn(false);
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   }
 
   async function generateCoverLetter(templateId: string) {
@@ -164,9 +170,13 @@ export default function CoverLetterPage() {
         }),
       });
       const data = (await res.json()) as { resultText?: string };
-      setGeneratedText(data.resultText || "Cover letter generation failed. Please try again.");
+      const result = data.resultText || "Cover letter generation failed. Please try again.";
+      setGeneratedText(result);
+      setLetterBody(result);
     } catch {
-      setGeneratedText("An error occurred. Please try again.");
+      const errorText = "An error occurred. Please try again.";
+      setGeneratedText(errorText);
+      setLetterBody(errorText);
     } finally {
       setGenerating(false);
     }
@@ -197,6 +207,12 @@ export default function CoverLetterPage() {
       setExporting(false);
     }
   }
+
+  const activeTemplate = templates.find((t) => t.id === selected) || templates[0];
+  const letterParagraphs = letterBody
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 
   return (
     <AppShell active="cover-letter">
@@ -415,15 +431,18 @@ export default function CoverLetterPage() {
           </div>
         )}
 
-        {(generating || generatedText) && (
+        {(selected || generating || generatedText) && (
           <div ref={resultRef} className="mt-12 scroll-mt-8 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
-            <div className="mb-6 flex items-center justify-between gap-4">
-              <h2 className="section-title text-2xl font-bold text-ink">{t("coverLetter.generated")}</h2>
-              {generatedText && (
+            <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+              <div>
+                <h2 className="section-title text-2xl font-bold text-ink">{selected ? "Fill Cover Letter" : t("coverLetter.generated")}</h2>
+                <p className="mt-3 text-sm text-muted">Edit the recipient details and letter body. The preview updates as you type.</p>
+              </div>
+              {(selected || generatedText) && (
                 <div className="flex gap-3">
                   <button
                     className="btn-spring rounded-xl border border-outline/70 bg-surface px-4 py-2 text-sm font-bold text-ink"
-                    onClick={() => void navigator.clipboard.writeText(generatedText)}
+                    onClick={() => void navigator.clipboard.writeText(letterBody)}
                     type="button"
                   >
                     {t("coverLetter.copyText")}
@@ -449,19 +468,49 @@ export default function CoverLetterPage() {
                 <div className="h-3 w-2/3 animate-pulse rounded bg-outline/20" />
               </div>
             ) : (
-              <div ref={letterRef} className="mx-auto max-w-[595px]">
-                <LetterLayout
-                  template={templates.find((t) => t.id === selected) || templates[0]}
-                  name={userName}
-                  title={userTitle}
-                  email={userEmail}
-                  phone={userPhone}
-                  date={new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                  recipientName={sampleContent.recipientName}
-                  recipientTitle={sampleContent.recipientTitle}
-                  company={sampleContent.company}
-                  body={generatedText ? generatedText.split("\n\n").filter(Boolean) : sampleContent.body}
-                />
+              <div className="grid gap-8 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Date</span>
+                      <input className="field" onChange={(e) => setLetterDate(e.target.value)} value={letterDate} />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient</span>
+                      <input className="field" onChange={(e) => setRecipientName(e.target.value)} value={recipientName} />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient Title</span>
+                      <input className="field" onChange={(e) => setRecipientTitle(e.target.value)} value={recipientTitle} />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Company</span>
+                      <input className="field" onChange={(e) => setRecipientCompany(e.target.value)} value={recipientCompany} />
+                    </label>
+                  </div>
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Letter Body</span>
+                    <textarea
+                      className="field min-h-[320px] resize-y text-sm leading-6"
+                      onChange={(e) => setLetterBody(e.target.value)}
+                      value={letterBody}
+                    />
+                  </label>
+                </div>
+                <div ref={letterRef} className="mx-auto w-full max-w-[595px] overflow-hidden rounded-2xl border border-outline/40 bg-white shadow-panel">
+                  <LetterLayout
+                    template={activeTemplate}
+                    name={userName}
+                    title={userTitle}
+                    email={userEmail}
+                    phone={userPhone}
+                    date={letterDate}
+                    recipientName={recipientName}
+                    recipientTitle={recipientTitle}
+                    company={recipientCompany}
+                    body={letterParagraphs.length > 0 ? letterParagraphs : sampleContent.body}
+                  />
+                </div>
               </div>
             )}
           </div>

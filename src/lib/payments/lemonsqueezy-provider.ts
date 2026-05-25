@@ -7,52 +7,82 @@ import type {
   VerifyPaymentResult,
 } from "./types";
 
-const API_KEY = () => process.env.LEMONSQUEEZY_API_KEY!;
-const STORE_ID = () => process.env.LEMONSQUEEZY_STORE_ID!;
-const VARIANT_ID = () => process.env.LEMONSQUEEZY_VARIANT_ID!;
-const WEBHOOK_SECRET = () => process.env.LEMONSQUEEZY_WEBHOOK_SECRET!;
+function requiredEnv(name: string) {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return value;
+}
+
+function getLemonSqueezyConfig() {
+  const variantId = requiredEnv("LEMONSQUEEZY_VARIANT_ID");
+
+  return {
+    apiKey: requiredEnv("LEMONSQUEEZY_API_KEY"),
+    storeId: requiredEnv("LEMONSQUEEZY_STORE_ID"),
+    variantId,
+    variantIdNumber: Number(variantId),
+    webhookSecret: requiredEnv("LEMONSQUEEZY_WEBHOOK_SECRET"),
+  };
+}
 
 export class LemonSqueezyProvider implements PaymentProvider {
   name = "lemonsqueezy";
 
   async createPayment(input: CreatePaymentInput): Promise<CreatePaymentResult> {
-    const body = {
-      data: {
-        type: "checkouts",
-        attributes: {
-          checkout_data: {
-            email: input.email,
-            custom: {
-              user_id: input.userId,
+    try {
+      const config = getLemonSqueezyConfig();
+
+      if (!Number.isInteger(config.variantIdNumber) || config.variantIdNumber <= 0) {
+        return {
+          success: false,
+          error: "Invalid Lemon Squeezy variant id configuration",
+        };
+      }
+
+      const customData = {
+        user_id: input.userId,
+        member_id: input.userId,
+      };
+
+      const body = {
+        data: {
+          type: "checkouts",
+          attributes: {
+            checkout_data: {
+              email: input.email,
+              custom: customData,
+            },
+            checkout_options: {
+              embed: false,
+              media: false,
+              dark: false,
+            },
+            product_options: {
+              enabled_variants: [config.variantIdNumber],
+              redirect_url: input.successUrl,
+              receipt_link_url: input.successUrl,
+              receipt_button_text: "Go to Dashboard",
             },
           },
-          checkout_options: {
-            embed: false,
-            media: false,
-            dark: false,
-          },
-          product_options: {
-            redirect_url: input.successUrl,
-            receipt_link_url: input.successUrl,
-            receipt_button_text: "Go to Dashboard",
+          relationships: {
+            store: {
+              data: { type: "stores", id: config.storeId },
+            },
+            variant: {
+              data: { type: "variants", id: config.variantId },
+            },
           },
         },
-        relationships: {
-          store: {
-            data: { type: "stores", id: STORE_ID() },
-          },
-          variant: {
-            data: { type: "variants", id: VARIANT_ID() },
-          },
-        },
-      },
-    };
+      };
 
-    try {
       const res = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${API_KEY()}`,
+          Authorization: `Bearer ${config.apiKey}`,
           "Content-Type": "application/vnd.api+json",
           Accept: "application/vnd.api+json",
         },
@@ -88,9 +118,10 @@ export class LemonSqueezyProvider implements PaymentProvider {
 
   async verifyPayment(input: VerifyPaymentInput): Promise<VerifyPaymentResult> {
     const { rawBody, signature } = input.providerRawData;
+    const { webhookSecret } = getLemonSqueezyConfig();
 
     const hmac = crypto
-      .createHmac("sha256", WEBHOOK_SECRET())
+      .createHmac("sha256", webhookSecret)
       .update(rawBody)
       .digest("hex");
 
@@ -121,7 +152,7 @@ export class LemonSqueezyProvider implements PaymentProvider {
       success: status === "paid",
       paymentId: String(payload.data?.id || input.paymentId),
       status: status === "paid" ? "paid" : "failed",
-      userId: payload.meta?.custom_data?.user_id,
+      userId: payload.meta?.custom_data?.user_id || payload.meta?.custom_data?.member_id,
       error: status === "paid" ? undefined : "Payment not completed",
     };
   }

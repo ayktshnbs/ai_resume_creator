@@ -7,7 +7,7 @@ export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
+    if (!session?.user?.id || !session.user.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -16,7 +16,7 @@ export async function POST() {
 
     const result = await provider.createPayment({
       userId: session.user.id,
-      email: session.user.email!,
+      email: session.user.email,
       productName: "CV with AI Pro Plan",
       price: 0,
       currency: "",

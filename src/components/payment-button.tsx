@@ -11,7 +11,7 @@ type PaymentButtonProps = {
 };
 
 export function PaymentButton({ price, className, children }: PaymentButtonProps) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -239,6 +240,7 @@ export default function TemplatesPage() {
 
         {/* Guest sign-in modal */}
         {showSignInModal && (
+          <ModalPortal>
           <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 backdrop-blur-sm" onClick={() => setShowSignInModal(false)}>
             <div className="mx-4 w-full max-w-md rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel" onClick={(e) => e.stopPropagation()}>
               <div className="mb-6 flex justify-center">
@@ -272,10 +274,12 @@ export default function TemplatesPage() {
               </div>
             </div>
           </div>
+          </ModalPortal>
         )}
 
         {/* Logged-in non-Pro upgrade modal */}
         {showUpgradeModal && !isPro && (
+          <ModalPortal>
           <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 backdrop-blur-sm" onClick={() => setShowUpgradeModal(false)}>
             <div className="mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-surface p-8 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="mb-6 flex items-center justify-between">
@@ -315,8 +319,21 @@ export default function TemplatesPage() {
               </div>
             </div>
           </div>
+          </ModalPortal>
         )}
       </div>
     </AppShell>
   );
+}
+
+function ModalPortal({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(children, document.body);
 }

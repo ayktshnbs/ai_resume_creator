@@ -126,6 +126,12 @@ export default function CoverLetterPage() {
     } catch {}
   }
 
+  function selectTemplate(templateId: string) {
+    setSelected(templateId);
+    setShowUpgrade(false);
+    setShowSignIn(false);
+  }
+
   async function generateCoverLetter(templateId: string) {
     // Guest: 1 free, then sign-in modal
     if (!session) {
@@ -265,7 +271,7 @@ export default function CoverLetterPage() {
                   ? "border-primary ring-2 ring-primary/20"
                   : ""
               }`}
-              onClick={() => void generateCoverLetter(template.id)}
+              onClick={() => selectTemplate(template.id)}
             >
               <div className="relative aspect-[1/1.38] overflow-hidden bg-white">
                 <div className="absolute inset-0 overflow-hidden">
@@ -292,10 +298,17 @@ export default function CoverLetterPage() {
                   </div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
-                  <div className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel">
+                  <button
+                    className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void generateCoverLetter(template.id);
+                    }}
+                    type="button"
+                  >
                     <Icon name="edit" />
                     {t("coverLetter.useTemplate")}
-                  </div>
+                  </button>
                 </div>
               </div>
               <div className="p-6">

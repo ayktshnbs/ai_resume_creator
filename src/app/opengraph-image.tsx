@@ -100,7 +100,7 @@ export default function OGImage() {
             marginBottom: 40,
           }}
         >
-          AI-powered tools, 50+ templates, one-click PDF export
+          AI-powered tools, 100 templates, one-click PDF export
         </div>
 
         {/* CTA pill */}

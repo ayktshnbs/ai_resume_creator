@@ -141,7 +141,7 @@ const translations = {
   "gate.signInDashboard": { en: "Sign in to your dashboard", tr: "Kontrol panelinize giriş yapın" },
   "gate.signInDashboardDesc": { en: "Create an account or sign in to access your resume workspace and manage your documents.", tr: "CV çalışma alanınıza erişmek ve belgelerinizi yönetmek için giriş yapın." },
   "gate.signInTemplates": { en: "Sign in to browse templates", tr: "Şablonlara göz atmak için giriş yapın" },
-  "gate.signInTemplatesDesc": { en: "Create an account or sign in to choose from 50+ professionally designed resume templates.", tr: "50'den fazla profesyonel CV şablonu arasından seçim yapmak için giriş yapın." },
+  "gate.signInTemplatesDesc": { en: "Create an account or sign in to choose from 100 professionally designed resume templates.", tr: "100 profesyonel CV şablonu arasından seçim yapmak için giriş yapın." },
   "gate.freeTrialUsed": { en: "You've used your free resume. Sign in or create an account to continue building resumes.", tr: "Ücretsiz CV hakkınızı kullandınız. CV oluşturmaya devam etmek için giriş yapın veya hesap oluşturun." },
   "gate.freeTrialUsedCL": { en: "You've used your free cover letter. Sign in or create an account to continue.", tr: "Ücretsiz ön yazı hakkınızı kullandınız. Devam etmek için giriş yapın veya hesap oluşturun." },
   "gate.upgradeResume": { en: "Upgrade to create more resumes", tr: "Daha fazla CV oluşturmak için yükseltin" },

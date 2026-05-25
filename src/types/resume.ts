@@ -9,6 +9,7 @@ export type TemplateSpacing = "compact" | "normal" | "spacious";
 export type TemplateAccent = "primary" | "primaryBright" | "secondary" | "ink" | "success" | "warning";
 
 export type SelectedTemplate = {
+  templateId?: number;
   name: string;
   layout: TemplateLayout;
   accent: TemplateAccent | string;

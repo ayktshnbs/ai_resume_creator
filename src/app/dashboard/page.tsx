@@ -177,7 +177,7 @@ export default function DashboardPage() {
               href="/templates"
               icon="palette"
               title="Browse Templates"
-              description="Choose from 50+ professionally designed templates for every career stage."
+              description="Choose from 100 professionally designed templates for every career stage."
               gradient="from-success/10 to-success/5"
               iconColor="text-success"
             />
@@ -189,7 +189,7 @@ export default function DashboardPage() {
           <h2 className="section-title mb-7 text-2xl font-bold text-ink">Getting Started</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { step: "1", title: "Choose a template", desc: "Pick from 50+ modern designs", done: totalDocs > 0 },
+              { step: "1", title: "Choose a template", desc: "Pick from 100 modern designs", done: totalDocs > 0 },
               { step: "2", title: "Fill in your details", desc: "Or import from LinkedIn", done: resumeCount > 0 },
               { step: "3", title: "Enhance with AI", desc: "Optimize for ATS systems", done: false },
               { step: "4", title: "Export PDF", desc: "Download and start applying", done: false },
@@ -231,7 +231,7 @@ function OnboardingModal({ onClose }: { onClose: () => void }) {
     {
       icon: "edit" as IconName,
       title: "Create Your Resume",
-      description: "Choose from 50+ templates, fill in your details, and let AI optimize your content for maximum impact. Import from LinkedIn to save time.",
+      description: "Choose from 100 templates, fill in your details, and let AI optimize your content for maximum impact. Import from LinkedIn to save time.",
       gradient: "from-secondary to-primary",
     },
     {

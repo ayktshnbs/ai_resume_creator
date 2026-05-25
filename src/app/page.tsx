@@ -8,6 +8,7 @@ import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 import { sampleResume } from "@/components/cv-templates/sample-data";
 import { saveSelectedTemplate } from "@/lib/resume-storage";
 import type { SelectedTemplate } from "@/types/resume";
+import { cvTemplates, cvTemplateToSelectedTemplate } from "@/templates/cvTemplates";
 
 type TemplateCard = SelectedTemplate & {
   text: string;
@@ -36,7 +37,13 @@ const parametricCards: TemplateCard[] = PARAMETRIC_CONFIGS.map((c) => ({
   category: "Parametric",
 }));
 
-const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards];
+const registryCards: TemplateCard[] = cvTemplates.map((template) => ({
+  ...cvTemplateToSelectedTemplate(template),
+  text: template.description,
+  category: template.category,
+}));
+
+const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards, ...registryCards];
 
 const features = [
   { title: "AI CV Enhancement", text: "Rewrite weak bullets into professional, ATS-friendly achievements with one click.", icon: "sparkle", gradient: "from-primary/10 to-primary/5" },
@@ -66,7 +73,7 @@ export default function Home() {
   }, []);
 
   function selectTemplate(t: TemplateCard) {
-    saveSelectedTemplate({ name: t.name, layout: t.layout, accent: t.accent, themeColor: t.themeColor });
+    saveSelectedTemplate({ templateId: t.templateId, name: t.name, layout: t.layout, accent: t.accent, themeColor: t.themeColor });
     router.push("/resume");
   }
 
@@ -697,7 +704,7 @@ export default function Home() {
 
               <div className="mt-10 grid grid-cols-3 gap-4">
                 {[
-                  { value: "50+", label: "Templates" },
+                  { value: String(ALL_TEMPLATES.length), label: "Templates" },
                   { value: "92%", label: "Avg. ATS" },
                   { value: "2min", label: "Setup time" },
                 ].map((stat) => (

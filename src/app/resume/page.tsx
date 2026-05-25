@@ -21,6 +21,7 @@ import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeDa
 import { cvLangList, cvLangNames, cvLangFlags, type CvLang } from "@/lib/cv-labels";
 
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
+import { getCVTemplateById, cvTemplateToSelectedTemplate } from "@/templates/cvTemplates";
 
 type AiState = {
   full: boolean;
@@ -393,7 +394,15 @@ export default function ResumeBuilderPage() {
     }
   }
 
-  async function exportPdf() {
+  async function exportCV(templateId?: number) {
+    const registryTemplate = getCVTemplateById(templateId);
+    const exportTemplate = registryTemplate ? cvTemplateToSelectedTemplate(registryTemplate) : template;
+
+    if (registryTemplate && template.templateId !== registryTemplate.id) {
+      setTemplate(exportTemplate);
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    }
+
     const el = document.getElementById("resume-export");
     if (!el) return;
 
@@ -430,6 +439,10 @@ export default function ResumeBuilderPage() {
     } finally {
       setExporting(false);
     }
+  }
+
+  async function exportPdf() {
+    await exportCV(template.templateId);
   }
 
   async function handleReferenceUpload(files: FileList | null) {

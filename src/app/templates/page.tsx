@@ -15,6 +15,7 @@ import type { SelectedTemplate, TemplateLayout } from "@/types/resume";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 import { sampleResume } from "@/components/cv-templates/sample-data";
+import { cvTemplates, cvTemplateToSelectedTemplate } from "@/templates/cvTemplates";
 
 type TemplateCard = SelectedTemplate & {
   text: string;
@@ -58,7 +59,14 @@ const parametricCards: TemplateCard[] = PARAMETRIC_CONFIGS.map((c) => ({
   category: categoryForStyle(c.style),
 }));
 
-const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards];
+const registryCards: TemplateCard[] = cvTemplates.map((template) => ({
+  ...cvTemplateToSelectedTemplate(template),
+  text: template.description,
+  tags: [`#${template.id}`, ...template.tags],
+  category: template.category,
+}));
+
+const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards, ...registryCards];
 
 const CATEGORIES = ["All", ...Array.from(new Set(ALL_TEMPLATES.map((t) => t.category)))];
 
@@ -126,6 +134,7 @@ export default function TemplatesPage() {
 
   function useTemplate(template: TemplateCard) {
     saveSelectedTemplate({
+      templateId: template.templateId,
       name: template.name,
       layout: template.layout,
       accent: template.accent,

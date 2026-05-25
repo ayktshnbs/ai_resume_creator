@@ -11,7 +11,8 @@ import { QuillPreview } from "./quill-preview";
 import { VertexPreview } from "./vertex-preview";
 import { ObsidianPreview } from "./obsidian-preview";
 import { HelixPreview } from "./helix-preview";
-import { parametricTemplates } from "./parametric-template";
+import { makeParametric, parametricTemplates } from "./parametric-template";
+import { cvTemplates, cvTemplateToParametricConfig } from "@/templates/cvTemplates";
 
 const handcrafted: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }>> = {
   "Modern Minimalist": OnyxPreview,
@@ -31,6 +32,15 @@ const map: Record<string, ComponentType<{ resume: ResumeData; settings?: Selecte
   ...parametricTemplates,
 };
 
+const registryById: Record<number, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }>> = {};
+const registryByName: Record<string, ComponentType<{ resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }>> = {};
+
+for (const template of cvTemplates) {
+  const Preview = makeParametric(cvTemplateToParametricConfig(template));
+  registryById[template.id] = Preview;
+  registryByName[template.name] = Preview;
+}
+
 export function TemplateRenderer({
   resume,
   templateName,
@@ -42,8 +52,9 @@ export function TemplateRenderer({
   template?: SelectedTemplate;
   settings?: SelectedTemplate;
 }) {
+  const templateId = template?.templateId ?? settings?.templateId;
   const name = templateName || template?.name || "Modern Minimalist";
-  const Preview = map[name] || OnyxPreview;
+  const Preview = (templateId ? registryById[templateId] : undefined) || registryByName[name] || map[name] || OnyxPreview;
   const effectiveSettings = settings || template;
   const labels = getCvLabels((effectiveSettings?.cvLanguage as CvLang) || "en");
   return <Preview resume={resume} settings={effectiveSettings} labels={labels} />;

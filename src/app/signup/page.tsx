@@ -95,7 +95,7 @@ export default function SignUpPage() {
 
             <ul className="mt-8 grid gap-3 text-sm font-medium text-ink sm:grid-cols-2">
               <FeatureItem text="Free forever — no credit card" />
-              <FeatureItem text="50+ professional templates" />
+              <FeatureItem text="100 professional templates" />
               <FeatureItem text="1 CV + 1 cover letter free" />
               <FeatureItem text="Live preview & editing" />
               <FeatureItem text="AI tools & PDF export (Pro)" />

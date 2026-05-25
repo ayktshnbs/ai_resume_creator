@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | CV with AI",
   },
   description:
-    "Create professional, ATS-optimized resumes and cover letters with AI-powered tools. 50+ templates, live preview, one-click PDF export. Start free.",
+    "Create professional, ATS-optimized resumes and cover letters with AI-powered tools. 100 templates, live preview, one-click PDF export. Start free.",
   keywords: [
     "CV builder",
     "resume builder",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     siteName: "CV with AI",
     title: "CV with AI — Build ATS-Friendly Resumes in Minutes",
     description:
-      "Create professional, ATS-optimized resumes and cover letters with AI-powered tools. 50+ templates, live preview, one-click PDF export.",
+      "Create professional, ATS-optimized resumes and cover letters with AI-powered tools. 100 templates, live preview, one-click PDF export.",
     images: [
       {
         url: "/og-image.png",

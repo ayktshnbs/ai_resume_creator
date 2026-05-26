@@ -534,25 +534,25 @@ function LetterLayout(props: LetterLayoutProps) {
 function ModernLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
-      <div style={{ background: template.accentColor + "12", padding: "40px 52px 32px" }}>
-        <div style={{ fontSize: 24, fontWeight: 700, color: "#141b2b" }}>{name}</div>
+      <div style={{ background: template.accentColor + "12", padding: "44px 56px 36px" }}>
+        <div style={{ fontSize: 26, fontWeight: 700, color: "#0f172a" }}>{name}</div>
         <div style={{ fontSize: 13, fontWeight: 600, color: template.accentColor, marginTop: 4, textTransform: "uppercase", letterSpacing: 1.5 }}>{title}</div>
-        <div style={{ display: "flex", gap: 24, marginTop: 16, fontSize: 11, color: "#6b7280" }}>
+        <div style={{ display: "flex", gap: 24, marginTop: 18, fontSize: 11, color: "#475569" }}>
           <span>{email}</span>
           <span>{phone}</span>
         </div>
       </div>
-      <div style={{ padding: "40px 52px 52px" }}>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 6 }}>{date}</div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 32 }}>{recipientTitle}, {company}</div>
-        <div style={{ fontSize: 12, color: "#141b2b", lineHeight: 1.85, fontWeight: 600, marginBottom: 20 }}>
+      <div style={{ padding: "44px 56px 56px" }}>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8 }}>{date}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 36 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 20 }}>
           Dear {recipientName},
         </div>
         {body.map((p, i) => (
-          <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.85, marginBottom: 16, textAlign: "justify" }}>{p}</div>
+          <div key={i} style={{ fontSize: 13, color: "#1e293b", lineHeight: 1.7, marginBottom: 18, textAlign: "justify" }}>{p}</div>
         ))}
-        <div style={{ marginTop: 40, fontSize: 12, color: "#141b2b", lineHeight: 1.85 }}>
+        <div style={{ marginTop: 44, fontSize: 13, color: "#0f172a", lineHeight: 1.7 }}>
           <div>Sincerely,</div>
           <div style={{ fontWeight: 700, marginTop: 24 }}>{name}</div>
           <div style={{ height: 3, width: 44, background: template.accentColor, borderRadius: 2, marginTop: 10 }} />
@@ -565,25 +565,25 @@ function ModernLetter({ template, name, title, email, phone, date, recipientName
 function ClassicLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Georgia, 'Times New Roman', serif" }}>
-      <div style={{ textAlign: "center", padding: "48px 56px 28px", borderBottom: "1px solid #e5e7eb" }}>
-        <div style={{ fontSize: 26, fontWeight: 700, color: "#141b2b", letterSpacing: 0.5 }}>{name}</div>
-        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>{title}</div>
-        <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 6 }}>{email} · {phone}</div>
-        <div style={{ height: 2, width: 56, background: template.accentColor, borderRadius: 1, margin: "20px auto 0" }} />
+      <div style={{ textAlign: "center", padding: "52px 64px 32px", borderBottom: "1px solid #f1f5f9" }}>
+        <div style={{ fontSize: 28, fontWeight: 700, color: "#0f172a", letterSpacing: 0.5 }}>{name}</div>
+        <div style={{ fontSize: 13, color: "#475569", marginTop: 8 }}>{title}</div>
+        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>{email} · {phone}</div>
+        <div style={{ height: 2, width: 60, background: template.accentColor, borderRadius: 1, margin: "24px auto 0" }} />
       </div>
-      <div style={{ padding: "40px 64px 52px" }}>
-        <div style={{ textAlign: "right", fontSize: 11, color: "#6b7280", marginBottom: 32 }}>{date}</div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 32 }}>{recipientTitle}, {company}</div>
-        <div style={{ fontSize: 12, color: "#141b2b", lineHeight: 1.9, marginBottom: 20 }}>
+      <div style={{ padding: "48px 64px 64px" }}>
+        <div style={{ textAlign: "right", fontSize: 11, color: "#64748b", marginBottom: 36 }}>{date}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 40 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.8, marginBottom: 24 }}>
           Dear {recipientName},
         </div>
         {body.map((p, i) => (
-          <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.9, marginBottom: 18, textIndent: 24, textAlign: "justify" }}>{p}</div>
+          <div key={i} style={{ fontSize: 13, color: "#1e293b", lineHeight: 1.8, marginBottom: 20, textIndent: 28, textAlign: "justify" }}>{p}</div>
         ))}
-        <div style={{ marginTop: 44, fontSize: 12, color: "#141b2b", lineHeight: 1.9 }}>
+        <div style={{ marginTop: 48, fontSize: 13, color: "#0f172a", lineHeight: 1.8 }}>
           <div>Yours sincerely,</div>
-          <div style={{ fontWeight: 700, marginTop: 28, fontStyle: "italic" }}>{name}</div>
+          <div style={{ fontWeight: 700, marginTop: 32, fontStyle: "italic" }}>{name}</div>
         </div>
       </div>
     </div>
@@ -593,31 +593,31 @@ function ClassicLetter({ template, name, title, email, phone, date, recipientNam
 function CreativeLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif", display: "flex" }}>
-      <div style={{ width: 8, background: template.accentColor, flexShrink: 0 }} />
-      <div style={{ flex: 1, padding: "48px 52px 52px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 }}>
+      <div style={{ width: 10, background: template.accentColor, flexShrink: 0 }} />
+      <div style={{ flex: 1, padding: "52px 56px 56px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 36 }}>
           <div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: "#141b2b" }}>{name}</div>
+            <div style={{ fontSize: 26, fontWeight: 700, color: "#0f172a" }}>{name}</div>
             <div style={{ fontSize: 13, fontWeight: 600, color: template.accentColor, marginTop: 4 }}>{title}</div>
-            <div style={{ fontSize: 11, color: "#6b7280", marginTop: 8 }}>{email} · {phone}</div>
+            <div style={{ fontSize: 11, color: "#64748b", marginTop: 10 }}>{email} · {phone}</div>
           </div>
-          <div style={{ background: template.accentColor + "18", borderRadius: 12, padding: "10px 16px", fontSize: 11, fontWeight: 700, color: template.accentColor }}>
+          <div style={{ background: template.accentColor + "18", borderRadius: 14, padding: "12px 18px", fontSize: 11, fontWeight: 700, color: template.accentColor }}>
             {date}
           </div>
         </div>
-        <div style={{ height: 1, background: "#e5e7eb", marginBottom: 32 }} />
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 32 }}>{recipientTitle}, {company}</div>
-        <div style={{ fontSize: 12, color: "#141b2b", lineHeight: 1.85, fontWeight: 600, marginBottom: 20 }}>
+        <div style={{ height: 1, background: "#f1f5f9", marginBottom: 36 }} />
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 36 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 20 }}>
           Dear {recipientName},
         </div>
         {body.map((p, i) => (
-          <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.85, marginBottom: 16, textAlign: "justify" }}>{p}</div>
+          <div key={i} style={{ fontSize: 13, color: "#1e293b", lineHeight: 1.7, marginBottom: 18, textAlign: "justify" }}>{p}</div>
         ))}
-        <div style={{ marginTop: 40, fontSize: 12, color: "#141b2b", lineHeight: 1.85 }}>
+        <div style={{ marginTop: 44, fontSize: 13, color: "#0f172a", lineHeight: 1.7 }}>
           <div>Best regards,</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 24 }}>
-            <div style={{ height: 3, width: 28, background: template.accentColor, borderRadius: 2 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
+            <div style={{ height: 3, width: 32, background: template.accentColor, borderRadius: 2 }} />
             <span style={{ fontWeight: 700 }}>{name}</span>
           </div>
         </div>
@@ -629,25 +629,25 @@ function CreativeLetter({ template, name, title, email, phone, date, recipientNa
 function MinimalLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
-      <div style={{ padding: "52px 64px 0" }}>
-        <div style={{ fontSize: 28, fontWeight: 700, color: "#141b2b", letterSpacing: -0.5 }}>{name}</div>
-        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 8 }}>{email} · {phone}</div>
-        <div style={{ height: 1, background: template.accentColor + "60", marginTop: 24 }} />
+      <div style={{ padding: "56px 64px 0" }}>
+        <div style={{ fontSize: 32, fontWeight: 700, color: "#0f172a", letterSpacing: -0.5 }}>{name}</div>
+        <div style={{ fontSize: 13, color: "#64748b", marginTop: 10 }}>{email} · {phone}</div>
+        <div style={{ height: 1, background: template.accentColor + "40", marginTop: 28 }} />
       </div>
-      <div style={{ padding: "36px 64px 52px" }}>
-        <div style={{ fontSize: 11, color: "#9ca3af", marginBottom: 24 }}>{date}</div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 36 }}>{recipientTitle}, {company}</div>
-        <div style={{ fontSize: 12, color: "#141b2b", lineHeight: 1.9, marginBottom: 20 }}>
+      <div style={{ padding: "40px 64px 64px" }}>
+        <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 28 }}>{date}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 40 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.8, marginBottom: 24 }}>
           Dear {recipientName},
         </div>
         {body.map((p, i) => (
-          <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.9, marginBottom: 18, textAlign: "justify" }}>{p}</div>
+          <div key={i} style={{ fontSize: 13, color: "#1e293b", lineHeight: 1.8, marginBottom: 20, textAlign: "justify" }}>{p}</div>
         ))}
-        <div style={{ height: 1, background: template.accentColor + "30", marginTop: 44, marginBottom: 32 }} />
-        <div style={{ fontSize: 12, color: "#141b2b", lineHeight: 1.9 }}>
-          <div style={{ color: "#9ca3af", fontSize: 11 }}>Sincerely,</div>
-          <div style={{ fontWeight: 700, marginTop: 10 }}>{name}</div>
+        <div style={{ height: 1, background: template.accentColor + "20", marginTop: 48, marginBottom: 36 }} />
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.8 }}>
+          <div style={{ color: "#94a3b8", fontSize: 11 }}>Sincerely,</div>
+          <div style={{ fontWeight: 700, marginTop: 12 }}>{name}</div>
         </div>
       </div>
     </div>
@@ -657,28 +657,28 @@ function MinimalLetter({ template, name, title, email, phone, date, recipientNam
 function BoldLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 595, minHeight: 842, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
-      <div style={{ background: template.accentColor, padding: "40px 52px 32px", color: "#fff" }}>
-        <div style={{ fontSize: 26, fontWeight: 800 }}>{name}</div>
-        <div style={{ fontSize: 13, opacity: 0.9, marginTop: 4 }}>{title}</div>
-        <div style={{ display: "flex", gap: 24, marginTop: 16, fontSize: 11, opacity: 0.8 }}>
+      <div style={{ background: template.accentColor, padding: "44px 56px 36px", color: "#fff" }}>
+        <div style={{ fontSize: 28, fontWeight: 800 }}>{name}</div>
+        <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>{title}</div>
+        <div style={{ display: "flex", gap: 24, marginTop: 18, fontSize: 11, opacity: 0.8 }}>
           <span>{email}</span>
           <span>{phone}</span>
         </div>
       </div>
-      <div style={{ padding: "40px 52px 52px" }}>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 6 }}>{date}</div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#141b2b" }}>{recipientName}</div>
-        <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 32 }}>{recipientTitle}, {company}</div>
-        <div style={{ fontSize: 12, color: "#141b2b", lineHeight: 1.85, fontWeight: 600, marginBottom: 20 }}>
+      <div style={{ padding: "44px 56px 56px" }}>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8 }}>{date}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
+        <div style={{ fontSize: 11, color: "#64748b", marginBottom: 36 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 20 }}>
           Dear {recipientName},
         </div>
         {body.map((p, i) => (
-          <div key={i} style={{ fontSize: 12, color: "#374151", lineHeight: 1.85, marginBottom: 16, textAlign: "justify" }}>{p}</div>
+          <div key={i} style={{ fontSize: 13, color: "#1e293b", lineHeight: 1.7, marginBottom: 18, textAlign: "justify" }}>{p}</div>
         ))}
-        <div style={{ marginTop: 40, fontSize: 12, color: "#141b2b", lineHeight: 1.85 }}>
+        <div style={{ marginTop: 44, fontSize: 13, color: "#0f172a", lineHeight: 1.7 }}>
           <div>Sincerely,</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 24 }}>
-            <div style={{ height: 3, width: 36, background: template.accentColor, borderRadius: 2 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 28 }}>
+            <div style={{ height: 3, width: 40, background: template.accentColor, borderRadius: 2 }} />
             <span style={{ fontWeight: 700 }}>{name}</span>
           </div>
         </div>

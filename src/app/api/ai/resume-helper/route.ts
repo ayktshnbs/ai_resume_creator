@@ -156,18 +156,19 @@ Return:
 Write a compelling, professional cover letter for this candidate applying to a "${targetRole}" position.${jobContext}
 
 REQUIREMENTS:
-- 4 paragraphs, each with a clear purpose:
-  1. HOOK: Open with a confident, specific statement about why this role excites them.${jobDesc ? " Reference the company name and role from the job description." : " Reference the role and hint at their strongest qualification."} No generic "I am writing to apply..."
-  2. VALUE PROOF: Highlight 2-3 concrete achievements from their resume that directly map to ${jobDesc ? "the requirements in the job description" : `what a "${targetRole}" needs`}. Use specific examples with context.
-  3. CULTURAL FIT: ${jobDesc ? "Reference specific values, mission, or culture mentioned in the job posting." : `Show understanding of what companies hiring for "${targetRole}" typically value.`} Connect the candidate's approach/philosophy to those values.
-  4. CLOSE: Confident but not arrogant. Express enthusiasm for discussing further. Include a forward-looking statement.
-- Tone: Professional yet human — avoid corporate robot language
-- Length: 250-350 words total
-- Never fabricate experiences — only reference what's in the resume
-- Address to "Dear Hiring Manager" unless a specific name is available in the job description
+- Return ONLY the body paragraphs (usually 3-4 paragraphs).
+- DO NOT include a date, salutation (e.g., "Dear..."), or signature/closing (e.g., "Sincerely..."). The template will handle these.
+- Each paragraph should have a clear purpose:
+  1. HOOK: Open with a confident, specific statement about why this role excites them. No generic "I am writing to apply..."
+  2. VALUE PROOF: Highlight 2-3 concrete achievements from their resume that map to the role.
+  3. CULTURAL FIT: Connect the candidate's approach/philosophy to the company's or role's values.
+  4. CLOSE: Confident but not arrogant. Express enthusiasm for discussing further.
+- Tone: Professional yet human — avoid corporate robot language.
+- Length: 200-300 words total.
+- Never fabricate experiences — only reference what's in the resume.
 
 Return:
-{"resultText":"...full cover letter text..."}`;
+{"resultText":"...body paragraphs only..."}`;
   }
 
   if (action === "analyze_resume") {
@@ -288,16 +289,11 @@ function mockResponse(action: ResumeHelperAction, body: RequestBody): { resultTe
 
   if (action === "generate_cover_letter") {
     return {
-      resultText: `Dear Hiring Manager,
-
-I am writing to express my interest in the ${role} position. My background has helped me build strong communication, organization, and problem-solving skills that can support your team's goals.
+      resultText: `I am writing to express my interest in the ${role} position. My background has helped me build strong communication, organization, and problem-solving skills that can support your team's goals.
 
 In my previous experience, I have focused on understanding needs, improving workflows, and delivering reliable results. I am especially motivated by roles where I can combine practical execution with clear, professional communication.
 
-I would welcome the opportunity to discuss how my experience can contribute to your organization.
-
-Sincerely,
-${name}`
+I would welcome the opportunity to discuss how my experience can contribute to your organization.`
     };
   }
 

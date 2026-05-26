@@ -9,12 +9,15 @@ export async function exportToPdf(
   element: HTMLElement,
   filename: string,
   options: {
-    scale?: number;
     backgroundColor?: string;
     onBeforeCapture?: (clonedDoc: Document) => void;
   } = {}
 ) {
-  const { scale = 2, backgroundColor = "#ffffff", onBeforeCapture } = options;
+  const { backgroundColor = "#ffffff", onBeforeCapture } = options;
+
+  // Standard A4 width at 96dpi is 794px
+  const A4_WIDTH_PX = 794;
+  const captureScale = 1.0; 
 
   // 1. Wait for fonts and images
   await document.fonts.ready;
@@ -38,7 +41,7 @@ export async function exportToPdf(
 
   // 2. Capture with html2canvas-pro
   const canvas = await html2canvas(element, {
-    scale,
+    scale: captureScale,
     useCORS: true,
     backgroundColor,
     logging: false,

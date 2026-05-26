@@ -18,6 +18,7 @@ import {
 } from "@/lib/resume-storage";
 import { useAutoSaveToDb, loadFromDb } from "@/lib/use-db-sync";
 import { emptyResumeData, type EducationItem, type ExperienceItem, type ResumeData, type ResumeReference, type SelectedTemplate } from "@/types/resume";
+import { exportToPdf } from "@/lib/export-utils";
 import { cvLangList, cvLangNames, cvLangFlags, type CvLang } from "@/lib/cv-labels";
 
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
@@ -408,32 +409,8 @@ export default function ResumeBuilderPage() {
 
     setExporting(true);
     try {
-      const html2canvas = (await import("html2canvas-pro")).default;
-      const { jsPDF } = await import("jspdf");
-
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        width: A4_W,
-        windowWidth: A4_W,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdfW = 210;
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      const pageH = 297;
-      const doc = new jsPDF("p", "mm", "a4");
-
-      let y = 0;
-      while (y < pdfH) {
-        if (y > 0) doc.addPage();
-        doc.addImage(imgData, "PNG", 0, -y, pdfW, pdfH);
-        y += pageH;
-      }
-
-      const name = `${resume.firstName || "Resume"}_${resume.lastName || ""}`.replace(/\s+$/, "");
-      doc.save(`${name}.pdf`);
+      const name = `${resume.firstName || "Resume"}_${resume.lastName || ""}`.trim().replace(/\s+/g, "_");
+      await exportToPdf(el, name);
     } catch {
       setAi((prev) => ({ ...prev, error: "PDF export failed. Try using your browser's Print function instead." }));
     } finally {

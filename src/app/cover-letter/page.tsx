@@ -8,6 +8,7 @@ import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
 import { PaymentButton } from "@/components/payment-button";
 import { loadResumeData } from "@/lib/resume-storage";
+import { exportToPdf } from "@/lib/export-utils";
 import Link from "next/link";
 
 type CoverLetterTemplate = {
@@ -186,21 +187,8 @@ export default function CoverLetterPage() {
     if (!letterRef.current) return;
     setExporting(true);
     try {
-      const html2canvas = (await import("html2canvas-pro")).default;
-      const { jsPDF } = await import("jspdf");
-
-      const canvas = await html2canvas(letterRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdfW = 210;
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      const doc = new jsPDF("p", "mm", "a4");
-      doc.addImage(imgData, "PNG", 0, 0, pdfW, Math.min(pdfH, 297));
-      doc.save(`Cover_Letter_${userName.replace(/\s+/g, "_")}.pdf`);
+      const name = `Cover_Letter_${userName.replace(/\s+/g, "_")}`;
+      await exportToPdf(letterRef.current, name);
     } catch {
       alert("PDF export failed. Try using your browser's Print function instead.");
     } finally {

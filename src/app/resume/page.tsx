@@ -1084,8 +1084,8 @@ export default function ResumeBuilderPage() {
   );
 }
 
-const A4_W = 793;
-const A4_H = 1122;
+const A4_W = 794;
+const A4_H = 1123;
 
 function ScaledTemplatePreview({ resume, template }: { resume: ResumeData; template: SelectedTemplate }) {
   const wrapRef = useRef<HTMLDivElement>(null);

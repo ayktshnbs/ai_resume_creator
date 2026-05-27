@@ -306,7 +306,7 @@ export default function CoverLetterPage() {
                     className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel"
                     onClick={(event) => {
                       event.stopPropagation();
-                      void generateCoverLetter(template.id);
+                      selectTemplate(template.id);
                     }}
                     type="button"
                   >
@@ -485,7 +485,7 @@ export default function CoverLetterPage() {
                     />
                   </label>
                 </div>
-                <div ref={letterRef} className="mx-auto w-full max-w-[595px] overflow-hidden rounded-2xl border border-outline/40 bg-white shadow-panel">
+                <ScaledLetterPreview exportRef={letterRef}>
                   <LetterLayout
                     template={activeTemplate}
                     name={userName}
@@ -498,7 +498,7 @@ export default function CoverLetterPage() {
                     company={recipientCompany}
                     body={letterParagraphs.length > 0 ? letterParagraphs : sampleContent.body}
                   />
-                </div>
+                </ScaledLetterPreview>
               </div>
             )}
           </div>
@@ -681,6 +681,67 @@ function BoldLetter({ template, name, title, email, phone, date, recipientName, 
             <div style={{ height: 4, width: 56, background: template.accentColor, borderRadius: 2 }} />
             <span style={{ fontWeight: 700 }}>{name}</span>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const LETTER_W = 794;
+const LETTER_H = 1123;
+
+function ScaledLetterPreview({
+  exportRef,
+  children
+}: {
+  exportRef: React.RefObject<HTMLDivElement | null>;
+  children: React.ReactNode;
+}) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.75);
+  const [innerH, setInnerH] = useState(LETTER_H);
+
+  // Keep exportRef pointing at the unscaled A4 element so the PDF export
+  // can capture it at native size.
+  useEffect(() => {
+    if (exportRef) {
+      (exportRef as React.MutableRefObject<HTMLDivElement | null>).current = innerRef.current;
+    }
+  });
+
+  useEffect(() => {
+    const measure = () => {
+      if (wrapRef.current) {
+        setScale(Math.min(1, wrapRef.current.clientWidth / LETTER_W));
+      }
+      if (innerRef.current) {
+        setInnerH(Math.max(LETTER_H, innerRef.current.scrollHeight));
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    if (innerRef.current) ro.observe(innerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapRef} className="mx-auto w-full max-w-[595px]">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-outline/40 bg-white shadow-panel"
+        style={{ width: LETTER_W * scale, height: innerH * scale }}
+      >
+        <div
+          ref={innerRef}
+          style={{
+            width: LETTER_W,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            background: "#ffffff"
+          }}
+        >
+          {children}
         </div>
       </div>
     </div>

@@ -109,6 +109,24 @@ export function getCVTemplateById(id: number | string | undefined | null) {
   return cvTemplates.find((template) => template.id === numericId);
 }
 
+/**
+ * Source-of-truth for which templates require Pro.
+ *
+ * Categorical gating keeps the registry rows lean (no per-row flag to
+ * maintain) and gives free users 30 templates across three categories —
+ * enough variety that the upgrade ask isn't framed as "you get no options."
+ */
+const PREMIUM_CATEGORIES = new Set<CVTemplateCategory>(["executive", "creative"]);
+
+export function isPremiumTemplate(template: CVTemplateDefinition | undefined | null): boolean {
+  if (!template) return false;
+  return PREMIUM_CATEGORIES.has(template.category);
+}
+
+export function isPremiumTemplateId(id: number | string | undefined | null): boolean {
+  return isPremiumTemplate(getCVTemplateById(id));
+}
+
 export function cvTemplateToParametricConfig(template: CVTemplateDefinition): ParametricConfig {
   return {
     name: template.name,

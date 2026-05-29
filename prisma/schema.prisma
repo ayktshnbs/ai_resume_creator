@@ -16,6 +16,8 @@ model User {
   password      String?
   plan          String    @default("free")
   planExpiresAt DateTime?
+  resumeExports      Int @default(0)
+  coverLetterExports Int @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -23,6 +25,48 @@ model User {
   sessions     Session[]
   resumes      Resume[]
   coverLetters CoverLetter[]
+}
+
+/// Tracks export quota for non-authenticated visitors.
+/// Identified by an HMAC-signed `guest_id` HTTP-only cookie.
+/// `ipHash` and `uaHash` are additional anti-abuse signals (no raw PII stored).
+model GuestSession {
+  id                  String    @id @default(cuid())
+  cookieId            String    @unique
+  ipHash              String
+  uaHash              String
+  resumeExports       Int       @default(0)
+  coverLetterExports  Int       @default(0)
+  migratedToUserId    String?
+  createdAt           DateTime  @default(now())
+  lastSeenAt          DateTime  @default(now())
+
+  @@index([ipHash])
+  @@index([migratedToUserId])
+}
+
+/// Append-only audit + rate-limit source. Every consume call writes a row,
+/// whether it succeeded or not — so refresh / cookie-clearing abuse is visible
+/// to the rate limiter even when the cap would otherwise hide it.
+///
+/// `actorType` is "user" or "guest"; `actorId` is the User.id or GuestSession.cookieId.
+/// `outcome` is one of: "consumed" | "rate_limited" | "cap_reached" | "template_locked".
+model UsageEvent {
+  id          String   @id @default(cuid())
+  actorType   String
+  actorId     String
+  kind        String
+  outcome     String   @default("consumed")
+  delta       Int      @default(1)
+  ipHash      String
+  uaHash      String
+  token       String?
+  refundedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([actorType, actorId, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([token])
 }
 
 model Account {

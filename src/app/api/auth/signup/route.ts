@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { GUEST_COOKIE } from "@/middleware";
+import { migrateGuestToUser } from "@/lib/usage/migrate-guest";
 
 export async function POST(req: Request) {
   try {
@@ -34,6 +37,16 @@ export async function POST(req: Request) {
         password: hashed,
       },
     });
+
+    // Carry the guest's used quota forward so a cookie-clear isn't a free reset.
+    try {
+      const cookieStore = await cookies();
+      const guestRaw = cookieStore.get(GUEST_COOKIE)?.value;
+      await migrateGuestToUser(guestRaw, user.id);
+    } catch (e) {
+      console.error("[Signup] guest migration failed", e);
+      // Non-fatal — the account is still created.
+    }
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 });
   } catch (error) {

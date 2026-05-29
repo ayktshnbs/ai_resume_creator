@@ -3,7 +3,10 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { GUEST_COOKIE } from "@/middleware";
+import { migrateGuestToUser } from "@/lib/usage/migrate-guest";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -53,6 +56,20 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  events: {
+    async signIn({ user }) {
+      // Carry forward any guest export quota the moment the visitor identifies
+      // themselves. Idempotent — migrateGuestToUser only runs once per GuestSession.
+      if (!user?.id) return;
+      try {
+        const cookieStore = await cookies();
+        const guestRaw = cookieStore.get(GUEST_COOKIE)?.value;
+        await migrateGuestToUser(guestRaw, user.id);
+      } catch (e) {
+        console.error("[NextAuth signIn] guest migration failed", e);
+      }
+    }
+  }
 };
 
 const handler = NextAuth(authOptions);

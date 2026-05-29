@@ -10,6 +10,9 @@ import { PaymentButton } from "@/components/payment-button";
 import { loadResumeData } from "@/lib/resume-storage";
 import { exportToPdf } from "@/lib/export-utils";
 import Link from "next/link";
+import { useUsageQuota, type ConsumeFailureReason } from "@/lib/use-usage-quota";
+import { PaywallModal } from "@/components/paywall-modal";
+import { UsageChip } from "@/components/usage-chip";
 
 type CoverLetterTemplate = {
   id: string;
@@ -92,6 +95,11 @@ export default function CoverLetterPage() {
   const [exporting, setExporting] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const { quota, consume, refund } = useUsageQuota();
+  const [paywall, setPaywall] = useState<{ open: boolean; reason: ConsumeFailureReason }>({
+    open: false,
+    reason: "limit_reached"
+  });
   const [jobDescription, setJobDescription] = useState("");
   const [showJobInput, setShowJobInput] = useState(false);
   const [letterDate, setLetterDate] = useState(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
@@ -140,20 +148,8 @@ export default function CoverLetterPage() {
   }
 
   async function generateCoverLetter(templateId: string) {
-    // Guest: 1 free, then sign-in modal
-    if (!session) {
-      const guestCount = getGuestCoverLetterCount();
-      if (guestCount >= 1) {
-        setShowSignIn(true);
-        return;
-      }
-      incrementGuestCoverLetterCount();
-    }
-    // Logged-in non-Pro: 1 free, then upgrade modal
-    if (session && !isPro && coverLetterCount >= 1) {
-      setShowUpgrade(true);
-      return;
-    }
+    // Generating doesn't burn quota — only the export step does. Anyone can
+    // type and tweak; we charge a credit at PDF time.
     setShowUpgrade(false);
     setSelected(templateId);
     setGenerating(true);
@@ -185,11 +181,23 @@ export default function CoverLetterPage() {
 
   async function exportPdf() {
     if (!letterRef.current) return;
+    // Server-side debit FIRST. The button is also visually locked when
+    // remaining=0, but never trust the UI — the consume API is the gate.
+    const debit = await consume("cover_letter");
+    if (!debit.ok) {
+      const reason = "reason" in debit ? debit.reason : "limit_reached";
+      if (reason !== "network_error") {
+        setPaywall({ open: true, reason });
+      }
+      return;
+    }
+    const token = debit.token;
     setExporting(true);
     try {
       const name = `Cover_Letter_${userName.replace(/\s+/g, "_")}`;
       await exportToPdf(letterRef.current, name);
     } catch {
+      await refund(token);
       alert("PDF export failed. Try using your browser's Print function instead.");
     } finally {
       setExporting(false);
@@ -205,53 +213,69 @@ export default function CoverLetterPage() {
   return (
     <AppShell active="cover-letter">
       <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-10 md:py-12">
-        <header className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+        <header className="mb-10 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="max-w-2xl">
-            <p className="mb-3 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               {t("coverLetter.gallery")}
             </p>
             <h1 className="headline-xl text-4xl text-ink md:text-5xl">
               {t("coverLetter.title")}
             </h1>
-            <p className="mt-3 text-lg leading-8 text-muted">
+            <p className="mt-3 max-w-xl text-base leading-7 text-muted md:text-lg">
               {t("coverLetter.subtitle")}
             </p>
           </div>
-          <div className="soft-card flex items-center gap-3 rounded-2xl px-5 py-4 text-sm">
-            <span className="icon-bounce flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 text-success">
+          <div className="soft-card flex items-center gap-3 rounded-2xl px-4 py-3 text-sm">
+            <span className="icon-bounce flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-success/10 text-success">
               <Icon name="sparkle" />
             </span>
-            <span className="leading-6 text-muted">
+            <span className="max-w-xs leading-5 text-muted">
               <strong className="text-ink">{t("coverLetter.aiPowered")}</strong>{" "}
               {isPro ? t("coverLetter.aiDesc") : t("coverLetter.aiUpgradeDesc")}
             </span>
           </div>
         </header>
 
+        {/* Process strip */}
+        <ol className="mb-8 grid gap-3 rounded-2xl border border-outline/30 bg-surface-soft/60 p-4 sm:grid-cols-3">
+          <ProcessStep n={1} label="Pick a template" />
+          <ProcessStep n={2} label="Add the job description" active={Boolean(jobDescription.trim())} />
+          <ProcessStep n={3} label="Edit & export" active={Boolean(generatedText || selected)} />
+        </ol>
+
         {/* Job Description Input */}
-        <div className="mb-10 rounded-2xl border border-outline/30 bg-surface-soft p-6">
+        <div className="mb-10 rounded-3xl border border-outline/30 bg-surface p-5 shadow-ambient">
           <button
-            className="flex w-full items-center justify-between text-left"
+            className="flex w-full items-center justify-between gap-3 text-left"
             onClick={() => setShowJobInput(!showJobInput)}
             type="button"
           >
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <Icon name="work" />
               </span>
               <div>
-                <p className="text-sm font-bold text-ink">Paste a job description for a tailored cover letter</p>
+                <p className="text-sm font-bold text-ink">Tailor the letter to a specific job</p>
                 <p className="mt-0.5 text-xs text-muted">
-                  {jobDescription.trim() ? "Job description added — your cover letter will be tailored to it" : "Optional — AI will match your experience to the job requirements"}
+                  {jobDescription.trim()
+                    ? `Tailored to ${jobDescription.length} chars of job description`
+                    : "Optional — paste the job post for a sharper letter"}
                 </p>
               </div>
             </div>
-            <Icon name={showJobInput ? "close" : "add"} className="text-muted" />
+            <span
+              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+                showJobInput ? "rotate-45 bg-primary/10 text-primary" : "bg-surface-soft text-muted"
+              }`}
+            >
+              <Icon name="add" className="text-[18px]" />
+            </span>
           </button>
           {showJobInput && (
             <div className="mt-5">
               <textarea
-                className="field min-h-[140px] resize-none text-sm"
+                className="field min-h-[140px] resize-none text-sm leading-6"
                 onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Paste the full job description here — include job title, requirements, responsibilities, and company info for best results..."
                 value={jobDescription}
@@ -259,7 +283,7 @@ export default function CoverLetterPage() {
               {jobDescription.trim() && (
                 <div className="mt-3 flex items-center gap-2 text-xs text-success">
                   <Icon name="check" className="text-sm" />
-                  <span className="font-semibold">Job description will be used to tailor your cover letter</span>
+                  <span className="font-semibold">Job description will tailor the AI-generated copy</span>
                 </div>
               )}
             </div>
@@ -420,32 +444,63 @@ export default function CoverLetterPage() {
         )}
 
         {(selected || generating || generatedText) && (
-          <div ref={resultRef} className="mt-12 scroll-mt-8 rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel">
-            <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+          <div
+            ref={resultRef}
+            className="mt-12 scroll-mt-8 overflow-hidden rounded-3xl border border-outline/30 bg-surface shadow-panel"
+          >
+            <div className="flex flex-col justify-between gap-4 border-b border-outline/30 bg-surface-soft/70 px-6 py-5 lg:flex-row lg:items-center lg:px-8">
               <div>
-                <h2 className="section-title text-2xl font-bold text-ink">{selected ? "Fill Cover Letter" : t("coverLetter.generated")}</h2>
-                <p className="mt-3 text-sm text-muted">Edit the recipient details and letter body. The preview updates as you type.</p>
+                <p className="font-label text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                  Editor
+                </p>
+                <h2 className="mt-1 text-xl font-extrabold tracking-tight text-ink md:text-2xl">
+                  {selected ? "Fill in the details" : t("coverLetter.generated")}
+                </h2>
+                <p className="mt-1 text-sm text-muted">
+                  Edit the recipient details and letter body. Preview updates as you type.
+                </p>
               </div>
               {(selected || generatedText) && (
-                <div className="flex gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <UsageChip quota={quota} kind="cover_letter" className="mr-1" />
+                  {isPro && (
+                    <button
+                      className="btn-spring flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-bold text-primary disabled:opacity-50"
+                      onClick={() => void generateCoverLetter(selected || templates[0].id)}
+                      disabled={generating}
+                      type="button"
+                    >
+                      <Icon name="sparkle" className="text-[14px]" />
+                      {generating ? "Drafting…" : "Regenerate with AI"}
+                    </button>
+                  )}
                   <button
-                    className="btn-spring rounded-xl border border-outline/70 bg-surface px-4 py-2 text-sm font-bold text-ink"
+                    className="btn-spring rounded-xl border border-outline/70 bg-surface px-3 py-2 text-xs font-bold text-ink"
                     onClick={() => void navigator.clipboard.writeText(letterBody)}
                     type="button"
                   >
                     {t("coverLetter.copyText")}
                   </button>
-                  <button
-                    className="btn-glow rounded-xl bg-ink px-4 py-2 text-sm font-bold text-background disabled:opacity-50"
-                    disabled={exporting}
-                    onClick={() => void exportPdf()}
-                    type="button"
-                  >
-                    {exporting ? t("resume.exporting") : t("resume.exportPdf")}
-                  </button>
+                  {(() => {
+                    const locked = Boolean(quota && !quota.isPro && quota.cover_letter.remaining <= 0);
+                    return (
+                      <button
+                        className={`btn-glow rounded-xl px-3 py-2 text-xs font-bold text-background transition disabled:opacity-50 ${
+                          locked ? "bg-ink/60 ring-2 ring-warning/30 saturate-50" : "bg-ink"
+                        }`}
+                        disabled={exporting}
+                        onClick={() => void exportPdf()}
+                        type="button"
+                        title={locked ? "Free limit reached — upgrade to continue" : "Export PDF"}
+                      >
+                        {exporting ? t("resume.exporting") : locked ? "Export PDF · 🔒" : t("resume.exportPdf")}
+                      </button>
+                    );
+                  })()}
                 </div>
               )}
             </div>
+            <div className="p-6 lg:p-8">
             {generating ? (
               <div className="space-y-3">
                 <div className="h-3 w-3/4 animate-pulse rounded bg-outline/30" />
@@ -501,10 +556,37 @@ export default function CoverLetterPage() {
                 </ScaledLetterPreview>
               </div>
             )}
+            </div>
           </div>
         )}
       </div>
+      <PaywallModal
+        open={paywall.open}
+        reason={paywall.reason}
+        kind="cover_letter"
+        returnPath="/cover-letter"
+        onClose={() => setPaywall((p) => ({ ...p, open: false }))}
+      />
     </AppShell>
+  );
+}
+
+function ProcessStep({ n, label, active = false }: { n: number; label: string; active?: boolean }) {
+  return (
+    <li
+      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
+        active ? "bg-surface ring-1 ring-primary/20" : "bg-transparent"
+      }`}
+    >
+      <span
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+          active ? "bg-primary text-white" : "bg-surface text-muted ring-1 ring-outline/40"
+        }`}
+      >
+        {active ? <Icon name="check" className="text-[14px]" /> : n}
+      </span>
+      <span className={`text-sm font-semibold ${active ? "text-ink" : "text-muted"}`}>{label}</span>
+    </li>
   );
 }
 

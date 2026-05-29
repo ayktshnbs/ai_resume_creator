@@ -15,12 +15,15 @@ import type { SelectedTemplate, TemplateLayout } from "@/types/resume";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 import { sampleResume } from "@/components/cv-templates/sample-data";
-import { cvTemplates, cvTemplateToSelectedTemplate } from "@/templates/cvTemplates";
+import { cvTemplates, cvTemplateToSelectedTemplate, isPremiumTemplate } from "@/templates/cvTemplates";
+import { PaywallModal } from "@/components/paywall-modal";
+import { useUsageQuota, type ConsumeFailureReason } from "@/lib/use-usage-quota";
 
 type TemplateCard = SelectedTemplate & {
   text: string;
   tags: string[];
   category: string;
+  premium?: boolean;
 };
 
 const handcraftedTemplates: TemplateCard[] = [
@@ -64,6 +67,7 @@ const registryCards: TemplateCard[] = cvTemplates.map((template) => ({
   text: template.description,
   tags: [`#${template.id}`, ...template.tags],
   category: template.category,
+  premium: isPremiumTemplate(template),
 }));
 
 const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards, ...registryCards];
@@ -114,6 +118,11 @@ export default function TemplatesPage() {
 
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const { quota } = useUsageQuota();
+  const [paywall, setPaywall] = useState<{ open: boolean; reason: ConsumeFailureReason }>({
+    open: false,
+    reason: "needs_upgrade"
+  });
 
   function getGuestResumeCount(): number {
     if (typeof window === "undefined") return 0;
@@ -133,6 +142,17 @@ export default function TemplatesPage() {
   }
 
   function useTemplate(template: TemplateCard) {
+    // Premium templates require Pro. Refuse to even save the selection so a
+    // free user can't end up with a premium template silently bound to their
+    // editor session (which would then fail on export with a confusing error).
+    const isPro = Boolean(quota?.isPro);
+    if (template.premium && !isPro) {
+      // template_locked has its own copy ("This template is part of Pro").
+      // Guests still see the sign-up path; logged-in non-Pro users see upgrade.
+      setPaywall({ open: true, reason: "template_locked" });
+      return;
+    }
+
     saveSelectedTemplate({
       templateId: template.templateId,
       name: template.name,
@@ -211,10 +231,18 @@ export default function TemplatesPage() {
             >
               <div className="relative">
                 <TemplateCardPreview templateName={template.name} />
+                {template.premium && !quota?.isPro && (
+                  <span className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-ink/85 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-lg backdrop-blur">
+                    <Icon name="sparkle" className="text-[12px]" />
+                    Pro
+                  </span>
+                )}
                 <div className="absolute inset-0 flex items-center justify-center bg-surface/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
-                  <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5">
-                    <Icon name="edit" />
-                    {t("templates.useTemplate")}
+                  <div className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5 ${
+                    template.premium && !quota?.isPro ? "bg-ink" : "primary-gradient"
+                  }`}>
+                    <Icon name={template.premium && !quota?.isPro ? "sparkle" : "edit"} />
+                    {template.premium && !quota?.isPro ? "Unlock with Pro" : t("templates.useTemplate")}
                   </div>
                 </div>
               </div>
@@ -331,6 +359,13 @@ export default function TemplatesPage() {
           </ModalPortal>
         )}
       </div>
+      <PaywallModal
+        open={paywall.open}
+        reason={paywall.reason}
+        kind="resume"
+        returnPath="/templates"
+        onClose={() => setPaywall((p) => ({ ...p, open: false }))}
+      />
     </AppShell>
   );
 }

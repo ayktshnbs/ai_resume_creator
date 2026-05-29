@@ -183,11 +183,10 @@ export default function Home() {
           100% { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
         @keyframes letter-drop {
-          0%, 100% { opacity: 0; transform: translateY(-60px); }
-          8% { opacity: 1; transform: translateY(5px); }
-          11% { transform: translateY(-2px); }
-          14%, 68% { opacity: 1; transform: translateY(0); }
-          80% { opacity: 0; transform: translateY(14px); }
+          0% { opacity: 0; transform: translateY(-40px); }
+          60% { opacity: 1; transform: translateY(4px); }
+          80% { transform: translateY(-1px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes hero-slide-in {
           0% { opacity: 0; transform: translateX(-40px); }
@@ -202,7 +201,7 @@ export default function Home() {
           100% { background-position: 200% center; }
         }
         .hero-fade-up { animation: hero-fade-up 0.8s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
-        .letter-drop { display: inline-block; animation: letter-drop 6s ease-in-out infinite; opacity: 0; }
+        .letter-drop { display: inline-block; animation: letter-drop 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
         .letter-accent { color: #6366f1; }
         .hero-delay-1 { animation-delay: 0.1s; }
         .hero-delay-2 { animation-delay: 0.25s; }
@@ -270,48 +269,117 @@ export default function Home() {
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
             </a>
             <button
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/50 bg-white/30 text-[#111827] backdrop-blur-sm transition hover:bg-white/60 md:hidden"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/50 bg-white/40 text-[#111827] backdrop-blur-sm transition hover:bg-white/70 md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              ) : (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-              )}
+              {/* Animated hamburger → X */}
+              <span className="relative block h-3.5 w-5">
+                <span
+                  className={`absolute left-0 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ${
+                    mobileMenuOpen ? "top-1/2 -translate-y-1/2 rotate-45" : "top-0"
+                  }`}
+                />
+                <span
+                  className={`absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 rounded-full bg-current transition-opacity duration-200 ${
+                    mobileMenuOpen ? "opacity-0" : "opacity-100"
+                  }`}
+                />
+                <span
+                  className={`absolute left-0 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ${
+                    mobileMenuOpen ? "top-1/2 -translate-y-1/2 -rotate-45" : "bottom-0"
+                  }`}
+                />
+              </span>
             </button>
           </div>
         </nav>
-        {mobileMenuOpen && (
-          <div className="border-t border-white/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(239,246,255,0.9))] backdrop-blur-2xl md:hidden">
-            <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4">
-              {[
-                { label: "Features", href: "#features" },
-                { label: "Builder", href: "/resume" },
-                { label: "Templates", href: "/templates" },
-                { label: "Pricing", href: "#pricing" },
-              ].map((link) => (
+      </header>
+
+      {/* Mobile menu — full-screen overlay with slide-down panel.
+          Rendered outside the sticky <header> so the backdrop covers the page. */}
+      <div
+        className={`fixed inset-0 z-[60] md:hidden ${mobileMenuOpen ? "" : "pointer-events-none"}`}
+        aria-hidden={!mobileMenuOpen}
+      >
+        <div
+          className={`absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity duration-300 ${
+            mobileMenuOpen ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        <nav
+          className={`absolute inset-x-3 top-3 origin-top rounded-3xl border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,255,0.96))] p-5 shadow-2xl ring-1 ring-black/[0.04] backdrop-blur-xl transition-all duration-300 ease-out ${
+            mobileMenuOpen
+              ? "translate-y-0 scale-100 opacity-100"
+              : "-translate-y-2 scale-[0.98] opacity-0"
+          }`}
+          aria-label="Primary"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <span className="flex items-center gap-2 text-base font-bold text-[#111827]">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#3b82f6] text-[10px] font-extrabold text-white shadow-md shadow-[#6366f1]/25">
+                CV
+              </span>
+              Menu
+            </span>
+            <button
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f4f6] text-[#4b5563] transition hover:bg-[#e5e7eb] hover:text-[#111827]"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+              type="button"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <ul className="space-y-1">
+            {[
+              { label: "Features", href: "#features", icon: "sparkle" as const },
+              { label: "Builder", href: "/resume", icon: "document" as const },
+              { label: "Templates", href: "/templates", icon: "document" as const },
+              { label: "Pricing", href: "#pricing", icon: "sparkle" as const }
+            ].map((link) => (
+              <li key={link.label}>
                 <a
-                  key={link.label}
-                  className="rounded-xl px-4 py-3 text-sm font-semibold text-[#111827] transition hover:bg-white/60"
+                  className="group flex items-center justify-between rounded-2xl px-3 py-3.5 text-[15px] font-semibold text-[#111827] transition hover:bg-[#eef2ff]"
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  {link.label}
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#eef2ff] text-[#6366f1] transition group-hover:bg-white">
+                      <SvgIcon className="h-4 w-4" name={link.icon} />
+                    </span>
+                    {link.label}
+                  </span>
+                  <SvgIcon className="h-4 w-4 text-[#9ca3af] transition group-hover:translate-x-0.5 group-hover:text-[#6366f1]" name="arrow-right" />
                 </a>
-              ))}
-              <div className="mt-3 flex flex-col gap-2 border-t border-white/30 pt-4">
-                <a className="rounded-xl px-4 py-3 text-center text-sm font-bold text-[#111827] transition hover:bg-white/60" href="/signin">
-                  Sign in
-                </a>
-                <a className="rounded-xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-4 py-3 text-center text-sm font-bold text-white shadow-lg shadow-[#6366f1]/20" href="/signup">
-                  Get started free
-                </a>
-              </div>
-            </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-5 flex flex-col gap-2.5 border-t border-[#e5e7eb] pt-5">
+            <a
+              className="flex items-center justify-center rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 text-sm font-bold text-[#111827] transition hover:border-[#6366f1]/40 hover:bg-[#f8faff]"
+              href="/signin"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Sign in
+            </a>
+            <a
+              className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition hover:brightness-105 active:scale-[0.98]"
+              href="/signup"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Get started free
+              <SvgIcon className="h-3.5 w-3.5" name="arrow-right" />
+            </a>
           </div>
-        )}
-      </header>
+        </nav>
+      </div>
 
       {/* Hero */}
       <section
@@ -320,8 +388,8 @@ export default function Home() {
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setMouse({ x: 0, y: 0 })}
       >
-        {/* 3D Water Balloons */}
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        {/* 3D Water Balloons — softened so they read as ambient depth, not foreground noise */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-70">
           {/* Blue balloon — large */}
           <div
             className="balloon balloon-1"
@@ -388,12 +456,12 @@ export default function Home() {
         <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(113,119,134,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.03)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
         <div className="relative z-10 mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
           <div className="flex flex-col justify-center py-10">
-            <div className="hero-fade-up hero-delay-1 mb-6 flex items-center gap-3">
-              <span className="rounded-full bg-primary/10 px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.15em] text-primary">
-                New: AI Power-Up
+            <div className="hero-fade-up hero-delay-1 mb-6 inline-flex w-fit items-center gap-2.5 rounded-full border border-[#6366f1]/15 bg-white/70 py-1 pl-1 pr-3 shadow-sm backdrop-blur-sm">
+              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+                <SvgIcon className="h-3 w-3" name="sparkle" />
+                New
               </span>
-              <span className="h-1 w-1 rounded-full bg-[#d1d5db]" />
-              <span className="text-xs font-medium text-[#6b7280]">Trusted by 50k+ job seekers</span>
+              <span className="text-xs font-semibold text-[#374151]">AI Power-Up is live · 50k+ job seekers building</span>
             </div>
             <h1 className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-[#111827] sm:text-5xl md:text-7xl">
               {(() => {

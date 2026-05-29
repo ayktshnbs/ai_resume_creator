@@ -178,6 +178,62 @@ const translations = {
   "common.resume": { en: "resume", tr: "CV" },
   "common.coverLetter": { en: "cover letter", tr: "ön yazı" },
   "common.workspace": { en: "Resume workspace", tr: "CV çalışma alanı" },
+  "common.previous": { en: "Previous", tr: "Önceki" },
+  "common.next": { en: "Next", tr: "Sonraki" },
+  "common.continue": { en: "Continue", tr: "Devam" },
+  "common.finish": { en: "Finish & Review", tr: "Bitir ve İncele" },
+  "common.optional": { en: "Optional", tr: "İsteğe bağlı" },
+
+  // Resume builder — wizard
+  "builder.progress": { en: "Progress", tr: "İlerleme" },
+  "builder.preview": { en: "Preview", tr: "Önizleme" },
+  "builder.viewPreview": { en: "View preview", tr: "Önizlemeyi gör" },
+  "builder.hidePreview": { en: "Hide preview", tr: "Önizlemeyi gizle" },
+
+  "step.import": { en: "Import", tr: "İçe Aktar" },
+  "step.import.title": { en: "Start with what you already have", tr: "Var olanla başlayın" },
+  "step.import.desc": { en: "Upload an old CV, paste from LinkedIn, or skip this step to start from scratch.", tr: "Eski bir CV yükleyin, LinkedIn'den yapıştırın veya sıfırdan başlayın." },
+  "step.import.tip": { en: "AI extracts your name, history, skills, and education in a few seconds — saves 20+ minutes of typing.", tr: "Yapay zeka adınızı, geçmişinizi ve yetkinliklerinizi saniyeler içinde çıkarır — 20+ dakika kazandırır." },
+
+  "step.profile": { en: "Profile", tr: "Profil" },
+  "step.profile.title": { en: "Your professional identity", tr: "Profesyonel kimliğiniz" },
+  "step.profile.desc": { en: "The header information every recruiter sees first. Keep it precise and current.", tr: "İşe alım uzmanlarının ilk gördüğü bilgiler. Net ve güncel tutun." },
+  "step.profile.tip": { en: "Use a headshot taken in the last 2 years with neutral background. Avoid group photos or sunglasses.", tr: "Son 2 yıl içinde, sade arka planlı bir fotoğraf kullanın. Grup fotoğrafı veya güneş gözlüğü olmasın." },
+
+  "step.summary": { en: "Summary", tr: "Özet" },
+  "step.summary.title": { en: "Your two-sentence elevator pitch", tr: "İki cümlelik tanıtım yazınız" },
+  "step.summary.desc": { en: "A tight summary tells recruiters in 5 seconds why you fit. AI can polish it.", tr: "İyi bir özet 5 saniyede neden uygun olduğunuzu anlatır. Yapay zeka cilalayabilir." },
+  "step.summary.tip": { en: "Lead with your strongest result (\"Shipped X to Y users\") — vague summaries get skimmed.", tr: "En güçlü sonucunuzla başlayın (\"X'i Y kullanıcıya ulaştırdım\") — belirsiz özetler atlanır." },
+
+  "step.experience": { en: "Experience", tr: "Deneyim" },
+  "step.experience.title": { en: "Your professional history", tr: "İş deneyiminiz" },
+  "step.experience.desc": { en: "Most recent role first. Each bullet should start with a strong verb and end with a measurable outcome.", tr: "En son pozisyonunuz başta. Her madde güçlü bir fiille başlasın ve ölçülebilir bir sonuçla bitsin." },
+  "step.experience.tip": { en: "Numbers beat adjectives. \"Cut p95 latency 38%\" lands better than \"improved performance significantly.\"", tr: "Sayılar sıfatlardan iyidir. \"P95 gecikmeyi %38 azalttım\" \"performansı çok iyileştirdim\"den daha güçlüdür." },
+
+  "step.education": { en: "Education", tr: "Eğitim" },
+  "step.education.title": { en: "Academic background", tr: "Akademik geçmiş" },
+  "step.education.desc": { en: "Degrees, certifications, and notable coursework that matter for the roles you want.", tr: "Hedeflediğiniz roller için önemli derece ve sertifikalar." },
+  "step.education.tip": { en: "Only list a GPA if it's 3.5+ and you're within 3 years of graduating. Otherwise skip it.", tr: "GPA'yı yalnızca 3.5+ ise ve mezuniyetinizden 3 yıl geçmediyse ekleyin. Aksi halde atlayın." },
+
+  "step.skills": { en: "Skills", tr: "Yetkinlikler" },
+  "step.skills.title": { en: "Core competencies", tr: "Temel yetkinlikler" },
+  "step.skills.desc": { en: "10–20 keywords that match the roles you're targeting. ATS systems scan for these first.", tr: "Hedeflediğiniz rollere uygun 10-20 anahtar kelime. ATS sistemleri önce bunları tarar." },
+  "step.skills.tip": { en: "Mix hard skills (tools, frameworks) with role-specific soft skills. Skip the generic ones like \"teamwork.\"", tr: "Teknik becerilerle (araç, framework) role özgü soft skill'leri birleştirin. \"Takım çalışması\" gibi geneller olmasın." },
+
+  "step.languages": { en: "Languages", tr: "Diller" },
+  "step.languages.title": { en: "Languages you work in", tr: "Çalıştığınız diller" },
+  "step.languages.desc": { en: "Spoken or written. Optional — add when relevant for the role.", tr: "Konuşma veya yazma. İsteğe bağlı — rol için önemliyse ekleyin." },
+  "step.languages.tip": { en: "Use clear proficiency labels like Native / Fluent / Conversational. Avoid vague \"intermediate.\"", tr: "Native / Fluent / Conversational gibi net seviyeler kullanın. \"Orta\" gibi belirsiz olmasın." },
+
+  "step.review": { en: "Review", tr: "İncele" },
+  "step.review.title": { en: "Final check before export", tr: "Dışa aktarmadan önce son kontrol" },
+  "step.review.desc": { en: "Confirm every section is complete and export your polished resume.", tr: "Her bölümün eksiksiz olduğunu doğrulayın ve CV'nizi dışa aktarın." },
+  "step.review.tip": { en: "Run \"Audit Resume\" for an AI-powered score with strengths, gaps, and recommendations.", tr: "AI destekli puan, güçlü yönler ve eksikler için \"CV'yi Analiz Et\" çalıştırın." },
+  "step.review.complete": { en: "Complete", tr: "Tamam" },
+  "step.review.incomplete": { en: "Needs attention", tr: "İlgi bekliyor" },
+  "step.review.jumpTo": { en: "Edit", tr: "Düzenle" },
+  "step.review.exportReady": { en: "Your resume is ready to export.", tr: "CV'niz dışa aktarmaya hazır." },
+  "step.review.finishFirst": { en: "Finish remaining sections for the strongest result.", tr: "En iyi sonuç için kalan bölümleri tamamlayın." },
 } as const;
 
 type TranslationKey = keyof typeof translations;

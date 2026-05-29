@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useUsageQuota, type ConsumeFailureReason } from "@/lib/use-usage-quota";
 import { PaywallModal } from "@/components/paywall-modal";
 import { UsageChip } from "@/components/usage-chip";
+import { useToast } from "@/components/toast";
 
 type CoverLetterTemplate = {
   id: string;
@@ -87,6 +88,7 @@ export default function CoverLetterPage() {
   const { data: session, status } = useSession();
   const { t } = useI18n();
   const { isPro, coverLetterCount } = useProStatus();
+  const { toast } = useToast();
   const letterRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -198,7 +200,7 @@ export default function CoverLetterPage() {
       await exportToPdf(letterRef.current, name);
     } catch {
       await refund(token);
-      alert("PDF export failed. Try using your browser's Print function instead.");
+      toast("PDF export failed. Try your browser's Print function instead.", "error");
     } finally {
       setExporting(false);
     }

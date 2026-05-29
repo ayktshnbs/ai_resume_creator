@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import type { ResumeData } from "@/types/resume";
+import { throttle } from "@/lib/usage/throttle";
 
 type ResumeHelperAction =
   | "improve_summary"
@@ -28,6 +29,10 @@ type RequestBody = {
 };
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
+/** Caps on free-text inputs so one request can't run up an unbounded token bill. */
+const MAX_TEXT_CHARS = 40_000;
+const MAX_JOB_DESC_CHARS = 12_000;
+const MAX_RESUME_CHARS = 80_000;
 
 export async function POST(request: Request) {
   let body: RequestBody | null = null;
@@ -42,8 +47,28 @@ export async function POST(request: Request) {
     const effectiveKey = body.userApiKey || process.env.OPENAI_API_KEY;
 
     if (!effectiveKey) {
-      console.log("[AI] No API key configured, using mock response");
       return NextResponse.json(mockResponse(action, body));
+    }
+
+    // Bound input size regardless of whose key pays.
+    if (
+      (body.text?.length ?? 0) > MAX_TEXT_CHARS ||
+      (body.jobDescription?.length ?? 0) > MAX_JOB_DESC_CHARS ||
+      (body.resumeData ? JSON.stringify(body.resumeData).length : 0) > MAX_RESUME_CHARS
+    ) {
+      return NextResponse.json({ error: "Input is too large to process." }, { status: 413 });
+    }
+
+    // Only rate-limit when the request would spend OUR OpenAI budget. If the
+    // user supplied their own key, it's their cost — let them through.
+    if (!body.userApiKey) {
+      const gate = await throttle("ai");
+      if (!gate.ok) {
+        return NextResponse.json(
+          { error: "Too many AI requests. Please wait a minute and try again." },
+          { status: 429, headers: { "Retry-After": String(gate.retryAfterSec) } }
+        );
+      }
     }
 
     const client = new OpenAI({ apiKey: effectiveKey });
@@ -56,7 +81,6 @@ export async function POST(request: Request) {
     });
 
     const output = response.output_text?.trim() || "";
-    console.log("[AI] Raw output length:", output.length, "preview:", output.slice(0, 300));
     const parsed = parseJson(output);
 
     if (parsed) {
@@ -309,11 +333,7 @@ I would welcome the opportunity to discuss how my experience can contribute to y
 }
 
 function mockExtract(text: string): Partial<ResumeData> {
-  console.log("[mockExtract] Input text length:", text.length);
-  console.log("[mockExtract] First 1000 chars:", text.slice(0, 1000));
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  console.log("[mockExtract] Total lines:", lines.length);
-  console.log("[mockExtract] First 30 lines:", JSON.stringify(lines.slice(0, 30)));
   const result: Partial<ResumeData> = {};
 
   // --- Contact info ---
@@ -384,19 +404,6 @@ function mockExtract(text: string): Partial<ResumeData> {
       }
       sectionLines[currentSection].push(line);
     }
-  }
-
-  console.log("[mockExtract] Sections detected:", {
-    unknown: sectionLines.unknown.length,
-    summary: sectionLines.summary.length,
-    experience: sectionLines.experience.length,
-    education: sectionLines.education.length,
-    skills: sectionLines.skills.length,
-    languages: sectionLines.languages.length,
-    headerCount
-  });
-  if (sectionLines.experience.length > 0) {
-    console.log("[mockExtract] Experience lines:", JSON.stringify(sectionLines.experience.slice(0, 20)));
   }
 
   // --- Title (a short professional title line, not address/contact/personal) ---
@@ -653,11 +660,5 @@ function mockExtract(text: string): Partial<ResumeData> {
     if (education.length > 0) result.education = education;
   }
 
-  console.log("[mockExtract] Final result keys:", Object.keys(result));
-  console.log("[mockExtract] Experiences count:", result.experiences?.length ?? 0);
-  console.log("[mockExtract] Education count:", result.education?.length ?? 0);
-  if (result.experiences) {
-    console.log("[mockExtract] Experiences:", JSON.stringify(result.experiences));
-  }
   return result;
 }

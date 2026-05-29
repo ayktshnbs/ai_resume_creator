@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/toast";
 
 type PaymentButtonProps = {
   price: string;
@@ -13,6 +14,7 @@ type PaymentButtonProps = {
 export function PaymentButton({ price, className, children }: PaymentButtonProps) {
   const { status } = useSession();
   const router = useRouter();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   async function handleUpgrade() {
@@ -39,11 +41,11 @@ export function PaymentButton({ price, className, children }: PaymentButtonProps
           newWindow.document.close();
         }
       } else {
-        alert(data.error || "Could not initialize payment. Please try again.");
+        toast(data.error || "Could not initialize payment. Please try again.", "error");
       }
     } catch (error) {
       console.error("[Payment Button Error]", error);
-      alert("An unexpected error occurred. Please try again.");
+      toast("An unexpected error occurred. Please try again.", "error");
     } finally {
       setLoading(false);
     }

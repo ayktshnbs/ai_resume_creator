@@ -7,15 +7,20 @@ import { migrateGuestToUser } from "@/lib/usage/migrate-guest";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = (await req.json()) as {
+    const { name, email: rawEmail, password } = (await req.json()) as {
       name?: string;
       email?: string;
       password?: string;
     };
 
-    if (!email || !password || password.length < 8) {
+    // Normalize so "Foo@x.com" and "foo@x.com" can't become two accounts (and so
+    // credential login, which looks up the normalized form, always matches).
+    const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!emailValid || !password || password.length < 8) {
       return NextResponse.json(
-        { error: "Email and password (min 8 chars) are required." },
+        { error: "A valid email and password (min 8 characters) are required." },
         { status: 400 },
       );
     }

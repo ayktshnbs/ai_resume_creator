@@ -7,7 +7,10 @@ import { resolveActor, quotaSnapshot } from "@/lib/usage/actor";
  * Works for both authenticated users and anonymous visitors.
  */
 export async function GET() {
-  const actor = await resolveActor();
+  // Read-only: this runs on every page load, so don't write a GuestSession row
+  // here. A brand-new visitor simply reads as 0 used; the row is created lazily
+  // on their first actual export (consume), not on a quota check.
+  const actor = await resolveActor({ persist: false });
   const res = NextResponse.json({
     ok: true,
     ...quotaSnapshot(actor)

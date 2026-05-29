@@ -44,6 +44,7 @@ import { SectionShell } from "@/components/resume-builder/section-shell";
 import { useUsageQuota, type ConsumeFailureReason } from "@/lib/use-usage-quota";
 import { PaywallModal } from "@/components/paywall-modal";
 import { UsageChip } from "@/components/usage-chip";
+import { useToast } from "@/components/toast";
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Types                                                          */
@@ -106,6 +107,7 @@ export default function ResumeBuilderPage() {
   const { data: session, status } = useSession();
   const { isPro } = useProStatus();
   const { t } = useI18n();
+  const { toast, confirm } = useToast();
 
   const [resume, setResume] = useState<ResumeData>(emptyResumeData);
   const [template, setTemplate] = useState<SelectedTemplate>({
@@ -370,14 +372,22 @@ export default function ResumeBuilderPage() {
     }
   }
 
-  function clearResume() {
-    if (!window.confirm("Clear this resume and remove the local autosave?")) return;
+  async function clearResume() {
+    const ok = await confirm({
+      title: "Clear this resume?",
+      message: "This wipes every section and removes the local autosave. This can't be undone.",
+      confirmLabel: "Clear resume",
+      cancelLabel: "Keep editing",
+      destructive: true
+    });
+    if (!ok) return;
     clearResumeData();
     setResume(emptyResumeData);
     setSkillDraft("");
     setLangDraft("");
     setReferenceMessage("");
     setHelper(initialHelperState);
+    toast("Resume cleared.", "success");
   }
 
   async function handleLinkedInImport() {
@@ -412,7 +422,8 @@ export default function ResumeBuilderPage() {
       setShareMessage("Temporary preview URL copied to clipboard.");
       setTimeout(() => setShareMessage(""), 4000);
     } catch {
-      window.alert("Sharing requires login/backend. For now, the URL is: " + url);
+      setShareMessage("Couldn't copy automatically — your browser blocked clipboard access.");
+      setTimeout(() => setShareMessage(""), 5000);
     }
   }
 

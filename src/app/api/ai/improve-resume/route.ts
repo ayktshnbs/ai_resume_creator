@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import type { ResumeData } from "@/types/resume";
+import { throttle } from "@/lib/usage/throttle";
 
 type RequestBody = {
   resumeData?: ResumeData;
@@ -8,6 +9,8 @@ type RequestBody = {
 };
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
+/** Upper bound on the resume payload we'll send to the model (bounds token cost). */
+const MAX_RESUME_CHARS = 80_000;
 
 export async function POST(request: Request) {
   try {
@@ -20,6 +23,21 @@ export async function POST(request: Request) {
 
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ resumeData: mockImproveResume(resume) });
+    }
+
+    // Bound the input so a single request can't run up an unbounded token bill.
+    if (JSON.stringify(resume).length > MAX_RESUME_CHARS) {
+      return NextResponse.json({ error: "Resume is too large to optimize." }, { status: 413 });
+    }
+
+    // Rate-limit the OpenAI-backed path so the endpoint can't be scripted to
+    // drain the API budget. Cost-free paths above (mock) are intentionally exempt.
+    const gate = await throttle("ai");
+    if (!gate.ok) {
+      return NextResponse.json(
+        { error: "Too many AI requests. Please wait a minute and try again." },
+        { status: 429, headers: { "Retry-After": String(gate.retryAfterSec) } }
+      );
     }
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -76,8 +94,10 @@ ${JSON.stringify(resume, null, 2)}
 
     return NextResponse.json(parsed);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown AI error.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log the detail server-side; return a generic message so we don't leak
+    // internal/provider error strings to the client.
+    console.error("[AI improve-resume] failed:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Couldn't optimize the resume right now." }, { status: 500 });
   }
 }
 

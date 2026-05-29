@@ -31,7 +31,7 @@ export type ConsumeResult =
     }
   | {
       ok: false;
-      reason: "limit_reached" | "rate_limited" | "needs_signin" | "needs_upgrade";
+      reason: "limit_reached" | "rate_limited" | "needs_signin" | "needs_upgrade" | "template_locked";
       quota: ReturnType<typeof quotaSnapshot>;
       retryAfterSec?: number;
     };
@@ -43,16 +43,20 @@ export async function consume(actor: Actor, kind: UsageKind): Promise<ConsumeRes
   const actorSince = new Date(now.getTime() - RATE_LIMITS.perActorWindowSec * 1000);
   const ipSince = new Date(now.getTime() - RATE_LIMITS.perIpWindowSec * 1000);
 
+  // Scope to export kinds only: non-export throttle rows (ai, pw_reset) live in
+  // the same table but must not count against the export rate limit.
+  const exportKinds = { in: ["resume", "cover_letter"] };
   const [actorAttempts, ipAttempts] = await Promise.all([
     prisma.usageEvent.count({
       where: {
         actorType: actor.type,
         actorId: actor.id,
+        kind: exportKinds,
         createdAt: { gte: actorSince }
       }
     }),
     prisma.usageEvent.count({
-      where: { ipHash: actor.ipHash, createdAt: { gte: ipSince } }
+      where: { ipHash: actor.ipHash, kind: exportKinds, createdAt: { gte: ipSince } }
     })
   ]);
   if (actorAttempts >= RATE_LIMITS.perActorMaxAttempts) {
@@ -230,9 +234,11 @@ export async function rejectPremiumTemplate(
 ): Promise<ConsumeResult | null> {
   if (!isPremium || actor.isPro) return null;
   await logAttempt(actor, kind, "template_locked");
+  // Premium templates require Pro for everyone (guest or free user alike), so
+  // surface the template-specific paywall copy rather than the generic one.
   return {
     ok: false,
-    reason: actor.type === "guest" ? "needs_signin" : "needs_upgrade",
+    reason: "template_locked",
     quota: quotaSnapshot(actor)
   };
 }

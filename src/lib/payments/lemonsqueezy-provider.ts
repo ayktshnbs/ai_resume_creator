@@ -120,12 +120,19 @@ export class LemonSqueezyProvider implements PaymentProvider {
     const { rawBody, signature } = input.providerRawData;
     const { webhookSecret } = getLemonSqueezyConfig();
 
-    const hmac = crypto
+    const expected = crypto
       .createHmac("sha256", webhookSecret)
       .update(rawBody)
       .digest("hex");
 
-    if (hmac !== signature) {
+    // Constant-time comparison to avoid leaking the signature via timing.
+    const expectedBuf = Buffer.from(expected, "hex");
+    const signatureBuf = Buffer.from(signature || "", "hex");
+    const signatureValid =
+      expectedBuf.length === signatureBuf.length &&
+      crypto.timingSafeEqual(expectedBuf, signatureBuf);
+
+    if (!signatureValid) {
       return {
         success: false,
         paymentId: input.paymentId,

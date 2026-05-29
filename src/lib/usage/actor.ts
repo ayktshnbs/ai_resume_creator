@@ -39,20 +39,33 @@ export type Actor =
     };
 
 /**
- * Best-effort IP extraction. Trusts standard proxy headers in this order:
- * X-Forwarded-For (first), X-Real-IP, then falls back to a placeholder. The
- * value is immediately hashed, so even if it's spoofed, no PII is stored.
+ * Best-effort IP extraction.
+ *
+ * On Vercel, `x-real-ip` is set by the platform to the true client IP and
+ * cannot be spoofed by the client, so we trust it first. `x-forwarded-for` is
+ * client-appendable (an attacker can prepend a fake first hop), so we only use
+ * it as a fallback for non-Vercel hosts. The value is immediately hashed, so
+ * even if it's spoofed, no PII is stored.
  */
 function extractIp(h: Headers): string {
+  const real = h.get("x-real-ip");
+  if (real?.trim()) return real.trim();
   const xff = h.get("x-forwarded-for");
   if (xff) {
     const first = xff.split(",")[0]?.trim();
     if (first) return first;
   }
-  return h.get("x-real-ip") || "0.0.0.0";
+  return "0.0.0.0";
 }
 
-export async function resolveActor(): Promise<Actor> {
+/**
+ * @param opts.persist When true (default) the guest's row is upserted so its
+ *   `lastSeenAt`/identity signals stay fresh and counters are read live. When
+ *   false (read-only paths like /api/usage/me and rate-limit checks) we avoid
+ *   writing on every request — a brand-new guest simply reads as 0/0.
+ */
+export async function resolveActor(opts?: { persist?: boolean }): Promise<Actor> {
+  const persist = opts?.persist ?? true;
   const h = await headers();
   const ip = extractIp(h);
   const ua = h.get("user-agent") || "";
@@ -98,19 +111,36 @@ export async function resolveActor(): Promise<Actor> {
     newCookieValue = await mintGuestCookie(cookieId);
   }
 
-  // Upsert keeps lastSeenAt fresh and creates the row on first export attempt.
-  const guest = await prisma.guestSession.upsert({
-    where: { cookieId },
-    create: { cookieId, ipHash, uaHash },
-    update: { lastSeenAt: new Date(), ipHash, uaHash }
-  });
+  // Persisting path (consume/refund): upsert keeps lastSeenAt fresh and
+  // creates the row on first export attempt. Read-only path (me/throttle):
+  // just read; a missing row reads as 0/0 without a write on every page load.
+  let resumeExports = 0;
+  let coverLetterExports = 0;
+  if (persist) {
+    const guest = await prisma.guestSession.upsert({
+      where: { cookieId },
+      create: { cookieId, ipHash, uaHash },
+      update: { lastSeenAt: new Date(), ipHash, uaHash }
+    });
+    resumeExports = guest.resumeExports;
+    coverLetterExports = guest.coverLetterExports;
+  } else {
+    const guest = await prisma.guestSession.findUnique({
+      where: { cookieId },
+      select: { resumeExports: true, coverLetterExports: true }
+    });
+    if (guest) {
+      resumeExports = guest.resumeExports;
+      coverLetterExports = guest.coverLetterExports;
+    }
+  }
 
   return {
     type: "guest",
     id: cookieId,
     isPro: false,
-    resumeExports: guest.resumeExports,
-    coverLetterExports: guest.coverLetterExports,
+    resumeExports,
+    coverLetterExports,
     ipHash,
     uaHash,
     newCookieValue

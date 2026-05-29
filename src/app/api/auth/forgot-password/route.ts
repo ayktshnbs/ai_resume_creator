@@ -2,13 +2,25 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/resend";
+import { throttle } from "@/lib/usage/throttle";
 
 export async function POST(req: Request) {
   try {
-    const { email } = (await req.json()) as { email?: string };
+    const { email: rawEmail } = (await req.json()) as { email?: string };
+    const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
 
     if (!email) {
       return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    }
+
+    // Throttle by IP so this endpoint can't be used to mailbomb a victim or
+    // exhaust the email-sending quota.
+    const gate = await throttle("pw_reset");
+    if (!gate.ok) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again in a few minutes." },
+        { status: 429, headers: { "Retry-After": String(gate.retryAfterSec) } },
+      );
     }
 
     const user = await prisma.user.findUnique({ where: { email } });

@@ -120,12 +120,6 @@ export default function RootLayout({
                     "Unlimited CVs & cover letters, AI rewrite, cover letter generator, resume scoring, PDF exports",
                 },
               ],
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: "4.9",
-                ratingCount: "50000",
-                bestRating: "5",
-              },
             }),
           }}
         />

@@ -159,8 +159,16 @@ select {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Intentionally NO `forwards` fill. Retaining the final keyframe would leave
+   `transform: translateY(0)` on the element — and ANY non-`none` transform makes
+   it the containing block for every `position: fixed` descendant, anchoring
+   in-page fixed overlays (mobile nav drawer, modals, toasts) to this element
+   instead of the viewport once the page is scrolled. Without the fill, the
+   element reverts to its base style (transform: none) the moment the entrance
+   ends. The 100% keyframe is visually identical to that base style, so dropping
+   the fill causes no flash. Do not add `forwards` back. */
 .page-enter {
-  animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes marquee {

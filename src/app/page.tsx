@@ -962,6 +962,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-[#6b7280]">
               <a className="hover:text-primary" href="/resume">Builder</a>
               <a className="hover:text-primary" href="/templates">Templates</a>
+              <a className="hover:text-primary" href="/pricing">Pricing</a>
               <a className="hover:text-primary" href="/signin">Sign in</a>
               <a className="hover:text-primary" href="/signup">Sign up</a>
             </div>

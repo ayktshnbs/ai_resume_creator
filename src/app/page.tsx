@@ -1050,17 +1050,33 @@ const A4_W = 793;
 
 function HeroPreview() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0);
+  const [scaledHeight, setScaledHeight] = useState(0);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const measure = () => setScale(el.clientWidth / A4_W);
+    const measure = () => {
+      const cw = el.clientWidth;
+      if (cw > 0) setScale(cw / A4_W);
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (scale <= 0) return;
+    const content = contentRef.current;
+    if (!content) return;
+    const update = () => setScaledHeight(Math.ceil(content.scrollHeight * scale));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, [scale]);
 
   return (
     <div className="relative">
@@ -1068,12 +1084,20 @@ function HeroPreview() {
       <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/20 blur-[100px]" />
 
       <div className="relative rounded-3xl border border-white/80 bg-white/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
-        <div ref={containerRef} className="relative aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-[#e5e7eb]/30 bg-white shadow-panel">
+        <div
+          ref={containerRef}
+          className="relative w-full overflow-hidden rounded-2xl border border-[#e5e7eb]/30 bg-white shadow-panel"
+          style={{
+            boxSizing: "content-box",
+            height: scaledHeight > 0 ? scaledHeight : undefined,
+            aspectRatio: scaledHeight > 0 ? undefined : "210 / 297",
+          }}
+        >
           {scale > 0 && (
             <div
+              ref={contentRef}
               style={{
                 width: A4_W,
-                minHeight: Math.round(A4_W * 1.414),
                 transform: `scale(${scale})`,
                 transformOrigin: "top left",
               }}

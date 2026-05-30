@@ -242,7 +242,7 @@ export default function Home() {
                 { label: "Features", href: "#features" },
                 { label: "Builder", href: "/resume" },
                 { label: "Templates", href: "/templates" },
-                { label: "Pricing", href: "#pricing" },
+                { label: "Pricing", href: "/pricing" },
               ].map((link) => (
                 <a
                   key={link.label}
@@ -341,7 +341,7 @@ export default function Home() {
               { label: "Features", href: "#features", icon: "sparkle" as const },
               { label: "Builder", href: "/resume", icon: "document" as const },
               { label: "Templates", href: "/templates", icon: "document" as const },
-              { label: "Pricing", href: "#pricing", icon: "sparkle" as const }
+              { label: "Pricing", href: "/pricing", icon: "sparkle" as const }
             ].map((link) => (
               <li key={link.label}>
                 <a
@@ -1071,8 +1071,14 @@ function HeroPreview() {
   useEffect(() => {
     if (scale <= 0) return;
     const content = contentRef.current;
-    if (!content) return;
-    const update = () => setScaledHeight(Math.ceil(content.scrollHeight * scale));
+    const container = containerRef.current;
+    if (!content || !container) return;
+    const update = () => {
+      // Compensate for the container's vertical border so the scaled content
+      // doesn't get clipped under border-box sizing.
+      const borderY = container.offsetHeight - container.clientHeight;
+      setScaledHeight(Math.ceil(content.scrollHeight * scale) + borderY);
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(content);
@@ -1089,7 +1095,6 @@ function HeroPreview() {
           ref={containerRef}
           className="relative w-full overflow-hidden rounded-2xl border border-[#e5e7eb]/30 bg-white shadow-panel"
           style={{
-            boxSizing: "content-box",
             height: scaledHeight > 0 ? scaledHeight : undefined,
             aspectRatio: scaledHeight > 0 ? undefined : "210 / 297",
           }}
@@ -1144,7 +1149,7 @@ function PricingSection() {
           href="/signup"
           features={["1 CV + 1 cover letter", "All standard templates", "Live preview"]}
           name="Basic"
-          price="$0"
+          price="€0"
           period=""
         />
         <PricingCard

@@ -19,7 +19,7 @@ export function PaymentButton({ price, className, children }: PaymentButtonProps
 
   async function handleUpgrade() {
     if (status !== "authenticated") {
-      router.push("/signin?callbackUrl=/#pricing");
+      router.push("/signin?callbackUrl=/pricing");
       return;
     }
 

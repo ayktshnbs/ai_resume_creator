@@ -31,6 +31,7 @@ const copy = {
     ctaTitle: "Ready to build a resume that gets interviews?",
     ctaSub: "Join 50,000+ professionals already using CV with AI.",
     ctaButton: "Get started — it's free",
+    discountBadge: "50% OFF · LIMITED",
   },
   tr: {
     badge: "Fiyatlandırma",
@@ -55,6 +56,7 @@ const copy = {
     ctaTitle: "Mülakata çağrılan bir CV oluşturmaya hazır mısınız?",
     ctaSub: "Halihazırda CV with AI kullanan 50.000+ profesyonele katılın.",
     ctaButton: "Hemen başla — ücretsiz",
+    discountBadge: "%50 İNDİRİM · SINIRLI",
   },
 } as const;
 
@@ -320,11 +322,19 @@ export default function PricingPage() {
               {c.recommended}
             </div>
             <div className="mb-8">
-              <h2 className="bg-gradient-to-r from-[#111827] to-[#6366f1] bg-clip-text text-xl font-bold text-transparent">{c.pro}</h2>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-5xl font-extrabold text-[#111827]">{yearly ? "€4.20" : "€6"}</span>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="bg-gradient-to-r from-[#111827] to-[#6366f1] bg-clip-text text-xl font-bold text-transparent">{c.pro}</h2>
+                <span className="rounded-full bg-gradient-to-r from-[#ef4444] to-[#f97316] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-sm">
+                  {c.discountBadge}
+                </span>
+              </div>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-[#9ca3af] line-through decoration-[#ef4444]/70 decoration-2">
+                  {yearly ? "€4.20" : "€6"}
+                </span>
+                <span className="text-5xl font-extrabold text-[#111827]">{yearly ? "€2.10" : "€3"}</span>
                 <span className="text-sm font-medium text-[#6b7280]">
-                  {yearly ? c.perMonthBilled("€50.40") : c.perMonth}
+                  {yearly ? c.perMonthBilled("€25.20") : c.perMonth}
                 </span>
               </div>
               <p className="mt-3 text-sm text-[#6b7280]">
@@ -345,7 +355,7 @@ export default function PricingPage() {
               ))}
             </ul>
             <PaymentButton
-              price={yearly ? "50.40" : "6"}
+              price={yearly ? "25.20" : "3"}
               className="block w-full rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-[#6366f1]/30 transition hover:brightness-105 active:scale-[0.98]"
             >
               {c.getPro}

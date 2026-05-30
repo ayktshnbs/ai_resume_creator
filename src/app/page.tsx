@@ -1153,15 +1153,16 @@ function PricingSection() {
           featured
           features={["Unlimited CVs & cover letters", "AI rewrite & optimization", "AI cover letter generator", "Resume analysis & scoring", "High-res PDF exports", "Priority support"]}
           name="Pro"
-          price={yearly ? "€4.20" : "€6"}
-          period={yearly ? "/mo — billed €50.40/year" : "/month"}
+          price={yearly ? "€2.10" : "€3"}
+          originalPrice={yearly ? "€4.20" : "€6"}
+          period={yearly ? "/mo — billed €25.20/year" : "/month"}
         />
       </div>
     </section>
   );
 }
 
-function PricingCard({ cta, featured = false, features, href, name, price, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; period: string }) {
+function PricingCard({ cta, featured = false, features, href, name, price, originalPrice, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; originalPrice?: string; period: string }) {
   return (
     <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-[#e5e7eb]/30"}`}>
       {featured && (
@@ -1170,8 +1171,18 @@ function PricingCard({ cta, featured = false, features, href, name, price, perio
         </div>
       )}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-[#111827]">{name}</h3>
-        <div className="mt-4 flex items-baseline gap-1">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-xl font-bold text-[#111827]">{name}</h3>
+          {originalPrice && (
+            <span className="rounded-full bg-gradient-to-r from-[#ef4444] to-[#f97316] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-sm">
+              50% OFF · LIMITED
+            </span>
+          )}
+        </div>
+        <div className="mt-4 flex items-baseline gap-2">
+          {originalPrice && (
+            <span className="text-xl font-bold text-[#9ca3af] line-through decoration-[#ef4444]/70 decoration-2">{originalPrice}</span>
+          )}
           <span className="text-4xl font-extrabold text-[#111827]">{price}</span>
           <span className="text-sm font-medium text-[#6b7280]">{period || "/month"}</span>
         </div>

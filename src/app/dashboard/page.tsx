@@ -353,7 +353,7 @@ function PlanCell({ isPro, loaded, totalDocs }: { isPro: boolean; loaded: boolea
         </div>
       </div>
       <PaymentButton
-        price="6"
+        price="3"
         className="badge-shimmer hidden shrink-0 rounded-xl bg-ink px-3 py-2 text-xs font-bold text-background lg:inline-flex"
       >
         Upgrade
@@ -377,7 +377,7 @@ function UpgradeBanner({ totalDocs, resumeCount, coverLetterCount }: { totalDocs
           </div>
           <h3 className="text-2xl font-bold leading-tight md:text-3xl">
             {atLimit
-              ? "Unlock unlimited documents — €6/month"
+              ? "Unlock unlimited documents — €3/month (50% off, limited)"
               : `${totalDocs}/2 documents used. Go unlimited.`}
           </h3>
           <p className="mt-3 max-w-md text-sm leading-6 text-white/80">
@@ -394,10 +394,14 @@ function UpgradeBanner({ totalDocs, resumeCount, coverLetterCount }: { totalDocs
         </div>
         <div className="flex flex-col items-stretch justify-center gap-3 lg:items-end">
           <PaymentButton
-            price="6"
+            price="3"
             className="btn-glow rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-primary shadow-lg transition hover:scale-[1.02]"
           >
-            Upgrade to Pro — €6/mo
+            <span className="inline-flex items-center justify-center gap-2">
+              Upgrade to Pro —
+              <span className="text-primary/40 line-through decoration-2">€6</span>
+              €3/mo
+            </span>
           </PaymentButton>
           <p className="text-center text-xs text-white/70 lg:text-right">Cancel anytime. No commitment.</p>
         </div>

@@ -114,10 +114,10 @@ export default function RootLayout({
                 {
                   "@type": "Offer",
                   name: "Pro",
-                  price: "6",
+                  price: "3",
                   priceCurrency: "EUR",
                   description:
-                    "Unlimited CVs & cover letters, AI rewrite, cover letter generator, resume scoring, PDF exports",
+                    "Unlimited CVs & cover letters, AI rewrite, cover letter generator, resume scoring, PDF exports — 50% off monthly, limited time",
                 },
               ],
             }),

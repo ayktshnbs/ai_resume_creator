@@ -1375,7 +1375,7 @@ function SummaryStep({
           </button>
         ) : (
           <PaymentButton
-            price="6"
+            price="3"
             className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-bold text-primary"
           >
             <Icon name="sparkle" className="text-[14px]" />
@@ -1860,7 +1860,7 @@ function ReviewStep({
           </h3>
           {!isPro && (
             <PaymentButton
-              price="6"
+              price="3"
               className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary"
             >
               Pro

@@ -398,7 +398,7 @@ export default function CoverLetterPage() {
                   Maybe later
                 </button>
                 <PaymentButton
-                  price="6"
+                  price="3"
                   className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white"
                 >
                   {t("coverLetter.upgradePro")}

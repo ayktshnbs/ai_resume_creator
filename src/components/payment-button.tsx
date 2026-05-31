@@ -6,12 +6,15 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/toast";
 
 type PaymentButtonProps = {
+  /** Display-only hint. Actual billed amount is decided server-side from `plan`. */
   price: string;
+  /** Which subscription plan to subscribe the user to. Server validates this. */
+  plan?: "monthly" | "yearly";
   className?: string;
   children: React.ReactNode;
 };
 
-export function PaymentButton({ price, className, children }: PaymentButtonProps) {
+export function PaymentButton({ plan = "monthly", className, children }: PaymentButtonProps) {
   const { status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
@@ -28,6 +31,8 @@ export function PaymentButton({ price, className, children }: PaymentButtonProps
     try {
       const res = await fetch("/api/payment/create", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
       });
       const data = await res.json();
 

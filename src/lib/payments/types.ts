@@ -12,10 +12,14 @@ export type UserData = {
   paymentStatus: PaymentStatus;
 };
 
+export type BillingPlan = "monthly" | "yearly";
+
 export type CreatePaymentInput = {
   userId: string;
   email: string;
   productName: string;
+  plan: BillingPlan;
+  /** Server-decided amount in minor units (e.g., euro cents). Not trusted from the client. */
   price: number;
   currency: string;
   callbackUrl: string;

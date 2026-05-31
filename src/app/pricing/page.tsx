@@ -356,6 +356,7 @@ export default function PricingPage() {
             </ul>
             <PaymentButton
               price={yearly ? "25.20" : "3"}
+              plan={yearly ? "yearly" : "monthly"}
               className="block w-full rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-6 py-4 text-center text-sm font-bold text-white shadow-lg shadow-[#6366f1]/30 transition hover:brightness-105 active:scale-[0.98]"
             >
               {c.getPro}

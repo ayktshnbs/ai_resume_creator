@@ -1,14 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getPaymentProvider } from "@/lib/payments/provider";
+import type { BillingPlan } from "@/lib/payments/types";
+import { getPlanAmountEuros } from "@/lib/payments/stripe-provider";
 
-export async function POST() {
+const ALLOWED_PLANS: BillingPlan[] = ["monthly", "yearly"];
+
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id || !session.user.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Plan is the only thing the client can choose. The actual amount comes
+    // from the server-side catalog so a tampered request can't lower the price.
+    let plan: BillingPlan = "monthly";
+    try {
+      const body = (await req.json().catch(() => ({}))) as { plan?: unknown };
+      if (typeof body.plan === "string" && ALLOWED_PLANS.includes(body.plan as BillingPlan)) {
+        plan = body.plan as BillingPlan;
+      }
+    } catch {
+      /* body optional — default to monthly */
     }
 
     const provider = getPaymentProvider();
@@ -17,9 +33,11 @@ export async function POST() {
     const result = await provider.createPayment({
       userId: session.user.id,
       email: session.user.email,
-      productName: "CV with AI Pro Plan",
-      price: 0,
-      currency: "",
+      productName:
+        plan === "yearly" ? "CV with AI Pro — Yearly" : "CV with AI Pro — Monthly",
+      plan,
+      price: getPlanAmountEuros(plan),
+      currency: "eur",
       callbackUrl: `${siteUrl}/api/payment/callback`,
       successUrl: `${siteUrl}/payment/success`,
       failUrl: `${siteUrl}/payment/fail`,

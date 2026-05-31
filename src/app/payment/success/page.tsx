@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-sidebar";
-import { Icon } from "@/components/icon";
 import Link from "next/link";
 
 export default function PaymentSuccessPage() {
@@ -13,11 +12,10 @@ export default function PaymentSuccessPage() {
       try {
         const res = await fetch("/api/payment/status");
         const data = await res.json();
-        
+
         if (data.plan === "pro") {
           setStatus("success");
         } else {
-          // Keep polling or show verifying state
           setTimeout(checkStatus, 2000);
         }
       } catch {
@@ -30,40 +28,70 @@ export default function PaymentSuccessPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto flex max-w-2xl flex-col items-center justify-center gap-6 px-4 py-20 text-center">
-        {status === "verifying" && (
-          <>
-            <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <h1 className="text-3xl font-bold">Verifying Payment...</h1>
-            <p className="text-muted text-lg">Please wait while we confirm your transaction. Do not refresh this page.</p>
-          </>
-        )}
+      <div className="noise-paper min-h-screen">
+        <div className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-20 md:py-28">
+          {status === "verifying" && (
+            <>
+              <p className="font-serif text-sm italic text-saffron">— On the press —</p>
+              <h1 className="headline-editorial text-[48px] md:text-[68px]">
+                Verifying <em>payment</em>...
+              </h1>
+              <p className="font-serif text-lg italic leading-snug text-ink-soft">
+                Hold the front page — we&apos;re confirming your transaction with the printer. Please don&apos;t refresh.
+              </p>
+              <div className="mt-4 flex items-center gap-4">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-deep/20 border-t-saffron" />
+                <p className="font-serif text-sm italic text-ink-soft">Setting the type ...</p>
+              </div>
+            </>
+          )}
 
-        {status === "success" && (
-          <>
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 text-success">
-              <Icon name="sparkle" className="text-4xl" />
-            </div>
-            <h1 className="text-3xl font-bold">Welcome to CV with AI Pro!</h1>
-            <p className="text-muted text-lg">Your account has been upgraded. You now have full access to all premium templates and AI features.</p>
-            <Link href="/dashboard" className="primary-gradient rounded-xl px-8 py-3 font-bold text-white transition hover:brightness-105">
-              Go to Dashboard
-            </Link>
-          </>
-        )}
+          {status === "success" && (
+            <>
+              <p className="font-serif text-sm italic text-moss">— Welcome aboard —</p>
+              <h1 className="headline-editorial text-[48px] md:text-[80px]">
+                You&apos;re a <em>Pro</em> subscriber.
+              </h1>
+              <p className="font-serif text-lg italic leading-snug text-ink-soft">
+                The full press is now at your disposal: unlimited drafts, the AI editor, all premium templates, and
+                hi-res PDF exports. Tomorrow&apos;s edition starts now.
+              </p>
+              <div className="my-2 border-y-2 border-ink-deep py-4">
+                <div className="grid grid-cols-3 divide-x divide-ink-deep/30 text-center">
+                  {[
+                    ["∞", "documents"],
+                    ["100", "templates"],
+                    ["300", "DPI PDF"],
+                  ].map(([v, l]) => (
+                    <div key={l} className="px-3">
+                      <p className="font-serif text-3xl text-ink-deep">{v}</p>
+                      <p className="font-serif text-xs italic text-ink-soft">{l}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Link href="/dashboard" className="btn-editorial w-fit">
+                Open The Desk →
+              </Link>
+            </>
+          )}
 
-        {status === "error" && (
-          <>
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-error/10 text-error">
-              <Icon name="bolt" className="text-4xl" />
-            </div>
-            <h1 className="text-3xl font-bold">Verification Delay</h1>
-            <p className="text-muted text-lg">We couldn't confirm your Pro status immediately. If you completed the payment, your account will be upgraded shortly.</p>
-            <Link href="/dashboard" className="rounded-xl border border-outline px-8 py-3 font-bold text-ink transition hover:bg-surface-soft">
-              Check Dashboard Later
-            </Link>
-          </>
-        )}
+          {status === "error" && (
+            <>
+              <p className="font-serif text-sm italic text-oxblood">— Delay at the print room —</p>
+              <h1 className="headline-editorial text-[48px] md:text-[68px]">
+                Verification <em>delayed</em>.
+              </h1>
+              <p className="font-serif text-lg italic leading-snug text-ink-soft">
+                We couldn&apos;t confirm your Pro status immediately. If you completed the payment, your account will
+                be upgraded shortly — usually within a minute.
+              </p>
+              <Link href="/dashboard" className="btn-editorial btn-editorial-ghost w-fit">
+                Check the dashboard later →
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </AppShell>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
@@ -45,32 +45,12 @@ const registryCards: TemplateCard[] = cvTemplates.map((template) => ({
 
 const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCards, ...registryCards];
 
-const features = [
-  { title: "AI CV Enhancement", text: "Rewrite weak bullets into professional, ATS-friendly achievements with one click.", icon: "sparkle", gradient: "from-primary/10 to-primary/5" },
-  { title: "Live Template Preview", text: "Edit your details while the CV preview updates beside the form in real time.", icon: "document", gradient: "from-secondary/10 to-secondary/5" },
-  { title: "Cover Letter Generator", text: "Generate targeted cover letters from your saved CV data in seconds.", icon: "cl", gradient: "from-success/10 to-success/5" },
-  { title: "PDF Export", text: "Export polished A4 PDFs that match your chosen template exactly.", icon: "pdf", gradient: "from-warning/10 to-warning/5" },
-];
-
-const savedCvs = [
-  ["Product Manager CV", "Updated today", "ATS 92"],
-  ["SaaS Founder Resume", "2 days ago", "ATS 88"],
-  ["Consulting Cover Letter", "Draft", "AI"],
-];
+const ISSUE_DATE = "VOL. MMXXVI · NO. 01";
 
 export default function Home() {
   const router = useRouter();
   const { lang, setLang } = useI18n();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const heroRef = useRef<HTMLElement>(null);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-    setMouse({ x, y });
-  }, []);
 
   function selectTemplate(t: TemplateCard) {
     saveSelectedTemplate({ templateId: t.templateId, name: t.name, layout: t.layout, accent: t.accent, themeColor: t.themeColor });
@@ -80,901 +60,653 @@ export default function Home() {
   const marqueeTemplates = [...ALL_TEMPLATES, ...ALL_TEMPLATES];
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f9fafb]" data-theme="light">
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 120s linear infinite;
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
-        }
-        @keyframes float-up {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-        .animate-float { animation: float-up 6s ease-in-out infinite; }
-        .animate-float-delay { animation: float-up 6s ease-in-out infinite 2s; }
-        .card-hover {
-          transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
-        }
-        .card-hover:hover {
-          transform: translateY(-6px) scale(1.015);
-          box-shadow: 0 20px 60px rgba(99,102,241,0.15), 0 8px 24px rgba(0,0,0,0.08);
-        }
-        @keyframes balloon-float-1 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-          20% { transform: translate(70px, -50px) rotate(4deg) scale(1.04); }
-          40% { transform: translate(-30px, -90px) rotate(-3deg) scale(0.97); }
-          60% { transform: translate(50px, -40px) rotate(2deg) scale(1.03); }
-          80% { transform: translate(-50px, -20px) rotate(-2deg) scale(0.98); }
-        }
-        @keyframes balloon-float-2 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-          25% { transform: translate(-60px, -70px) rotate(-5deg) scale(1.06); }
-          50% { transform: translate(40px, -30px) rotate(3deg) scale(0.95); }
-          75% { transform: translate(-20px, -80px) rotate(-2deg) scale(1.02); }
-        }
-        @keyframes balloon-float-3 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.02); }
-          33% { transform: translate(90px, -60px) rotate(6deg) scale(0.94); }
-          66% { transform: translate(-50px, -100px) rotate(-4deg) scale(1.05); }
-        }
-        @keyframes balloon-float-4 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(0.98); }
-          30% { transform: translate(-80px, -40px) rotate(-3deg) scale(1.05); }
-          60% { transform: translate(60px, -70px) rotate(4deg) scale(0.96); }
-        }
-        @keyframes balloon-float-5 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-          20% { transform: translate(40px, -80px) rotate(3deg) scale(1.03); }
-          50% { transform: translate(-60px, -50px) rotate(-5deg) scale(0.97); }
-          80% { transform: translate(30px, -30px) rotate(2deg) scale(1.01); }
-        }
-        @keyframes balloon-float-6 {
-          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1.01); }
-          35% { transform: translate(-40px, -60px) rotate(-4deg) scale(0.95); }
-          70% { transform: translate(70px, -40px) rotate(3deg) scale(1.04); }
-        }
-        @keyframes balloon-wobble {
-          0%, 100% { border-radius: 50% 50% 50% 50%; }
-          25% { border-radius: 48% 52% 53% 47%; }
-          50% { border-radius: 52% 48% 47% 53%; }
-          75% { border-radius: 47% 53% 52% 48%; }
-        }
-        .balloon {
-          position: absolute;
-          border-radius: 50%;
-          animation-timing-function: ease-in-out;
-          animation-iteration-count: infinite;
-        }
-        .balloon::before {
-          content: '';
-          position: absolute;
-          top: 12%;
-          left: 18%;
-          width: 35%;
-          height: 30%;
-          background: radial-gradient(ellipse, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
-          border-radius: 50%;
-          transform: rotate(-30deg);
-        }
-        .balloon::after {
-          content: '';
-          position: absolute;
-          bottom: 15%;
-          right: 20%;
-          width: 15%;
-          height: 12%;
-          background: radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 70%);
-          border-radius: 50%;
-        }
-        .balloon-1 { animation: balloon-float-1 18s ease-in-out infinite, balloon-wobble 8s ease-in-out infinite; }
-        .balloon-2 { animation: balloon-float-2 22s ease-in-out infinite, balloon-wobble 10s ease-in-out infinite 1s; }
-        .balloon-3 { animation: balloon-float-3 20s ease-in-out infinite, balloon-wobble 9s ease-in-out infinite 2s; }
-        .balloon-4 { animation: balloon-float-4 24s ease-in-out infinite, balloon-wobble 11s ease-in-out infinite 0.5s; }
-        .balloon-5 { animation: balloon-float-5 19s ease-in-out infinite, balloon-wobble 7s ease-in-out infinite 1.5s; }
-        .balloon-6 { animation: balloon-float-6 21s ease-in-out infinite, balloon-wobble 12s ease-in-out infinite 3s; }
-        @keyframes hero-fade-up {
-          0% { opacity: 0; transform: translateY(30px); filter: blur(6px); }
-          100% { opacity: 1; transform: translateY(0); filter: blur(0); }
-        }
-        @keyframes letter-drop {
-          0% { opacity: 0; transform: translateY(-40px); }
-          60% { opacity: 1; transform: translateY(4px); }
-          80% { transform: translateY(-1px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes hero-slide-in {
-          0% { opacity: 0; transform: translateX(-40px); }
-          100% { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes hero-scale-in {
-          0% { opacity: 0; transform: scale(0.9); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        .hero-fade-up { animation: hero-fade-up 0.8s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
-        .letter-drop { display: inline-block; animation: letter-drop 0.7s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
-        .letter-accent { color: #6366f1; }
-        .hero-delay-1 { animation-delay: 0.1s; }
-        .hero-delay-2 { animation-delay: 0.25s; }
-        .hero-delay-3 { animation-delay: 0.45s; }
-        .hero-delay-4 { animation-delay: 0.65s; }
-        .hero-delay-5 { animation-delay: 0.85s; }
-        .hero-slide-in { animation: hero-slide-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
-        .hero-scale-in { animation: hero-scale-in 0.6s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
-        .shimmer-text {
-          background: linear-gradient(90deg, #2563eb 0%, #6366f1 30%, #0ea5e9 50%, #6366f1 70%, #2563eb 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: shimmer 4s linear infinite;
-        }
-      `}</style>
+    <main className="min-h-screen overflow-x-hidden noise-paper text-ink-deep" data-theme="light" style={{ fontFamily: "var(--sans)" }}>
+      {/* ─────────── MASTHEAD ─────────── */}
+      <header className="relative z-50 noise-paper">
+        {/* Top thin date strip */}
+        <div className="border-b border-ink-deep/15">
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-2 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-soft md:px-12">
+            <span className="hidden md:inline">{ISSUE_DATE}</span>
+            <span className="font-serif italic tracking-normal text-saffron normal-case">— Hand-set for ambitious careers —</span>
+            <span className="hidden md:inline">Worldwide · Print &amp; Web</span>
+          </div>
+        </div>
 
-      <header className="sticky top-0 z-50">
-        {/* Glassmorphic background with color tint */}
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.75),rgba(239,246,255,0.7),rgba(238,242,255,0.7))] backdrop-blur-2xl" />
-        {/* Rainbow gradient bottom border */}
-        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-[#3b82f6]/0 via-[#6366f1]/40 to-[#ec4899]/0" />
-        {/* Subtle top glow */}
-        <div className="absolute inset-x-0 -bottom-8 h-8 bg-gradient-to-b from-[#6366f1]/[0.04] to-transparent" />
-        <nav className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-10">
-          <a className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#111827]" href="#">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#3b82f6] text-xs font-extrabold text-white shadow-lg shadow-[#6366f1]/25">
-              CV
-            </span>
-            <span className="bg-gradient-to-r from-[#111827] to-[#6366f1] bg-clip-text text-transparent">
-              CV with AI
-            </span>
-          </a>
-          <div className="hidden items-center md:flex">
-            <div className="flex items-center gap-1 rounded-full border border-white/60 bg-white/40 px-2 py-1.5 shadow-sm backdrop-blur-sm">
+        {/* Big newspaper masthead */}
+        <div className="border-b-[3px] border-ink-deep">
+          <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-6 pt-6 pb-4 md:px-12 md:pt-8 md:pb-5">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <p className="font-serif text-[11px] italic text-ink-soft md:text-xs">The Resumé Press</p>
+                <a href="#" className="block font-serif text-[44px] font-medium leading-[0.92] tracking-[-0.04em] text-ink-deep sm:text-[60px] md:text-[84px] lg:text-[104px]">
+                  CV <em className="italic text-saffron">with</em> AI
+                </a>
+              </div>
+              <div className="hidden flex-col items-end gap-2 pt-2 md:flex">
+                <span className="font-serif text-xs italic text-ink-soft">Est. 2026 · Worldwide circulation</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setLang(lang === "en" ? "tr" : "en")}
+                    className="border border-ink-deep px-3 py-1.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
+                  >
+                    {lang === "en" ? "TR" : "EN"}
+                  </button>
+                  <a href="/signin" className="border border-ink-deep px-4 py-1.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft">
+                    Sign in
+                  </a>
+                  <a href="/signup" className="bg-ink-deep px-4 py-1.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron">
+                    Subscribe →
+                  </a>
+                </div>
+              </div>
+              <button
+                className="md:hidden inline-flex h-10 w-10 items-center justify-center border border-ink-deep text-ink-deep"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Menu"
+              >
+                <span className="relative block h-3.5 w-5">
+                  <span className={`absolute left-0 block h-[2px] w-full bg-current transition-all ${mobileMenuOpen ? "top-1/2 -translate-y-1/2 rotate-45" : "top-0"}`} />
+                  <span className={`absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 bg-current transition-opacity ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`} />
+                  <span className={`absolute left-0 block h-[2px] w-full bg-current transition-all ${mobileMenuOpen ? "top-1/2 -translate-y-1/2 -rotate-45" : "bottom-0"}`} />
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Nav strip */}
+        <div className="border-b border-ink-deep/30">
+          <div className="mx-auto hidden max-w-[1400px] items-center justify-between px-12 py-2.5 md:flex">
+            <nav className="flex items-center gap-7">
               {[
-                { label: "Features", href: "#features" },
-                { label: "Builder", href: "/resume" },
-                { label: "Templates", href: "/templates" },
-                { label: "Pricing", href: "/pricing" },
+                { label: "Front Page", href: "#hero", marker: "01" },
+                { label: "Anthology", href: "#templates", marker: "02" },
+                { label: "Toolkit", href: "#features", marker: "03" },
+                { label: "Field Notes", href: "#before-after", marker: "04" },
+                { label: "The Desk", href: "#management", marker: "05" },
+                { label: "Letters", href: "#testimonials", marker: "06" },
+                { label: "Subscribe", href: "#pricing", marker: "07" },
               ].map((link) => (
-                <a
-                  key={link.label}
-                  className="rounded-full px-4 py-1.5 text-sm font-medium text-[#4b5563] transition-all hover:bg-white/80 hover:text-[#111827] hover:shadow-sm"
-                  href={link.href}
-                >
+                <a key={link.label} href={link.href} className="group inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-deep transition hover:text-saffron">
+                  <span className="font-serif text-[11px] italic text-saffron normal-case tracking-normal">{link.marker} /</span>
                   {link.label}
                 </a>
               ))}
-            </div>
+            </nav>
+            <span className="font-serif text-xs italic text-ink-soft">A daily edition · One reader at a time</span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setLang(lang === "en" ? "tr" : "en")}
-              className="rounded-full border border-white/50 bg-white/30 px-3 py-1.5 text-xs font-bold text-[#6b7280] backdrop-blur-sm transition-all hover:bg-white/60 hover:text-[#111827]"
-            >
-              {lang === "en" ? "TR" : "EN"}
-            </button>
-            <a className="hidden rounded-full px-4 py-2 text-sm font-bold text-[#4b5563] transition-all hover:text-[#111827] md:block" href="/signin">
-              Sign in
-            </a>
-            <a className="hidden items-center gap-1.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:shadow-xl hover:shadow-[#6366f1]/30 hover:brightness-105 active:scale-[0.97] sm:inline-flex" href="/signup">
-              Get started free
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-            </a>
-            <button
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/50 bg-white/40 text-[#111827] backdrop-blur-sm transition hover:bg-white/70 md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {/* Animated hamburger → X */}
-              <span className="relative block h-3.5 w-5">
-                <span
-                  className={`absolute left-0 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ${
-                    mobileMenuOpen ? "top-1/2 -translate-y-1/2 rotate-45" : "top-0"
-                  }`}
-                />
-                <span
-                  className={`absolute left-0 top-1/2 block h-[2px] w-full -translate-y-1/2 rounded-full bg-current transition-opacity duration-200 ${
-                    mobileMenuOpen ? "opacity-0" : "opacity-100"
-                  }`}
-                />
-                <span
-                  className={`absolute left-0 block h-[2px] w-full rounded-full bg-current transition-all duration-300 ${
-                    mobileMenuOpen ? "top-1/2 -translate-y-1/2 -rotate-45" : "bottom-0"
-                  }`}
-                />
-              </span>
-            </button>
-          </div>
-        </nav>
+        </div>
       </header>
 
-      {/* Mobile menu — full-screen overlay with slide-down panel.
-          Rendered outside the sticky <header> so the backdrop covers the page. */}
-      <div
-        className={`fixed inset-0 z-[60] md:hidden ${mobileMenuOpen ? "" : "pointer-events-none"}`}
-        aria-hidden={!mobileMenuOpen}
-      >
-        <div
-          className={`absolute inset-0 bg-[#0f172a]/40 backdrop-blur-sm transition-opacity duration-300 ${
-            mobileMenuOpen ? "opacity-100" : "opacity-0"
-          }`}
-          onClick={() => setMobileMenuOpen(false)}
-        />
-        <nav
-          className={`absolute inset-x-3 top-3 origin-top rounded-3xl border border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,255,0.96))] p-5 shadow-2xl ring-1 ring-black/[0.04] backdrop-blur-xl transition-all duration-300 ease-out ${
-            mobileMenuOpen
-              ? "translate-y-0 scale-100 opacity-100"
-              : "-translate-y-2 scale-[0.98] opacity-0"
-          }`}
-          aria-label="Primary"
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <span className="flex items-center gap-2 text-base font-bold text-[#111827]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1] to-[#3b82f6] text-[10px] font-extrabold text-white shadow-md shadow-[#6366f1]/25">
-                CV
-              </span>
-              Menu
-            </span>
-            <button
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f4f6] text-[#4b5563] transition hover:bg-[#e5e7eb] hover:text-[#111827]"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label="Close menu"
-              type="button"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+      {/* Mobile menu */}
+      <div className={`fixed inset-0 z-[60] md:hidden ${mobileMenuOpen ? "" : "pointer-events-none"}`} aria-hidden={!mobileMenuOpen}>
+        <div className={`absolute inset-0 bg-ink-deep/40 transition-opacity ${mobileMenuOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setMobileMenuOpen(false)} />
+        <nav className={`absolute inset-x-3 top-3 noise-paper border-2 border-ink-deep p-6 transition-all ${mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}>
+          <div className="mb-4 flex items-center justify-between border-b border-ink-deep pb-3">
+            <p className="font-serif text-2xl text-ink-deep">Menu</p>
+            <button className="font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep" onClick={() => setMobileMenuOpen(false)}>Close ×</button>
           </div>
-
-          <ul className="space-y-1">
+          <ul className="space-y-3">
             {[
-              { label: "Features", href: "#features", icon: "sparkle" as const },
-              { label: "Builder", href: "/resume", icon: "document" as const },
-              { label: "Templates", href: "/templates", icon: "document" as const },
-              { label: "Pricing", href: "/pricing", icon: "sparkle" as const }
+              { label: "Front Page", href: "#hero", marker: "01" },
+              { label: "Anthology", href: "#templates", marker: "02" },
+              { label: "Toolkit", href: "#features", marker: "03" },
+              { label: "Field Notes", href: "#before-after", marker: "04" },
+              { label: "The Desk", href: "#management", marker: "05" },
+              { label: "Letters", href: "#testimonials", marker: "06" },
+              { label: "Subscribe", href: "#pricing", marker: "07" },
             ].map((link) => (
               <li key={link.label}>
-                <a
-                  className="group flex items-center justify-between rounded-2xl px-3 py-3.5 text-[15px] font-semibold text-[#111827] transition hover:bg-[#eef2ff]"
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#eef2ff] text-[#6366f1] transition group-hover:bg-white">
-                      <SvgIcon className="h-4 w-4" name={link.icon} />
-                    </span>
-                    {link.label}
-                  </span>
-                  <SvgIcon className="h-4 w-4 text-[#9ca3af] transition group-hover:translate-x-0.5 group-hover:text-[#6366f1]" name="arrow-right" />
+                <a href={link.href} onClick={() => setMobileMenuOpen(false)} className="flex items-baseline gap-3 border-b border-ink-deep/20 py-2.5">
+                  <span className="font-serif text-sm italic text-saffron">{link.marker}</span>
+                  <span className="font-serif text-2xl text-ink-deep">{link.label}</span>
                 </a>
               </li>
             ))}
           </ul>
-
-          <div className="mt-5 flex flex-col gap-2.5 border-t border-[#e5e7eb] pt-5">
-            <a
-              className="flex items-center justify-center rounded-2xl border border-[#e5e7eb] bg-white px-4 py-3 text-sm font-bold text-[#111827] transition hover:border-[#6366f1]/40 hover:bg-[#f8faff]"
-              href="/signin"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Sign in
-            </a>
-            <a
-              className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition hover:brightness-105 active:scale-[0.98]"
-              href="/signup"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Get started free
-              <SvgIcon className="h-3.5 w-3.5" name="arrow-right" />
-            </a>
+          <div className="mt-6 flex gap-2">
+            <a href="/signin" onClick={() => setMobileMenuOpen(false)} className="flex-1 border border-ink-deep px-4 py-3 text-center font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep">Sign in</a>
+            <a href="/signup" onClick={() => setMobileMenuOpen(false)} className="flex-1 bg-ink-deep px-4 py-3 text-center font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft">Subscribe</a>
           </div>
         </nav>
       </div>
 
-      {/* Hero */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden pt-8 pb-20 bg-[#f8faff]"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => setMouse({ x: 0, y: 0 })}
-      >
-        {/* 3D Water Balloons — softened so they read as ambient depth, not foreground noise */}
-        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-70">
-          {/* Blue balloon — large */}
-          <div
-            className="balloon balloon-1"
-            style={{
-              left: "5%", top: "8%", width: 200, height: 200,
-              background: "radial-gradient(circle at 38% 30%, rgba(147,197,253,0.9), rgba(59,130,246,0.7) 50%, rgba(29,78,216,0.5) 80%, rgba(30,64,175,0.3))",
-              boxShadow: "inset 0 -20px 40px rgba(30,64,175,0.25), 0 20px 60px rgba(59,130,246,0.2)",
-              transform: `translate(${mouse.x * 20}px, ${mouse.y * 15}px)`,
-            }}
-          />
-          {/* Indigo balloon — medium */}
-          <div
-            className="balloon balloon-2"
-            style={{
-              right: "8%", top: "5%", width: 160, height: 160,
-              background: "radial-gradient(circle at 35% 28%, rgba(199,210,254,0.9), rgba(129,140,248,0.7) 45%, rgba(99,102,241,0.5) 75%, rgba(79,70,229,0.3))",
-              boxShadow: "inset 0 -18px 36px rgba(79,70,229,0.25), 0 18px 50px rgba(99,102,241,0.2)",
-              transform: `translate(${mouse.x * -15}px, ${mouse.y * 20}px)`,
-            }}
-          />
-          {/* Cyan balloon — large */}
-          <div
-            className="balloon balloon-3"
-            style={{
-              left: "25%", bottom: "5%", width: 180, height: 180,
-              background: "radial-gradient(circle at 36% 32%, rgba(165,243,252,0.9), rgba(34,211,238,0.65) 48%, rgba(6,182,212,0.45) 78%, rgba(8,145,178,0.25))",
-              boxShadow: "inset 0 -18px 38px rgba(8,145,178,0.2), 0 18px 55px rgba(6,182,212,0.18)",
-              transform: `translate(${mouse.x * 25}px, ${mouse.y * -18}px)`,
-            }}
-          />
-          {/* Pink balloon — small */}
-          <div
-            className="balloon balloon-4"
-            style={{
-              right: "20%", bottom: "15%", width: 120, height: 120,
-              background: "radial-gradient(circle at 38% 30%, rgba(251,207,232,0.9), rgba(244,114,182,0.65) 48%, rgba(236,72,153,0.45) 78%, rgba(219,39,119,0.25))",
-              boxShadow: "inset 0 -14px 30px rgba(219,39,119,0.2), 0 14px 40px rgba(236,72,153,0.15)",
-              transform: `translate(${mouse.x * -30}px, ${mouse.y * 25}px)`,
-            }}
-          />
-          {/* Purple balloon — medium */}
-          <div
-            className="balloon balloon-5"
-            style={{
-              left: "55%", top: "12%", width: 140, height: 140,
-              background: "radial-gradient(circle at 36% 28%, rgba(233,213,255,0.9), rgba(192,132,252,0.65) 48%, rgba(168,85,247,0.45) 78%, rgba(147,51,234,0.25))",
-              boxShadow: "inset 0 -16px 34px rgba(147,51,234,0.2), 0 16px 45px rgba(168,85,247,0.18)",
-              transform: `translate(${mouse.x * -20}px, ${mouse.y * 30}px)`,
-            }}
-          />
-          {/* Green balloon — small */}
-          <div
-            className="balloon balloon-6"
-            style={{
-              left: "12%", top: "50%", width: 100, height: 100,
-              background: "radial-gradient(circle at 38% 30%, rgba(187,247,208,0.9), rgba(74,222,128,0.65) 48%, rgba(34,197,94,0.45) 78%, rgba(22,163,74,0.25))",
-              boxShadow: "inset 0 -12px 26px rgba(22,163,74,0.2), 0 12px 35px rgba(34,197,94,0.15)",
-              transform: `translate(${mouse.x * 18}px, ${mouse.y * -22}px)`,
-            }}
-          />
-        </div>
+      {/* ─────────── HERO ─────────── */}
+      <section id="hero" className="relative noise-paper">
+        <div className="mx-auto max-w-[1400px] px-6 pt-10 pb-16 md:px-12 md:pt-16 md:pb-24">
+          <div className="grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+            <div className="flex flex-col justify-center">
+              {/* Eyebrow with rule */}
+              <div className="ink-reveal mb-7 flex items-center gap-4">
+                <div className="h-px w-12 bg-ink-deep" />
+                <p className="font-serif text-sm italic text-saffron">No. 01 — The Front Page</p>
+                <div className="h-px flex-1 bg-ink-deep/30" />
+              </div>
 
-        {/* Subtle grid overlay */}
-        <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(113,119,134,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(113,119,134,0.03)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:linear-gradient(to_bottom,black,transparent_88%)]" />
-        <div className="relative z-10 mx-auto grid max-w-7xl gap-16 px-4 md:grid-cols-[1fr_1.1fr] md:px-10">
-          <div className="flex flex-col justify-center py-10">
-            <div className="hero-fade-up hero-delay-1 mb-6 inline-flex w-fit items-center gap-2.5 rounded-full border border-[#6366f1]/15 bg-white/70 py-1 pl-1 pr-3 shadow-sm backdrop-blur-sm">
-              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-2.5 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em] text-white">
-                <SvgIcon className="h-3 w-3" name="sparkle" />
-                New
-              </span>
-              <span className="text-xs font-semibold text-[#374151]">AI Power-Up is live · 50k+ job seekers building</span>
-            </div>
-            <h1 className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-[#111827] sm:text-5xl md:text-7xl">
-              {(() => {
-                const words = [
-                  { text: "The", accent: false },
-                  { text: "smarter", accent: true },
-                  { text: "way", accent: false },
-                  { text: "to", accent: false },
-                  { text: "build", accent: false },
-                  { text: "your", accent: false },
-                  { text: "resume.", accent: false },
-                ];
-                let charIndex = 0;
-                return words.map((word, wi) => (
-                  <span key={wi} className="inline-block whitespace-nowrap">
-                    {wi > 0 && <span className="inline-block">&nbsp;</span>}
-                    {word.text.split("").map((char, ci) => {
-                      const delay = charIndex * 0.045;
-                      charIndex++;
-                      return (
-                        <span
-                          key={ci}
-                          className={`letter-drop ${word.accent ? "letter-accent" : ""}`}
-                          style={{ animationDelay: `${delay}s` }}
-                        >
-                          {char}
-                        </span>
-                      );
-                    })}
-                  </span>
-                ));
-              })()}
-            </h1>
-            <p className="hero-fade-up hero-delay-3 mt-8 max-w-xl text-lg leading-relaxed text-[#6b7280]">
-              Stop fighting with Word. Use professional templates, AI-powered rewrites, and one-click export to land your next interview.
-            </p>
-            <div className="hero-fade-up hero-delay-4 mt-10 flex flex-col gap-4 sm:flex-row">
-              <a
-                className="primary-gradient group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-center text-base font-bold text-white shadow-panel transition-all hover:shadow-[0_12px_40px_rgba(99,102,241,0.4)] hover:brightness-105 active:scale-[0.98]"
-                href="/resume"
-              >
-                Create your resume — it&apos;s free
-                <SvgIcon name="arrow-right" />
-              </a>
-              <a
-                className="flex items-center justify-center gap-2 rounded-2xl border border-[#e5e7eb] bg-white px-8 py-4 text-center text-base font-bold text-[#111827] transition-all hover:border-primary/40 hover:bg-[#f3f4f6] active:scale-[0.98]"
-                href="/templates"
-              >
-                Browse templates
-              </a>
-            </div>
-            <div className="hero-fade-up hero-delay-5 mt-12 flex items-center gap-8 border-t border-[#e5e7eb]/60 pt-8">
-              <div className="flex -space-x-3">
-                {["SM", "JK", "AR", "LW"].map((initials, i) => (
-                  <div key={i} className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#f8faff] bg-primary/10 text-[11px] font-bold text-primary shadow-sm">
-                    {initials}
+              <h1 className="ink-reveal headline-editorial text-[56px] sm:text-[80px] md:text-[104px] lg:text-[116px]" style={{ animationDelay: "0.1s" }}>
+                The <em>smarter</em><br />way to build<br />your résumé.
+              </h1>
+
+              <p className="ink-reveal mt-9 max-w-xl font-serif text-[19px] leading-[1.45] text-ink-soft" style={{ animationDelay: "0.25s" }}>
+                <span className="font-serif italic text-saffron">Stop fighting with Word.</span> Use a print-grade typesetter,
+                AI editorials that rewrite your bullets, and one-click export to land your next interview —
+                set in the same press that designed this page.
+              </p>
+
+              {/* CTAs */}
+              <div className="ink-reveal mt-9 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "0.4s" }}>
+                <a href="/resume" className="btn-editorial group">
+                  Start a new manuscript
+                  <span className="font-serif text-base italic">→</span>
+                </a>
+                <a href="/templates" className="btn-editorial btn-editorial-ghost">
+                  Browse the anthology
+                </a>
+              </div>
+
+              {/* Editorial stats strip */}
+              <div className="ink-reveal mt-12 grid grid-cols-3 gap-0 border-y-2 border-ink-deep py-5" style={{ animationDelay: "0.55s" }}>
+                {[
+                  { num: "50K+", label: "subscribers writing" },
+                  { num: "4.9", label: "average reader rating" },
+                  { num: String(ALL_TEMPLATES.length), label: "templates in press" },
+                ].map((stat, i) => (
+                  <div key={stat.label} className={`flex flex-col gap-1 px-4 ${i > 0 ? "border-l border-ink-deep/30" : ""}`}>
+                    <p className="font-serif text-[40px] leading-none text-ink-deep md:text-[52px]">{stat.num}</p>
+                    <p className="font-serif text-xs italic text-ink-soft">{stat.label}</p>
                   </div>
                 ))}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#f8faff] bg-primary text-[10px] font-bold text-white shadow-sm">50k+</div>
               </div>
-              <div>
-                <div className="flex items-center gap-1 text-warning">
-                  {[1, 2, 3, 4, 5].map((i) => <SvgIcon key={i} className="h-4 w-4" name="star" />)}
+
+              {/* Byline */}
+              <p className="byline mt-6">
+                Reported and typeset for ambitious professionals — Worldwide · {new Date().getFullYear()}.
+              </p>
+            </div>
+
+            {/* Right: framed preview */}
+            <div className="relative flex flex-col items-center">
+              <div className="w-full max-w-[460px]">
+                <div className="mb-2 flex items-end justify-between">
+                  <p className="font-serif text-xs italic text-ink-soft">Plate I — Academic Classic, set in Fraunces &amp; Geist</p>
+                  <p className="font-serif text-[10px] italic text-saffron">No. 01</p>
                 </div>
-                <p className="mt-1 text-sm text-[#6b7280]"><strong className="text-[#111827]">4.9/5</strong> from our community</p>
+                <div className="thumb-frame p-3 border-2">
+                  <HeroPreview />
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="font-serif text-[11px] italic text-ink-soft">— Hand-set example —</p>
+                  <p className="font-serif text-[11px] italic text-ink-soft">A4 · 210 × 297 mm</p>
+                </div>
+
+                {/* margin notes */}
+                <div className="mt-10 grid grid-cols-2 gap-4">
+                  <div className="border-l-2 border-saffron pl-3">
+                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-saffron">Marginalia</p>
+                    <p className="font-serif mt-1 text-sm italic text-ink-deep">"Edited my CV during a coffee — landed three callbacks the next week."</p>
+                    <p className="mt-2 font-serif text-[11px] italic text-ink-soft">— S. Mitchell, Spotify</p>
+                  </div>
+                  <div className="border-l-2 border-moss pl-3">
+                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-moss">Press notes</p>
+                    <p className="font-serif mt-1 text-sm italic text-ink-deep">"Finally, a builder that doesn't look generic. The press aesthetic just hits."</p>
+                    <p className="mt-2 font-serif text-[11px] italic text-ink-soft">— D. Chen, Amazon</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div className="relative hidden md:flex md:items-center md:justify-center" style={{ perspective: "1200px" }}>
-            <div className="animate-float w-full max-w-[420px] lg:max-w-[460px]" style={{ transform: "rotateY(-6deg) rotateX(2deg)" }}>
-              <HeroPreview />
-            </div>
-            <div className="absolute -left-12 bottom-12 h-32 w-32 animate-float-delay rounded-3xl bg-primary/10 blur-2xl" />
-            <div className="absolute -right-8 top-12 h-40 w-40 animate-float rounded-full bg-secondary/10 blur-3xl" />
-          </div>
+        </div>
+
+        {/* big rule */}
+        <div className="mx-auto max-w-[1400px] px-6 md:px-12">
+          <div className="rule-double" />
         </div>
       </section>
 
-      {/* All templates showcase — dark background */}
+      {/* ─────────── ANTHOLOGY (Templates marquee, dark) ─────────── */}
       <LazyTemplateMarquee templates={marqueeTemplates} onSelect={selectTemplate} totalCount={ALL_TEMPLATES.length} />
 
-      {/* Features — Bento grid */}
-      <section className="relative overflow-hidden py-28" id="features">
-        {/* Decorative background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f8faff] via-[#eef2ff] to-[#f8faff]" />
-        <div className="absolute left-1/4 top-0 h-[500px] w-[500px] rounded-full bg-[#6366f1]/[0.04] blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-[#3b82f6]/[0.05] blur-[100px]" />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-10">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
-            <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 px-4 py-1.5">
-              <SvgIcon className="h-3.5 w-3.5 text-[#6366f1]" name="sparkle" />
-              <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-[#6366f1]">Everything you need</span>
+      {/* ─────────── TOOLKIT (Features) ─────────── */}
+      <section id="features" className="noise-paper">
+        <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
+          {/* Section heading */}
+          <div className="mb-14 grid gap-6 md:grid-cols-[2fr_3fr] md:items-end">
+            <div>
+              <p className="font-serif text-sm italic text-saffron">No. 03 — The Toolkit</p>
+              <h2 className="headline-editorial mt-3 text-[44px] sm:text-[60px] md:text-[72px]">
+                Built for <em>precision</em><br />and speed.
+              </h2>
             </div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-[#111827] sm:text-5xl">Built for precision<br className="hidden sm:block" /> and speed.</h2>
-            <p className="mt-5 text-lg leading-relaxed text-[#6b7280]">A streamlined workflow from draft to download — no learning curve.</p>
+            <div className="md:pl-12">
+              <p className="font-serif text-lg italic leading-snug text-ink-soft">
+                A streamlined newsroom workflow — from blank page to polished print. No learning curve, no marketing fluff, no purple gradients.
+              </p>
+              <div className="mt-4 h-px w-full bg-ink-deep/30" />
+              <p className="mt-3 font-serif text-xs italic text-ink-soft">Filed under: AI · Typography · Export · Live preview</p>
+            </div>
           </div>
 
-          {/* Bento Grid */}
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {/* Card 1 — AI Enhancement (large) */}
-            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm lg:col-span-2">
-              <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-[#6366f1]/10 to-[#3b82f6]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
-              <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#3b82f6] shadow-lg shadow-[#6366f1]/25 transition-transform group-hover:scale-110 group-hover:rotate-3">
-                  <SvgIcon className="h-7 w-7 text-white" name="sparkle" />
+          {/* Editorial newspaper bento — 12-col grid */}
+          <div className="grid grid-cols-12 gap-px bg-ink-deep border-2 border-ink-deep">
+            {/* Feature 01 — AI Editor (big, 8 cols, taller) */}
+            <article className="col-span-12 lg:col-span-8 noise-paper p-7 md:p-10">
+              <div className="flex items-baseline justify-between">
+                <span className="font-serif text-sm italic text-saffron">Feature № 01</span>
+                <span className="smallcaps text-ink-soft">AI desk</span>
+              </div>
+              <h3 className="headline-editorial mt-4 text-[40px] leading-[0.95] md:text-[56px]">
+                The <em>AI Editor</em><br />rewrites your draft.
+              </h3>
+              <p className="font-serif dropcap mt-6 max-w-2xl text-[17px] leading-[1.5] text-ink-soft">
+                One click and weak bullets become ATS-friendly, achievement-driven sentences. The AI reads the job
+                description, hunts for the keywords that pass automated screens, then sets the language so a hiring
+                manager actually wants to read it.
+              </p>
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="border border-oxblood/30 bg-oxblood/[0.05] p-4">
+                  <p className="smallcaps text-oxblood">Before · Manuscript</p>
+                  <p className="mt-2 font-serif text-[15px] italic leading-snug text-ink-soft">
+                    "Managed social media accounts for the company and posted regularly."
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#111827]">AI CV Enhancement</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Rewrite weak bullets into professional, ATS-friendly achievements with one click. Our AI analyzes job descriptions and optimizes your content for maximum impact.</p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {["ATS Optimization", "Smart Rewrite", "Keyword Match"].map((tag) => (
-                      <span key={tag} className="rounded-full bg-[#6366f1]/5 px-3 py-1 text-[11px] font-bold text-[#6366f1]">{tag}</span>
-                    ))}
-                  </div>
+                <div className="border border-moss/30 bg-moss/[0.05] p-4">
+                  <p className="smallcaps text-moss">After · AI Edit</p>
+                  <p className="mt-2 font-serif text-[15px] italic leading-snug text-ink-deep">
+                    "Grew social engagement <em className="not-italic text-saffron">+156%</em> across 4 platforms in six months, managing a 40-post weekly cadence."
+                  </p>
                 </div>
               </div>
-              {/* Mini mockup */}
-              <div className="relative z-10 mt-6 overflow-hidden rounded-2xl border border-[#e5e7eb]/50 bg-[#f8fafc] p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#ef4444]/60" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]/60" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#22c55e]/60" />
+            </article>
+
+            {/* Feature 02 — Live Preview (4 cols) */}
+            <article className="col-span-12 sm:col-span-6 lg:col-span-4 noise-paper p-7 md:p-10">
+              <div className="flex items-baseline justify-between">
+                <span className="font-serif text-sm italic text-saffron">№ 02</span>
+                <span className="smallcaps text-ink-soft">Live press</span>
+              </div>
+              <h3 className="headline-editorial mt-4 text-[28px] md:text-[34px]">
+                Live <em>preview</em>, like a working printer's proof.
+              </h3>
+              <p className="font-serif mt-4 text-[15px] leading-[1.5] text-ink-soft">
+                Edit on the left, watch the page ink itself on the right. What you set is exactly what gets exported.
+              </p>
+              <div className="mt-6 flex gap-2">
+                <div className="flex-1 border border-rule-soft bg-paper p-3">
+                  <div className="space-y-1.5">
+                    <div className="h-1.5 w-3/4 bg-ink-deep/50" />
+                    <div className="h-1.5 w-full bg-saffron/50" />
+                    <div className="h-1.5 w-2/3 bg-ink-deep/30" />
                   </div>
-                  <div className="h-5 flex-1 rounded bg-[#e5e7eb]/50" />
                 </div>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <div className="rounded-xl bg-[#fef2f2] p-3">
-                    <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[#ef4444]">Before</p>
-                    <p className="text-[11px] leading-relaxed text-[#6b7280]">Managed social media accounts for the company.</p>
-                  </div>
-                  <div className="rounded-xl bg-[#f0fdf4] p-3">
-                    <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[#16a34a]">After — AI</p>
-                    <p className="text-[11px] leading-relaxed text-[#111827]">Grew social engagement by 156% across 4 platforms in 6 months.</p>
+                <span className="self-center font-serif text-2xl italic text-saffron">→</span>
+                <div className="flex-1 border-2 border-ink-deep bg-paper-soft p-3">
+                  <div className="space-y-1.5">
+                    <div className="h-1.5 w-1/2 bg-ink-deep" />
+                    <div className="h-1 w-full bg-ink-deep/30" />
+                    <div className="h-1 w-4/5 bg-ink-deep/30" />
+                    <div className="h-1 w-3/5 bg-ink-deep/30" />
                   </div>
                 </div>
               </div>
             </article>
 
-            {/* Card 2 — Live Preview */}
-            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm">
-              <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-gradient-to-br from-[#8b5cf6]/10 to-[#6366f1]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
-              <div className="relative z-10">
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#6366f1] shadow-lg shadow-[#8b5cf6]/25 transition-transform group-hover:scale-110 group-hover:-rotate-3">
-                  <SvgIcon className="h-6 w-6 text-white" name="document" />
-                </div>
-                <h3 className="text-xl font-bold text-[#111827]">Live Template Preview</h3>
-                <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Edit your details while the CV preview updates beside the form in real time. What you see is what you export.</p>
-                {/* Mini preview mockup */}
-                <div className="mt-6 flex gap-2">
-                  <div className="flex-1 rounded-xl border border-[#e5e7eb]/50 bg-[#f8fafc] p-3">
-                    <div className="space-y-2">
-                      <div className="h-2 w-3/4 rounded bg-[#e5e7eb]" />
-                      <div className="h-2 w-full rounded bg-[#6366f1]/20" />
-                      <div className="h-2 w-2/3 rounded bg-[#e5e7eb]" />
-                    </div>
-                  </div>
-                  <div className="flex items-center text-[#6366f1]">
-                    <SvgIcon className="h-4 w-4" name="arrow-right" />
-                  </div>
-                  <div className="flex-1 rounded-xl border border-[#6366f1]/20 bg-white p-3 shadow-sm">
-                    <div className="space-y-2">
-                      <div className="h-2 w-1/2 rounded bg-[#111827]" />
-                      <div className="h-1.5 w-full rounded bg-[#e5e7eb]" />
-                      <div className="h-1.5 w-4/5 rounded bg-[#e5e7eb]" />
-                      <div className="h-1.5 w-3/5 rounded bg-[#e5e7eb]" />
-                    </div>
-                  </div>
-                </div>
+            {/* Feature 03 — Cover letter */}
+            <article className="col-span-12 sm:col-span-6 lg:col-span-4 noise-paper p-7 md:p-10">
+              <div className="flex items-baseline justify-between">
+                <span className="font-serif text-sm italic text-saffron">№ 03</span>
+                <span className="smallcaps text-ink-soft">Correspondence</span>
               </div>
+              <h3 className="headline-editorial mt-4 text-[28px] md:text-[34px]">
+                Tailored <em>cover letters</em>, dictated in seconds.
+              </h3>
+              <ol className="mt-6 space-y-3">
+                {["Paste the listing", "AI drafts your letter", "Edit, sign, post."].map((step, i) => (
+                  <li key={step} className="flex items-baseline gap-3 border-b border-ink-deep/15 pb-2.5">
+                    <span className="font-serif text-base italic text-saffron">{(i + 1).toString().padStart(2, "0")}</span>
+                    <span className="font-serif text-[15px] text-ink-deep">{step}</span>
+                  </li>
+                ))}
+              </ol>
             </article>
 
-            {/* Card 3 — Cover Letter */}
-            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm">
-              <div className="absolute -left-16 -bottom-16 h-44 w-44 rounded-full bg-gradient-to-br from-[#10b981]/10 to-[#06b6d4]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
-              <div className="relative z-10">
-                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#10b981] to-[#06b6d4] shadow-lg shadow-[#10b981]/25 transition-transform group-hover:scale-110 group-hover:rotate-3">
-                  <SvgIcon className="h-6 w-6 text-white" name="cl" />
-                </div>
-                <h3 className="text-xl font-bold text-[#111827]">Cover Letter Generator</h3>
-                <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Generate targeted cover letters from your saved CV data in seconds. Perfectly matched to each job posting.</p>
-                <div className="mt-6 space-y-2">
-                  {["Paste job description", "AI generates draft", "Customize & export"].map((step, i) => (
-                    <div key={step} className="flex items-center gap-3 rounded-xl bg-[#f0fdf4]/80 px-3 py-2">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#10b981] text-[10px] font-bold text-white">{i + 1}</span>
-                      <span className="text-xs font-medium text-[#111827]">{step}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Feature 04 — PDF Export (big, 8 cols) */}
+            <article className="col-span-12 lg:col-span-8 noise-paper p-7 md:p-10">
+              <div className="flex items-baseline justify-between">
+                <span className="font-serif text-sm italic text-saffron">Feature № 04</span>
+                <span className="smallcaps text-ink-soft">The Press</span>
               </div>
-            </article>
-
-            {/* Card 4 — PDF Export (large) */}
-            <article className="card-hover group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-8 shadow-lg backdrop-blur-sm lg:col-span-2">
-              <div className="absolute -left-20 -bottom-20 h-60 w-60 rounded-full bg-gradient-to-br from-[#f59e0b]/10 to-[#f97316]/5 blur-3xl transition-transform duration-700 group-hover:scale-150" />
-              <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-start">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b] to-[#f97316] shadow-lg shadow-[#f59e0b]/25 transition-transform group-hover:scale-110 group-hover:-rotate-3">
-                  <SvgIcon className="h-7 w-7 text-white" name="pdf" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#111827]">Pixel-perfect PDF Export</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[#6b7280]">Export polished A4 PDFs that match your chosen template exactly. High-resolution output ready for recruiters and ATS systems.</p>
-                  <div className="mt-5 grid grid-cols-3 gap-3">
-                    {[
-                      { label: "Resolution", value: "300 DPI" },
-                      { label: "Format", value: "A4 PDF" },
-                      { label: "Quality", value: "Print-ready" },
-                    ].map((stat) => (
-                      <div key={stat.label} className="rounded-xl bg-[#fffbeb]/80 p-3 text-center">
-                        <p className="text-lg font-extrabold text-[#f59e0b]">{stat.value}</p>
-                        <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6b7280]">{stat.label}</p>
-                      </div>
-                    ))}
+              <h3 className="headline-editorial mt-4 text-[36px] md:text-[48px]">
+                Pixel-perfect <em>PDF</em> — printed on the same press as your favourite magazine.
+              </h3>
+              <p className="font-serif mt-5 max-w-2xl text-[16px] leading-[1.5] text-ink-soft">
+                A4 PDFs that match the on-screen preview character-by-character. Hand off to recruiters or feed straight
+                into ATS readers — every kern and ligature intact.
+              </p>
+              <div className="mt-8 grid grid-cols-3 divide-x divide-ink-deep/20 border-y border-ink-deep">
+                {[
+                  { value: "300", unit: "dpi", label: "Resolution" },
+                  { value: "A4", unit: "210×297", label: "Format" },
+                  { value: "100%", unit: "vector", label: "Sharpness" },
+                ].map((stat) => (
+                  <div key={stat.label} className="px-5 py-4 text-center">
+                    <p className="font-serif text-[38px] leading-none text-ink-deep md:text-[48px]">{stat.value}</p>
+                    <p className="font-serif text-[12px] italic text-saffron">{stat.unit}</p>
+                    <p className="smallcaps mt-1 text-ink-soft">{stat.label}</p>
                   </div>
-                </div>
+                ))}
               </div>
             </article>
           </div>
         </div>
       </section>
 
-      {/* Before → After Showcase */}
-      <section className="py-24" id="before-after">
-        <div className="mx-auto max-w-7xl px-4 md:px-10">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">AI Power</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">See the difference AI makes.</h2>
-            <p className="mt-4 text-lg text-[#6b7280]">One click transforms weak bullet points into professional, achievement-driven statements.</p>
+      {/* ─────────── FIELD NOTES (Before / After) ─────────── */}
+      <section id="before-after" className="relative noise-paper">
+        <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
+          <div className="mb-12 text-center">
+            <p className="font-serif text-sm italic text-saffron">No. 04 — Field Notes</p>
+            <h2 className="headline-editorial mx-auto mt-3 max-w-3xl text-[44px] sm:text-[60px] md:text-[76px]">
+              See the <em>difference</em><br />a single edit makes.
+            </h2>
+            <p className="byline mt-4">One click. Same words, transformed into achievement-driven copy.</p>
           </div>
-          <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
-            {/* Before */}
-            <div className="relative rounded-3xl border border-[#fca5a5]/30 bg-[#fef2f2] p-8">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#fecaca]/60 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#dc2626]">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                Before
+
+          <div className="grid gap-0 lg:grid-cols-[1fr_auto_1fr]">
+            {/* Manuscript */}
+            <article className="border-2 border-oxblood/40 bg-oxblood/[0.04] p-7 md:p-10">
+              <div className="mb-6 flex items-baseline justify-between">
+                <p className="smallcaps text-oxblood">Manuscript · Before</p>
+                <p className="font-serif text-xs italic text-oxblood">ATS · 34/100</p>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {[
                   { title: "Work Experience", text: "Worked on marketing campaigns and helped the team with various projects and tasks." },
                   { title: "Skills", text: "Good at communication, teamwork, and problem solving. Used Excel and PowerPoint." },
                   { title: "Achievement", text: "Was responsible for social media accounts and posting content regularly." },
-                ].map((item) => (
-                  <div key={item.title} className="rounded-2xl bg-white/60 p-5">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#9ca3af]">{item.title}</p>
-                    <p className="text-sm leading-relaxed text-[#6b7280]">{item.text}</p>
+                ].map((item, i) => (
+                  <div key={item.title} className={i > 0 ? "border-t border-oxblood/20 pt-5" : ""}>
+                    <p className="font-serif text-[11px] italic text-oxblood">§{(i + 1).toString().padStart(2, "0")} — {item.title}</p>
+                    <p className="font-serif mt-2 text-[16px] leading-[1.45] italic text-ink-soft">{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex items-center gap-2 text-sm font-bold text-[#ef4444]">
-                <span className="rounded-full bg-[#fecaca] px-3 py-1 text-xs">ATS Score: 34</span>
-                <span className="text-xs text-[#9ca3af]">Likely filtered out</span>
+              <p className="byline mt-6 text-oxblood">— Likely filtered out by automated readers.</p>
+            </article>
+
+            {/* Separator with arrow */}
+            <div className="my-6 flex items-center justify-center lg:my-0 lg:flex-col lg:px-4">
+              <div className="hidden h-px w-full bg-ink-deep lg:h-full lg:w-px" />
+              <div className="bg-paper border-2 border-ink-deep px-5 py-3">
+                <p className="font-serif text-base italic text-ink-deep">edited by AI <em className="not-italic text-saffron">→</em></p>
               </div>
+              <div className="hidden h-px w-full bg-ink-deep lg:h-full lg:w-px" />
             </div>
-            {/* After */}
-            <div className="relative rounded-3xl border border-[#86efac]/30 bg-[#f0fdf4] p-8">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#bbf7d0]/60 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#16a34a]">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                After — AI Enhanced
+
+            {/* AI Edit */}
+            <article className="border-2 border-moss/40 bg-moss/[0.04] p-7 md:p-10">
+              <div className="mb-6 flex items-baseline justify-between">
+                <p className="smallcaps text-moss">After · AI Edit</p>
+                <p className="font-serif text-xs italic text-moss">ATS · 92/100</p>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {[
-                  { title: "Work Experience", text: "Spearheaded 12 cross-channel marketing campaigns, driving a 34% increase in qualified leads and reducing CPA by 18%." },
-                  { title: "Skills", text: "Strategic communications, cross-functional leadership, data-driven decision making. Proficient in Excel (VLOOKUP, pivot tables), PowerPoint, and HubSpot CRM." },
-                  { title: "Achievement", text: "Grew organic social media engagement by 156% in 6 months, managing a content calendar of 40+ weekly posts across 4 platforms." },
-                ].map((item) => (
-                  <div key={item.title} className="rounded-2xl bg-white/60 p-5">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#6b7280]">{item.title}</p>
-                    <p className="text-sm leading-relaxed text-[#111827]">{item.text}</p>
+                  { title: "Work Experience", text: "Spearheaded 12 cross-channel campaigns, driving a 34% increase in qualified leads and reducing CPA by 18%." },
+                  { title: "Skills", text: "Strategic communications, cross-functional leadership, data-driven decisioning. Proficient in Excel (VLOOKUP, pivot tables), HubSpot CRM." },
+                  { title: "Achievement", text: "Grew organic social engagement by 156% in 6 months, managing a content calendar of 40+ weekly posts across 4 platforms." },
+                ].map((item, i) => (
+                  <div key={item.title} className={i > 0 ? "border-t border-moss/20 pt-5" : ""}>
+                    <p className="font-serif text-[11px] italic text-moss">§{(i + 1).toString().padStart(2, "0")} — {item.title}</p>
+                    <p className="font-serif mt-2 text-[16px] leading-[1.45] text-ink-deep">{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 flex items-center gap-2 text-sm font-bold text-[#16a34a]">
-                <span className="rounded-full bg-[#bbf7d0] px-3 py-1 text-xs">ATS Score: 92</span>
-                <span className="text-xs text-[#6b7280]">Interview-ready</span>
-              </div>
-            </div>
+              <p className="byline mt-6 text-moss">— Interview-ready. Sent straight to the recruiter.</p>
+            </article>
           </div>
+
           <div className="mt-12 text-center">
-            <a className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:shadow-xl hover:brightness-105 active:scale-[0.98]" href="/resume">
-              Try AI enhancement free
-              <SvgIcon className="h-4 w-4" name="arrow-right" />
+            <a href="/resume" className="btn-editorial btn-editorial-saffron inline-flex">
+              Try the AI editor — it&apos;s free
+              <span className="font-serif text-base italic">→</span>
             </a>
           </div>
         </div>
       </section>
 
-      {/* Dashboard preview */}
-      <section className="relative overflow-hidden py-28" id="management">
-        {/* Dark gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#0f172a]" />
-        {/* Decorative blobs */}
-        <div className="absolute left-0 top-1/4 h-[400px] w-[400px] rounded-full bg-[#6366f1]/10 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 h-[350px] w-[350px] rounded-full bg-[#3b82f6]/10 blur-[100px]" />
-        {/* Subtle grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
-
-        <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-10">
-          <div className="grid gap-16 lg:grid-cols-[1fr_1.4fr] lg:items-center">
-            {/* Left — text */}
+      {/* ─────────── THE DESK (Dashboard preview) — dark ─────────── */}
+      <section id="management" className="relative bg-paper-deep text-paper-soft">
+        <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_20%_20%,rgba(180,83,10,0.18),transparent_50%),radial-gradient(circle_at_80%_70%,rgba(63,91,71,0.15),transparent_50%)]" />
+        <div className="relative mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
+          <div className="grid gap-14 lg:grid-cols-[1fr_1.4fr] lg:items-center">
             <div>
-              <div className="mb-5 flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5">
-                <SvgIcon className="h-3.5 w-3.5 text-[#818cf8]" name="document" />
-                <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em] text-[#818cf8]">Smart Management</span>
-              </div>
-              <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">Your career<br />command center.</h2>
-              <p className="mt-6 text-lg leading-relaxed text-white/50">Save multiple versions of your CV for different roles. Manage, update, score, and export — all from one dashboard.</p>
+              <p className="font-serif text-sm italic text-saffron-bright">No. 05 — The Desk</p>
+              <h2 className="headline-editorial mt-3 text-[44px] text-paper-soft sm:text-[60px] md:text-[80px]" style={{ color: "var(--paper-soft)" }}>
+                Your career, <em style={{ color: "var(--saffron-bright)" }}>filed</em><br />and ready to send.
+              </h2>
+              <p className="font-serif mt-6 max-w-md text-[18px] italic leading-[1.45] text-paper-soft/75">
+                Save versions for every role. Manage, edit, score and export — all from one dashboard, designed to feel
+                like a writer's desk rather than a software product.
+              </p>
 
-              <div className="mt-10 grid grid-cols-3 gap-4">
+              <div className="mt-8 grid grid-cols-3 divide-x divide-paper-soft/15 border-y border-paper-soft/25 py-4">
                 {[
                   { value: String(ALL_TEMPLATES.length), label: "Templates" },
-                  { value: "92%", label: "Avg. ATS" },
-                  { value: "2min", label: "Setup time" },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm">
-                    <p className="text-2xl font-extrabold text-white">{stat.value}</p>
-                    <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-white/40">{stat.label}</p>
+                  { value: "92%", label: "Avg ATS" },
+                  { value: "2 min", label: "Setup time" },
+                ].map((stat, i) => (
+                  <div key={stat.label} className={`flex flex-col items-center gap-1 ${i > 0 ? "px-4" : "pr-4"}`}>
+                    <p className="font-serif text-[38px] leading-none text-paper-soft">{stat.value}</p>
+                    <p className="font-serif text-xs italic text-paper-soft/55">{stat.label}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-10 flex gap-4">
-                <a className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#3b82f6] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/30 transition-all hover:shadow-xl hover:brightness-105 active:scale-[0.98]" href="/resume">
-                  Create new CV
-                  <SvgIcon className="h-4 w-4" name="arrow-right" />
+              <div className="mt-9 flex flex-wrap gap-3">
+                <a href="/resume" className="btn-editorial-saffron btn-editorial">
+                  Start a new draft
+                  <span className="font-serif text-base italic">→</span>
                 </a>
-                <a className="rounded-2xl border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-bold text-white/80 backdrop-blur-sm transition-all hover:bg-white/10 hover:text-white" href="/dashboard">
+                <a href="/dashboard" className="btn-editorial inline-flex border-paper-soft/40 bg-transparent text-paper-soft hover:bg-paper-soft hover:text-ink-deep">
                   View dashboard
                 </a>
               </div>
             </div>
 
-            {/* Right — dashboard mockup */}
+            {/* Dashboard editorial mockup */}
             <div className="relative">
-              {/* Glow behind the card */}
-              <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-[#6366f1]/20 via-transparent to-[#3b82f6]/15 blur-2xl" />
-
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#1e293b]/80 p-6 shadow-2xl backdrop-blur-xl">
-                {/* Window controls */}
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-[#ef4444]/60" />
-                    <div className="h-3 w-3 rounded-full bg-[#f59e0b]/60" />
-                    <div className="h-3 w-3 rounded-full bg-[#22c55e]/60" />
+              <div className="absolute -inset-4 border border-saffron/30" />
+              <div className="relative border-2 border-paper-soft bg-paper p-6 text-ink-deep shadow-[12px_12px_0_0_rgba(180,83,10,0.5)]">
+                {/* Mock masthead */}
+                <div className="mb-5 flex items-baseline justify-between border-b-2 border-ink-deep pb-3">
+                  <div>
+                    <p className="font-serif text-[10px] italic text-saffron">The Desk · cv-with-ai.com/dashboard</p>
+                    <p className="font-serif text-2xl text-ink-deep">Welcome back, Aykut.</p>
                   </div>
-                  <div className="rounded-lg bg-white/5 px-4 py-1">
-                    <span className="text-[10px] font-medium text-white/30">cv-with-ai.com/dashboard</span>
-                  </div>
-                  <div className="w-14" />
+                  <p className="smallcaps text-ink-soft">Mon · Today</p>
                 </div>
 
-                {/* Stats row */}
-                <div className="mb-5 grid grid-cols-3 gap-3">
+                {/* Stat row */}
+                <div className="mb-5 grid grid-cols-3 divide-x divide-ink-deep/20 border border-ink-deep">
                   {[
-                    { label: "Resumes", value: "3", icon: "document", color: "from-[#6366f1] to-[#3b82f6]" },
-                    { label: "Cover Letters", value: "2", icon: "cl", color: "from-[#10b981] to-[#06b6d4]" },
-                    { label: "ATS Score", value: "92", icon: "sparkle", color: "from-[#f59e0b] to-[#f97316]" },
+                    { label: "Résumés", value: "3" },
+                    { label: "Letters", value: "2" },
+                    { label: "ATS score", value: "92" },
                   ].map((s) => (
-                    <div key={s.label} className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                      <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${s.color}`}>
-                        <SvgIcon className="h-3.5 w-3.5 text-white" name={s.icon} />
-                      </div>
-                      <p className="text-2xl font-extrabold text-white">{s.value}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-white/30">{s.label}</p>
+                    <div key={s.label} className="px-4 py-3">
+                      <p className="smallcaps text-ink-soft">{s.label}</p>
+                      <p className="font-serif text-3xl text-ink-deep">{s.value}</p>
                     </div>
                   ))}
                 </div>
 
-                {/* Document list */}
-                <div className="space-y-3">
+                {/* Document table */}
+                <div className="border border-ink-deep">
+                  <div className="grid grid-cols-[1.6fr_1fr_auto] gap-4 border-b-2 border-ink-deep bg-paper-warm px-4 py-2">
+                    <p className="smallcaps text-ink-soft">Title</p>
+                    <p className="smallcaps text-ink-soft">Modified</p>
+                    <p className="smallcaps text-ink-soft">Score</p>
+                  </div>
                   {[
-                    { title: "Product Manager CV", date: "Updated today", score: 92, progress: 92 },
-                    { title: "SaaS Founder Resume", date: "2 days ago", score: 88, progress: 88 },
-                    { title: "Consulting Cover Letter", date: "Draft", score: null, progress: 45 },
-                  ].map((doc) => (
-                    <div key={doc.title} className="group flex items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition-all hover:border-[#6366f1]/30 hover:bg-white/[0.06]">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366f1]/20 to-[#3b82f6]/10">
-                          <SvgIcon className="h-5 w-5 text-[#818cf8]" name="document" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">{doc.title}</p>
-                          <p className="mt-0.5 text-[11px] text-white/30">{doc.date}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        {doc.score ? (
-                          <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/10">
-                              <div className="h-full rounded-full bg-gradient-to-r from-[#22c55e] to-[#10b981]" style={{ width: `${doc.progress}%` }} />
-                            </div>
-                            <span className="text-xs font-bold text-[#22c55e]">{doc.score}</span>
-                          </div>
-                        ) : (
-                          <span className="rounded-full bg-[#f59e0b]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#f59e0b]">In Progress</span>
-                        )}
-                        <button className="rounded-lg bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/60 transition hover:bg-white/10 hover:text-white">Edit</button>
-                      </div>
+                    { title: "Product Manager CV", date: "Updated today", score: 92 },
+                    { title: "SaaS Founder Résumé", date: "Two days ago", score: 88 },
+                    { title: "Consulting Cover Letter", date: "Draft", score: null },
+                  ].map((doc, i, arr) => (
+                    <div key={doc.title} className={`grid grid-cols-[1.6fr_1fr_auto] items-center gap-4 px-4 py-3 ${i < arr.length - 1 ? "border-b border-ink-deep/20" : ""}`}>
+                      <p className="font-serif text-[17px] italic text-ink-deep">{doc.title}</p>
+                      <p className="font-serif text-sm italic text-ink-soft">{doc.date}</p>
+                      <p className="font-serif text-lg text-ink-deep">
+                        {doc.score !== null ? <><em className="text-saffron not-italic">{doc.score}</em>/100</> : <span className="italic text-ink-soft">in progress</span>}
+                      </p>
                     </div>
                   ))}
                 </div>
+
+                <p className="byline mt-4">— A daily edition of you. —</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24" id="testimonials">
-        <div className="mx-auto max-w-7xl px-4 md:px-10">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Testimonials</p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Loved by job seekers worldwide.</h2>
-            <p className="mt-4 text-lg text-[#6b7280]">See how professionals landed their dream jobs with CV with AI.</p>
+      {/* ─────────── LETTERS TO THE EDITOR (Testimonials) ─────────── */}
+      <section id="testimonials" className="noise-paper">
+        <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
+          <div className="mb-12 grid gap-6 md:grid-cols-[1.6fr_2.4fr] md:items-end">
+            <div>
+              <p className="font-serif text-sm italic text-saffron">No. 06 — Letters to the Editor</p>
+              <h2 className="headline-editorial mt-3 text-[44px] sm:text-[60px] md:text-[76px]">
+                Loved by <em>readers</em><br />in 92 countries.
+              </h2>
+            </div>
+            <p className="font-serif text-lg italic leading-snug text-ink-soft md:pl-12">
+              Postmarked from the people who used the press, signed off, and landed the job. Names redacted only where
+              the recruiter is still being polite.
+            </p>
           </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+
+          {/* Magazine grid */}
+          <div className="grid grid-cols-12 gap-px bg-ink-deep border-2 border-ink-deep">
             {[
               {
                 name: "Sarah Mitchell",
-                role: "Product Manager at Spotify",
-                text: "I went from zero callbacks to 5 interviews in two weeks. The AI rewrite feature transformed my bullet points from boring to impressive.",
-                rating: 5,
+                role: "Product Manager · Spotify",
+                quote: "I went from zero callbacks to five interviews in two weeks. The AI rewrite turned my bullets from boring to impressive.",
                 initials: "SM",
-                color: "from-[#6366f1] to-[#3b82f6]",
+                col: "col-span-12 md:col-span-6 lg:col-span-5",
               },
               {
                 name: "James Park",
-                role: "Software Engineer at Google",
-                text: "The ATS score checker was a game-changer. I had no idea my resume was getting filtered out. After optimizing with CV with AI, I finally heard back.",
-                rating: 5,
+                role: "Software Engineer · Google",
+                quote: "The ATS scorer was a game-changer. I had no idea my résumé was getting filtered. After editing, I finally heard back.",
                 initials: "JP",
-                color: "from-[#ec4899] to-[#f43f5e]",
+                col: "col-span-12 md:col-span-6 lg:col-span-4",
               },
               {
                 name: "Elena Rodriguez",
-                role: "Marketing Director at Shopify",
-                text: "The cover letter generator saved me hours. It perfectly matched the job description and highlighted my most relevant experience.",
-                rating: 5,
+                role: "Marketing Director · Shopify",
+                quote: "The cover letter generator saved me hours. It matched the job posting and highlighted exactly the right experience.",
                 initials: "ER",
-                color: "from-[#14b8a6] to-[#06b6d4]",
+                col: "col-span-12 md:col-span-6 lg:col-span-3",
               },
               {
                 name: "David Chen",
-                role: "Data Analyst at Amazon",
-                text: "I tried 4 other CV builders before this one. The templates are actually modern and the live preview makes editing so much faster.",
-                rating: 5,
+                role: "Data Analyst · Amazon",
+                quote: "I tried four other CV builders. Templates here actually look like a magazine, not a corporate slide deck.",
                 initials: "DC",
-                color: "from-[#f59e0b] to-[#f97316]",
+                col: "col-span-12 md:col-span-6 lg:col-span-4",
               },
               {
                 name: "Aisha Okonkwo",
-                role: "UX Designer at Meta",
-                text: "As a career changer, I struggled to present my experience. The AI suggestions helped me frame my transferable skills perfectly.",
-                rating: 5,
+                role: "UX Designer · Meta",
+                quote: "As a career changer, presenting my experience was hard. The AI helped me frame transferable skills perfectly.",
                 initials: "AO",
-                color: "from-[#8b5cf6] to-[#a855f7]",
+                col: "col-span-12 md:col-span-6 lg:col-span-5",
               },
               {
                 name: "Marcus Weber",
-                role: "Finance Analyst at JPMorgan",
-                text: "Clean, professional, and incredibly fast. I built my resume during lunch break and had a PDF ready to send by end of day.",
-                rating: 5,
+                role: "Finance Analyst · JPMorgan",
+                quote: "Clean, professional, fast. I built my résumé over lunch and sent it the same afternoon.",
                 initials: "MW",
-                color: "from-[#10b981] to-[#34d399]",
+                col: "col-span-12 md:col-span-12 lg:col-span-3",
               },
             ].map((t) => (
-              <article key={t.name} className="card-hover flex flex-col rounded-3xl bg-white p-7 shadow-ambient">
-                <div className="mb-4 flex items-center gap-1 text-[#f59e0b]">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <SvgIcon key={i} className="h-4 w-4" name="star" />
-                  ))}
-                </div>
-                <p className="mb-6 flex-1 text-sm leading-relaxed text-[#4b5563]">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3 border-t border-[#e5e7eb]/40 pt-5">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${t.color} text-xs font-bold text-white shadow-sm`}>
-                    {t.initials}
-                  </div>
+              <article key={t.name} className={`${t.col} noise-paper p-7 md:p-9 flex flex-col`}>
+                <p className="font-serif text-[60px] leading-none text-saffron">"</p>
+                <p className="font-serif mt-1 flex-1 text-[18px] italic leading-[1.35] text-ink-deep md:text-[20px]">
+                  {t.quote}
+                </p>
+                <div className="mt-6 flex items-center gap-3 border-t border-ink-deep pt-4">
+                  <div className="flex h-10 w-10 items-center justify-center bg-ink-deep font-serif text-sm italic text-paper-soft">{t.initials}</div>
                   <div>
-                    <p className="text-sm font-bold text-[#111827]">{t.name}</p>
-                    <p className="text-xs text-[#6b7280]">{t.role}</p>
+                    <p className="font-serif text-[15px] text-ink-deep">{t.name}</p>
+                    <p className="font-serif text-xs italic text-ink-soft">{t.role}</p>
                   </div>
                 </div>
               </article>
             ))}
           </div>
+
+          {/* Stars summary */}
+          <div className="mt-10 flex items-center justify-center gap-4">
+            <div className="h-px flex-1 bg-ink-deep/40" />
+            <p className="font-serif text-lg italic text-ink-deep">
+              ★ ★ ★ ★ ★ &nbsp; <em className="not-italic text-saffron">4.9</em> from 1,240 verified subscribers
+            </p>
+            <div className="h-px flex-1 bg-ink-deep/40" />
+          </div>
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* ─────────── SUBSCRIBE (Pricing) ─────────── */}
       <PricingSection />
 
-      <footer className="border-t border-[#e5e7eb]/20 bg-white py-12">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 md:px-10">
-          <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-            <a className="text-xl font-bold tracking-tight text-[#111827]" href="#">
-              CV with AI
-            </a>
-            <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-[#6b7280]">
-              <a className="hover:text-primary" href="/resume">Builder</a>
-              <a className="hover:text-primary" href="/templates">Templates</a>
-              <a className="hover:text-primary" href="/pricing">Pricing</a>
-              <a className="hover:text-primary" href="/signin">Sign in</a>
-              <a className="hover:text-primary" href="/signup">Sign up</a>
+      {/* ─────────── COLOPHON (Footer) ─────────── */}
+      <footer className="border-t-[3px] border-ink-deep bg-paper noise-paper">
+        <div className="mx-auto max-w-[1400px] px-6 py-14 md:px-12 md:py-20">
+          <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
+            <div>
+              <p className="font-serif text-[11px] italic text-ink-soft">The Resumé Press, est. 2026</p>
+              <p className="font-serif text-[44px] leading-none text-ink-deep md:text-[60px]">
+                CV <em className="text-saffron">with</em> AI
+              </p>
+              <p className="font-serif mt-4 max-w-sm text-[15px] italic leading-snug text-ink-soft">
+                A typeset newsroom for ambitious careers. Set in Fraunces &amp; Geist, printed on a press of cream &amp; ink.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <a href="/signup" className="btn-editorial">
+                  Subscribe — start free
+                </a>
+                <a href="/signin" className="btn-editorial btn-editorial-ghost">
+                  Sign in
+                </a>
+              </div>
             </div>
+
+            <FooterCol title="The Paper" links={[
+              { label: "Builder", href: "/resume" },
+              { label: "Templates", href: "/templates" },
+              { label: "Cover letters", href: "/cover-letter" },
+              { label: "Dashboard", href: "/dashboard" },
+            ]} />
+            <FooterCol title="Subscription" links={[
+              { label: "Pricing", href: "/pricing" },
+              { label: "Sign in", href: "/signin" },
+              { label: "Subscribe", href: "/signup" },
+            ]} />
+            <FooterCol title="Imprint" links={[
+              { label: "Privacy policy", href: "/privacy" },
+              { label: "Terms of service", href: "/terms" },
+              { label: "Refund policy", href: "/refund" },
+            ]} />
           </div>
-          <div className="flex flex-wrap justify-center gap-6 border-t border-[#e5e7eb]/20 pt-8 text-xs font-medium text-[#6b7280]">
-            <a className="hover:text-primary" href="/privacy">Privacy Policy</a>
-            <a className="hover:text-primary" href="/terms">Terms of Service</a>
-            <a className="hover:text-primary" href="/refund">Refund Policy</a>
-          </div>
-          <div className="flex flex-col items-center justify-between gap-4 text-xs text-[#6b7280] md:flex-row">
-            <p>© 2026 CV with AI. All rights reserved.</p>
-            <p>Made with precision for modern professionals.</p>
+
+          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-ink-deep/30 pt-6 md:flex-row">
+            <p className="font-serif text-xs italic text-ink-soft">
+              © {new Date().getFullYear()} CV with AI. All rights reserved. Hand-set with care.
+            </p>
+            <p className="font-serif text-xs italic text-ink-soft">
+              {ISSUE_DATE} · Worldwide circulation
+            </p>
           </div>
         </div>
       </footer>
@@ -982,6 +714,25 @@ export default function Home() {
   );
 }
 
+function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+  return (
+    <div>
+      <p className="font-serif text-sm italic text-saffron">{title}</p>
+      <div className="mt-2 h-px w-8 bg-ink-deep" />
+      <ul className="mt-4 space-y-2">
+        {links.map((link) => (
+          <li key={link.label}>
+            <a href={link.href} className="font-serif text-[16px] text-ink-deep transition hover:italic hover:text-saffron">
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ─────────── Templates marquee (editorial style) ─────────── */
 function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: TemplateCard[]; onSelect: (t: TemplateCard) => void; totalCount: number }) {
   const sectionRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
@@ -998,48 +749,53 @@ function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: T
   }, []);
 
   return (
-    <section ref={sectionRef} className="overflow-hidden bg-[#0f1117] py-20" id="templates">
-      <div className="mx-auto max-w-7xl px-4 md:px-10">
-        <div className="mb-12 flex flex-col items-end justify-between gap-6 md:flex-row">
-          <div className="max-w-xl">
-            <p className="font-label text-xs font-bold uppercase tracking-[0.2em] text-primary">Templates</p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">Designed for every career stage.</h2>
-            <p className="mt-3 text-sm text-white/50">{totalCount} professionally crafted templates, ready to use.</p>
+    <section ref={sectionRef} id="templates" className="relative bg-paper-deep py-20 text-paper-soft md:py-24">
+      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_30%_30%,rgba(180,83,10,0.16),transparent_50%),radial-gradient(circle_at_70%_70%,rgba(63,91,71,0.12),transparent_50%)]" />
+      <div className="relative mx-auto max-w-[1400px] px-6 md:px-12">
+        <div className="mb-12 flex flex-col items-end gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <p className="font-serif text-sm italic text-saffron-bright">No. 02 — The Anthology</p>
+            <h2 className="headline-editorial mt-3 text-[44px] text-paper-soft sm:text-[60px] md:text-[76px]" style={{ color: "var(--paper-soft)" }}>
+              Designed for <em style={{ color: "var(--saffron-bright)" }}>every</em><br />career stage.
+            </h2>
+            <p className="font-serif mt-4 text-lg italic text-paper-soft/65">
+              {totalCount} typeset templates, anthology-grade — from entry-level to executive.
+            </p>
           </div>
-          <a className="group flex items-center gap-2 text-sm font-bold text-white/70 hover:text-primary" href="/templates">
+          <a href="/templates" className="group inline-flex items-center gap-2 border border-paper-soft/40 px-5 py-3 font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-paper-soft hover:text-ink-deep">
             View all {totalCount} templates
-            <SvgIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" name="arrow-right" />
+            <span className="font-serif text-base italic">→</span>
           </a>
         </div>
       </div>
 
-      <div className="relative mt-8" style={{ minHeight: 340 }}>
+      <div className="relative mt-6" style={{ minHeight: 340 }}>
         {visible ? (
           <>
-            <div className="flex animate-marquee gap-6" style={{ width: "max-content" }}>
+            <div className="flex editorial-marquee gap-6 px-6 md:px-12" style={{ width: "max-content" }}>
               {templates.map((tmpl, i) => (
-                <div key={`${tmpl.name}-${i}`} className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[240px]" onClick={() => onSelect(tmpl)}>
-                  <div className="group relative aspect-[1/1.38] overflow-hidden rounded-2xl border border-white/10 bg-white transition-all duration-300 hover:-translate-y-3 hover:border-primary/60 hover:shadow-[0_20px_60px_rgba(99,102,241,0.3)]">
+                <div key={`${tmpl.name}-${i}`} className="w-[180px] flex-shrink-0 cursor-pointer sm:w-[220px]" onClick={() => onSelect(tmpl)}>
+                  <div className="group relative aspect-[1/1.38] overflow-hidden bg-paper-soft border border-paper-soft/30 transition-all duration-300 hover:border-saffron-bright">
                     <div className="absolute inset-0 overflow-hidden">
                       <div style={{ width: "210mm", minHeight: "297mm", transform: "scale(0.302)", transformOrigin: "top left" }}>
                         <TemplateRenderer resume={sampleResume} templateName={tmpl.name} />
                       </div>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    <div className="absolute inset-x-0 bottom-0 translate-y-full p-4 transition-transform duration-300 group-hover:translate-y-0">
-                      <p className="text-sm font-bold text-white drop-shadow-lg">{tmpl.name}</p>
-                      <p className="mt-1 text-xs font-semibold text-primary">Use this template →</p>
+                    <div className="absolute inset-x-0 bottom-0 translate-y-full bg-ink-deep/90 px-3 py-2 transition-transform duration-300 group-hover:translate-y-0">
+                      <p className="font-serif text-sm italic text-paper-soft">{tmpl.name}</p>
+                      <p className="font-serif text-[10px] italic text-saffron-bright">Set this template →</p>
                     </div>
                   </div>
+                  <p className="mt-2 font-serif text-[11px] italic text-paper-soft/55">Plate {(i % 99 + 1).toString().padStart(2, "0")} · {tmpl.category}</p>
                 </div>
               ))}
             </div>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-[#0f1117] to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-[#0f1117] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-paper-deep to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-paper-deep to-transparent" />
           </>
         ) : (
           <div className="flex items-center justify-center py-16">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-paper-soft/20 border-t-saffron-bright" />
           </div>
         )}
       </div>
@@ -1047,6 +803,7 @@ function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: T
   );
 }
 
+/* ─────────── Hero preview (paper frame) ─────────── */
 const A4_W = 793;
 
 function HeroPreview() {
@@ -1074,8 +831,6 @@ function HeroPreview() {
     const container = containerRef.current;
     if (!content || !container) return;
     const update = () => {
-      // Compensate for the container's vertical border so the scaled content
-      // doesn't get clipped under border-box sizing.
       const borderY = container.offsetHeight - container.clientHeight;
       setScaledHeight(Math.ceil(content.scrollHeight * scale) + borderY);
     };
@@ -1086,144 +841,144 @@ function HeroPreview() {
   }, [scale]);
 
   return (
-    <div className="relative">
-      <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px]" />
-      <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/20 blur-[100px]" />
-
-      <div className="relative rounded-3xl border border-white/80 bg-white/40 p-3 shadow-2xl backdrop-blur-2xl ring-1 ring-black/[0.05]">
+    <div
+      ref={containerRef}
+      className="relative w-full overflow-hidden bg-white"
+      style={{
+        height: scaledHeight > 0 ? scaledHeight : undefined,
+        aspectRatio: scaledHeight > 0 ? undefined : "210 / 297",
+      }}
+    >
+      {scale > 0 && (
         <div
-          ref={containerRef}
-          className="relative w-full overflow-hidden rounded-2xl border border-[#e5e7eb]/30 bg-white shadow-panel"
+          ref={contentRef}
           style={{
-            height: scaledHeight > 0 ? scaledHeight : undefined,
-            aspectRatio: scaledHeight > 0 ? undefined : "210 / 297",
+            width: A4_W,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
           }}
         >
-          {scale > 0 && (
-            <div
-              ref={contentRef}
-              style={{
-                width: A4_W,
-                transform: `scale(${scale})`,
-                transformOrigin: "top left",
-              }}
-            >
-              <TemplateRenderer resume={sampleResume} templateName="Academic Classic" />
-            </div>
-          )}
+          <TemplateRenderer resume={sampleResume} templateName="Academic Classic" />
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
+/* ─────────── Pricing (editorial style) ─────────── */
 function PricingSection() {
   const [yearly, setYearly] = useState(false);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-24 md:px-10" id="pricing">
-      <div className="mx-auto mb-12 max-w-2xl text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-[#111827] sm:text-4xl">Simple, honest pricing.</h2>
-        <p className="mt-4 text-lg text-[#6b7280]">Start for free, upgrade when you need the competitive edge.</p>
-        <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#e5e7eb]/40 bg-[#f3f4f6] p-1.5">
-          <button
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${!yearly ? "bg-white text-[#111827] shadow-sm" : "text-[#6b7280]"}`}
-            onClick={() => setYearly(false)}
-            type="button"
-          >
-            Monthly
-          </button>
-          <button
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${yearly ? "bg-white text-[#111827] shadow-sm" : "text-[#6b7280]"}`}
-            onClick={() => setYearly(true)}
-            type="button"
-          >
-            Yearly
-            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">Save 30%</span>
-          </button>
+    <section id="pricing" className="noise-paper">
+      <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
+        <div className="mb-12 text-center">
+          <p className="font-serif text-sm italic text-saffron">No. 07 — Subscription</p>
+          <h2 className="headline-editorial mt-3 text-[44px] sm:text-[60px] md:text-[76px]">
+            Simple, <em>honest</em><br />pricing.
+          </h2>
+          <p className="byline mt-4">Start free. Upgrade only when you need the press behind you.</p>
+
+          <div className="mt-8 inline-flex items-center gap-0 border-2 border-ink-deep">
+            <button
+              className={`px-6 py-2.5 font-edit text-xs font-bold uppercase tracking-[0.18em] transition ${!yearly ? "bg-ink-deep text-paper-soft" : "bg-paper-soft text-ink-deep"}`}
+              onClick={() => setYearly(false)}
+              type="button"
+            >
+              Monthly
+            </button>
+            <div className="h-8 w-px bg-ink-deep" />
+            <button
+              className={`px-6 py-2.5 font-edit text-xs font-bold uppercase tracking-[0.18em] transition ${yearly ? "bg-ink-deep text-paper-soft" : "bg-paper-soft text-ink-deep"}`}
+              onClick={() => setYearly(true)}
+              type="button"
+            >
+              Yearly
+              <span className="ml-2 bg-saffron px-1.5 py-0.5 text-[9px] text-paper-soft">Save 30%</span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
-        <PricingCard
-          cta="Start free"
-          href="/signup"
-          features={["1 CV + 1 cover letter", "All standard templates", "Live preview"]}
-          name="Basic"
-          price="€0"
-          period=""
-        />
-        <PricingCard
-          cta="Get started with Pro"
-          href="/signup?plan=pro"
-          featured
-          features={["Unlimited CVs & cover letters", "AI rewrite & optimization", "AI cover letter generator", "Resume analysis & scoring", "High-res PDF exports", "Priority support"]}
-          name="Pro"
-          price={yearly ? "€2.10" : "€3"}
-          originalPrice={yearly ? "€4.20" : "€6"}
-          period={yearly ? "/mo — billed €25.20/year" : "/month"}
-        />
+
+        <div className="mx-auto grid max-w-5xl gap-0 border-2 border-ink-deep md:grid-cols-2">
+          <PricingCard
+            cta="Start free"
+            href="/signup"
+            features={["1 CV + 1 cover letter", "All standard templates", "Live preview", "PDF export"]}
+            name="Basic"
+            tagline="The cub reporter."
+            price="€0"
+            period="forever"
+          />
+          <PricingCard
+            cta="Subscribe to Pro"
+            href="/signup?plan=pro"
+            featured
+            features={[
+              "Unlimited CVs & cover letters",
+              "AI Editor — rewrite & optimise",
+              "AI cover letter generator",
+              "Résumé scoring (ATS)",
+              "High-res PDF exports",
+              "Priority editorial support",
+            ]}
+            name="Pro"
+            tagline="The full press."
+            price={yearly ? "€2.10" : "€3"}
+            originalPrice={yearly ? "€4.20" : "€6"}
+            period={yearly ? "/mo · billed €25.20/year" : "/month"}
+          />
+        </div>
+
+        <p className="mt-8 text-center font-serif text-xs italic text-ink-soft">
+          All prices in EUR. Cancel anytime. The free plan stays free, no card required.
+        </p>
       </div>
     </section>
   );
 }
 
-function PricingCard({ cta, featured = false, features, href, name, price, originalPrice, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; price: string; originalPrice?: string; period: string }) {
+function PricingCard({ cta, featured = false, features, href, name, tagline, price, originalPrice, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; tagline: string; price: string; originalPrice?: string; period: string }) {
   return (
-    <article className={`card-hover relative flex flex-col rounded-3xl bg-white p-8 shadow-ambient ${featured ? "border-2 border-primary ring-4 ring-primary/10" : "border border-[#e5e7eb]/30"}`}>
+    <article className={`relative flex flex-col p-8 md:p-10 ${featured ? "bg-ink-deep text-paper-soft md:border-l-2 md:border-ink-deep" : "bg-paper-soft text-ink-deep border-b-2 border-ink-deep md:border-b-0 md:border-r-2"}`}>
       {featured && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+        <div className="absolute -top-px right-6 bg-saffron px-3 py-1 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft">
           Recommended
         </div>
       )}
-      <div className="mb-8">
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="text-xl font-bold text-[#111827]">{name}</h3>
-          {originalPrice && (
-            <span className="rounded-full bg-gradient-to-r from-[#ef4444] to-[#f97316] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-sm">
-              50% OFF · LIMITED
-            </span>
-          )}
-        </div>
-        <div className="mt-4 flex items-baseline gap-2">
-          {originalPrice && (
-            <span className="text-xl font-bold text-[#9ca3af] line-through decoration-[#ef4444]/70 decoration-2">{originalPrice}</span>
-          )}
-          <span className="text-4xl font-extrabold text-[#111827]">{price}</span>
-          <span className="text-sm font-medium text-[#6b7280]">{period || "/month"}</span>
-        </div>
+      <p className={`font-serif text-sm italic ${featured ? "text-saffron-bright" : "text-saffron"}`}>{tagline}</p>
+      <h3 className={`headline-editorial mt-2 text-[44px] ${featured ? "text-paper-soft" : "text-ink-deep"}`} style={featured ? { color: "var(--paper-soft)" } : {}}>
+        {name}
+      </h3>
+
+      <div className={`mt-5 flex items-baseline gap-2 border-y py-4 ${featured ? "border-paper-soft/25" : "border-ink-deep/25"}`}>
+        {originalPrice && (
+          <span className={`font-serif text-2xl italic line-through ${featured ? "text-paper-soft/40 decoration-saffron-bright" : "text-ink-quiet decoration-saffron"} decoration-2`}>
+            {originalPrice}
+          </span>
+        )}
+        <span className={`font-serif text-[56px] leading-none ${featured ? "text-paper-soft" : "text-ink-deep"}`}>{price}</span>
+        <span className={`font-serif text-sm italic ${featured ? "text-paper-soft/60" : "text-ink-soft"}`}>{period || "/month"}</span>
       </div>
-      <ul className="mb-10 flex-1 space-y-4 text-sm text-[#6b7280]">
+
+      <ul className={`my-8 flex-1 space-y-3 ${featured ? "text-paper-soft/85" : "text-ink-soft"}`}>
         {features.map((feature) => (
-          <li className="flex items-center gap-3" key={feature}>
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <SvgIcon className="h-3 w-3" name="sparkle" />
-            </div>
-            {feature}
+          <li key={feature} className={`flex items-baseline gap-3 border-b py-2 ${featured ? "border-paper-soft/15" : "border-ink-deep/12"}`}>
+            <span className={`font-serif text-base italic ${featured ? "text-saffron-bright" : "text-saffron"}`}>✓</span>
+            <span className="font-serif text-[16px]">{feature}</span>
           </li>
         ))}
       </ul>
+
       <a
         href={href}
-        className={`block w-full rounded-2xl px-6 py-4 text-center text-sm font-bold transition-all ${
-          featured ? "primary-gradient text-white shadow-lg hover:brightness-105" : "bg-[#f3f4f6] text-[#111827] hover:bg-[#e5e7eb]/20"
+        className={`mt-2 inline-flex items-center justify-center gap-2 px-6 py-4 font-edit text-xs font-bold uppercase tracking-[0.2em] transition ${
+          featured
+            ? "bg-saffron text-paper-soft hover:bg-paper-soft hover:text-ink-deep"
+            : "bg-ink-deep text-paper-soft hover:bg-saffron"
         }`}
       >
-        {cta}
+        {cta} <span className="font-serif text-base italic">→</span>
       </a>
     </article>
-  );
-}
-
-
-function SvgIcon({ className = "h-5 w-5", name }: { className?: string; name: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      {name === "arrow-right" && <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
-      {name === "sparkle" && <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
-      {name === "document" && <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
-      {name === "cl" && <path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
-      {name === "pdf" && <path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />}
-      {name === "star" && <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" fill="currentColor" />}
-    </svg>
   );
 }

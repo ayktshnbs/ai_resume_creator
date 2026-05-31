@@ -41,50 +41,63 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(0,88,188,0.12),transparent_28%),radial-gradient(circle_at_top_right,rgba(70,72,212,0.12),transparent_24%),linear-gradient(180deg,#f9f9ff_0%,#eef2ff_45%,#f9f9ff_100%)] px-4 py-6 text-ink md:px-8 md:py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-md items-center">
-        <div className="soft-card w-full rounded-2xl p-6 shadow-panel md:p-10">
-          <Link className="mb-8 inline-flex items-center gap-3 text-lg font-bold tracking-tight text-primary" href="/">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-ambient">
-              CV
-            </span>
-            CV with AI
+    <main className="min-h-screen noise-paper text-ink-deep">
+      <div className="border-b border-ink-deep/15">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-2 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-soft md:px-12">
+          <Link href="/signin" className="hover:text-saffron">← Back to sign-in</Link>
+          <span className="font-serif italic normal-case tracking-normal text-saffron">— Forgot password —</span>
+          <span className="hidden md:inline">The Resumé Press</span>
+        </div>
+      </div>
+
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-md items-center px-6">
+        <div className="w-full">
+          <Link className="block" href="/">
+            <p className="font-serif text-[10px] italic text-ink-soft">The Resumé Press</p>
+            <p className="font-serif text-[36px] leading-[0.95] text-ink-deep md:text-[48px]">
+              CV <em className="italic text-saffron">with</em> AI
+            </p>
           </Link>
+
+          <div className="my-7 rule-thin" />
 
           {sent ? (
             <div>
-              <h1 className="text-2xl font-extrabold text-ink">Check your email</h1>
-              <p className="mt-3 text-sm leading-6 text-muted">
-                If an account exists for <strong className="text-ink">{email}</strong>, we sent a password reset link. Check your inbox and spam folder.
+              <p className="font-serif text-sm italic text-saffron">— Sent. Check your inbox. —</p>
+              <h1 className="headline-editorial mt-3 text-[40px] md:text-[52px]">
+                Check your <em>email</em>.
+              </h1>
+              <p className="font-serif mt-4 text-base italic leading-snug text-ink-soft">
+                If an account exists for <span className="not-italic font-semibold text-ink-deep">{email}</span>, we&apos;ve posted a password reset link. Check your inbox — and the spam folder, just in case.
               </p>
-              <Link
-                href="/signin"
-                className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-surface-soft px-4 py-3 text-sm font-bold text-ink transition hover:bg-outline/20"
-              >
-                Back to Sign In
+              <Link href="/signin" className="btn-editorial btn-editorial-ghost mt-8 w-full justify-center">
+                Back to sign-in →
               </Link>
             </div>
           ) : (
             <div>
-              <h1 className="text-2xl font-extrabold text-ink">Forgot your password?</h1>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Enter your email and we'll send you a link to reset your password.
+              <p className="font-serif text-sm italic text-saffron">— Lost the key? —</p>
+              <h1 className="headline-editorial mt-3 text-[40px] md:text-[52px]">
+                Forgot your <em>password</em>?
+              </h1>
+              <p className="font-serif mt-4 text-base italic leading-snug text-ink-soft">
+                Enter your email and we&apos;ll post you a fresh reset link.
               </p>
 
-              <form className="mt-6 space-y-5" onSubmit={(e) => void handleSubmit(e)}>
+              <form className="mt-7 space-y-5" onSubmit={(e) => void handleSubmit(e)}>
                 {error && (
-                  <p className="rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm font-semibold text-error" role="alert">
-                    {error}
+                  <p className="border-2 border-oxblood bg-oxblood/[0.06] px-4 py-3 font-serif text-sm italic text-oxblood" role="alert">
+                    — {error}
                   </p>
                 )}
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-ink" htmlFor="email">
+                  <label className="block font-edit text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft" htmlFor="email">
                     Email
                   </label>
                   <input
                     autoComplete="email"
-                    className="field"
+                    className="mt-1.5 w-full border-b-2 border-ink-deep bg-transparent py-2 font-serif text-[17px] text-ink-deep outline-none placeholder:text-ink-quiet/60 focus:border-saffron"
                     id="email"
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
@@ -94,17 +107,17 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <button
-                  className="primary-gradient flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="btn-editorial w-full justify-center"
                   disabled={loading}
                   type="submit"
                 >
-                  {loading ? "Sending..." : "Send Reset Link"}
+                  {loading ? "Sending ..." : "Send reset link →"}
                 </button>
 
-                <p className="text-center text-sm text-muted">
-                  Remember your password?{" "}
-                  <Link className="font-semibold text-primary hover:underline" href="/signin">
-                    Sign in
+                <p className="text-center font-serif text-sm italic text-ink-soft">
+                  Remembered it?{" "}
+                  <Link className="font-edit not-italic text-[11px] font-bold uppercase tracking-[0.18em] text-saffron hover:text-ink-deep" href="/signin">
+                    Sign in →
                   </Link>
                 </p>
               </form>

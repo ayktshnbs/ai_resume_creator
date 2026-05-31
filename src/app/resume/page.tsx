@@ -181,8 +181,8 @@ export default function ResumeBuilderPage() {
   if (status === "loading") {
     return (
       <AppShell active="resume" fullHeight>
-        <div className="flex h-full items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="noise-paper flex h-full items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-deep/20 border-t-saffron" />
         </div>
       </AppShell>
     );
@@ -726,30 +726,34 @@ export default function ResumeBuilderPage() {
   /* ── Render ───────────────────────────────────────────────── */
   return (
     <AppShell active="resume" fullHeight>
-      <div className="flex h-full flex-col bg-background lg:flex-row">
+      <div className="noise-paper flex h-full flex-col text-ink-deep lg:flex-row">
         {/* Step rail — desktop */}
-        <div className="hidden w-64 shrink-0 border-r border-outline/30 bg-surface/70 backdrop-blur lg:flex lg:flex-col">
+        <div className="hidden w-64 shrink-0 border-r-2 border-ink-deep bg-paper-soft lg:flex lg:flex-col">
+          <div className="border-b-2 border-ink-deep px-5 py-4">
+            <p className="font-serif text-[10px] italic text-saffron">No. 02 — Manuscript</p>
+            <p className="font-serif text-xl text-ink-deep">The Builder</p>
+          </div>
           <StepRail
             steps={steps}
             activeId={activeStep}
             statuses={statuses}
             onSelect={(id) => setActiveStep(id as StepId)}
           />
-          <div className="border-t border-outline/30 px-5 py-4">
+          <div className="border-t-2 border-ink-deep px-5 py-4">
             <button
               type="button"
               onClick={clearResume}
-              className="text-xs font-bold text-muted transition hover:text-error"
+              className="font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft transition hover:text-oxblood"
             >
-              Clear all & start over
+              Clear all & start over →
             </button>
           </div>
         </div>
 
         {/* Editor middle pane */}
-        <div className="relative flex min-w-0 flex-1 flex-col bg-surface lg:max-w-[640px] lg:border-r lg:border-outline/30">
+        <div className="relative flex min-w-0 flex-1 flex-col bg-paper-soft lg:max-w-[640px] lg:border-r-2 lg:border-ink-deep">
           {/* Mobile step tabs */}
-          <div className="border-b border-outline/30 lg:hidden">
+          <div className="border-b-2 border-ink-deep lg:hidden">
             <StepTabs
               steps={steps}
               activeId={activeStep}
@@ -759,20 +763,20 @@ export default function ResumeBuilderPage() {
           </div>
 
           {ai.error && (
-            <div className="mx-4 mt-3 rounded-xl border border-error/20 bg-error/10 px-4 py-2 text-sm font-semibold text-error lg:mx-10">
-              {ai.error}
+            <div className="mx-4 mt-3 border-2 border-oxblood bg-oxblood/[0.06] px-4 py-2 font-serif text-sm italic text-oxblood lg:mx-10">
+              — {ai.error}
               <button
                 type="button"
                 onClick={() => setAi((p) => ({ ...p, error: "" }))}
-                className="ml-2 underline"
+                className="ml-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] not-italic underline hover:text-ink-deep"
               >
                 Dismiss
               </button>
             </div>
           )}
           {shareMessage && (
-            <div className="mx-4 mt-3 rounded-xl border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary lg:mx-10">
-              {shareMessage}
+            <div className="mx-4 mt-3 border-2 border-saffron bg-saffron-soft/40 px-4 py-2 font-serif text-sm italic text-saffron lg:mx-10">
+              — {shareMessage}
             </div>
           )}
 

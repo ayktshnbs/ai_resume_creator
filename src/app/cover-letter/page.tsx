@@ -214,83 +214,79 @@ export default function CoverLetterPage() {
 
   return (
     <AppShell active="cover-letter">
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-10 md:py-12">
-        <header className="mb-10 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="max-w-2xl">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              {t("coverLetter.gallery")}
-            </p>
-            <h1 className="headline-xl text-4xl text-ink md:text-5xl">
-              {t("coverLetter.title")}
-            </h1>
-            <p className="mt-3 max-w-xl text-base leading-7 text-muted md:text-lg">
-              {t("coverLetter.subtitle")}
-            </p>
-          </div>
-          <div className="soft-card flex items-center gap-3 rounded-2xl px-4 py-3 text-sm">
-            <span className="icon-bounce flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-success/10 text-success">
-              <Icon name="sparkle" />
-            </span>
-            <span className="max-w-xs leading-5 text-muted">
-              <strong className="text-ink">{t("coverLetter.aiPowered")}</strong>{" "}
-              {isPro ? t("coverLetter.aiDesc") : t("coverLetter.aiUpgradeDesc")}
-            </span>
-          </div>
-        </header>
+      <div className="noise-paper mx-auto w-full max-w-[1400px] px-4 py-8 text-ink-deep md:px-10 md:py-12">{/* Editorial wrapper */}
+          {/* Editorial masthead */}
+          <header className="border-b-[3px] border-ink-deep pb-6">
+            <div className="flex items-baseline justify-between border-b border-ink-deep/30 pb-2">
+              <p className="font-edit text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+                The Correspondence Desk · No. 04
+              </p>
+              <p className="font-serif text-xs italic text-saffron">{isPro ? "Pro subscriber" : "Free reader"}</p>
+            </div>
 
-        {/* Process strip */}
-        <ol className="mb-8 grid gap-3 rounded-2xl border border-outline/30 bg-surface-soft/60 p-4 sm:grid-cols-3">
-          <ProcessStep n={1} label="Pick a template" />
-          <ProcessStep n={2} label="Add the job description" active={Boolean(jobDescription.trim())} />
-          <ProcessStep n={3} label="Edit & export" active={Boolean(generatedText || selected)} />
-        </ol>
-
-        {/* Job Description Input */}
-        <div className="mb-10 rounded-3xl border border-outline/30 bg-surface p-5 shadow-ambient">
-          <button
-            className="flex w-full items-center justify-between gap-3 text-left"
-            onClick={() => setShowJobInput(!showJobInput)}
-            type="button"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Icon name="work" />
-              </span>
-              <div>
-                <p className="text-sm font-bold text-ink">Tailor the letter to a specific job</p>
-                <p className="mt-0.5 text-xs text-muted">
-                  {jobDescription.trim()
-                    ? `Tailored to ${jobDescription.length} chars of job description`
-                    : "Optional — paste the job post for a sharper letter"}
+            <div className="mt-5 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div className="max-w-2xl">
+                <h1 className="headline-editorial text-[48px] sm:text-[60px] md:text-[80px]">
+                  {t("coverLetter.title").split(" ").slice(0, -1).join(" ")}{" "}
+                  <em>{t("coverLetter.title").split(" ").slice(-1).join(" ")}</em>.
+                </h1>
+                <p className="font-serif mt-4 text-[17px] italic leading-snug text-ink-soft">
+                  {t("coverLetter.subtitle")}
+                </p>
+              </div>
+              <div className="border-2 border-ink-deep bg-paper-soft p-4">
+                <p className="font-serif text-sm italic text-saffron">— {t("coverLetter.aiPowered")} —</p>
+                <p className="font-serif mt-1.5 text-sm italic text-ink-deep">
+                  {isPro ? t("coverLetter.aiDesc") : t("coverLetter.aiUpgradeDesc")}
                 </p>
               </div>
             </div>
-            <span
-              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
-                showJobInput ? "rotate-45 bg-primary/10 text-primary" : "bg-surface-soft text-muted"
-              }`}
+          </header>
+
+          {/* Editorial process strip */}
+          <ol className="my-8 grid grid-cols-1 gap-0 border-2 border-ink-deep sm:grid-cols-3 sm:divide-x-2 sm:divide-ink-deep">
+            <ProcessStep n={1} label="Pick a template" />
+            <ProcessStep n={2} label="Add the job description" active={Boolean(jobDescription.trim())} />
+            <ProcessStep n={3} label="Edit & export" active={Boolean(generatedText || selected)} />
+          </ol>
+
+          {/* Job Description Input — editorial */}
+          <div className="mb-10 border-2 border-ink-deep bg-paper-soft p-5">
+            <button
+              className="flex w-full items-baseline justify-between gap-3 text-left"
+              onClick={() => setShowJobInput(!showJobInput)}
+              type="button"
             >
-              <Icon name="add" className="text-[18px]" />
-            </span>
-          </button>
-          {showJobInput && (
-            <div className="mt-5">
-              <textarea
-                className="field min-h-[140px] resize-none text-sm leading-6"
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste the full job description here — include job title, requirements, responsibilities, and company info for best results..."
-                value={jobDescription}
-              />
-              {jobDescription.trim() && (
-                <div className="mt-3 flex items-center gap-2 text-xs text-success">
-                  <Icon name="check" className="text-sm" />
-                  <span className="font-semibold">Job description will tailor the AI-generated copy</span>
+              <div className="flex items-baseline gap-3">
+                <span className="font-serif text-sm italic text-saffron">§ Brief</span>
+                <div>
+                  <p className="font-serif text-[18px] text-ink-deep">Tailor the letter to a specific job</p>
+                  <p className="font-serif mt-0.5 text-xs italic text-ink-soft">
+                    {jobDescription.trim()
+                      ? `Tailored to ${jobDescription.length} chars of job description`
+                      : "Optional — paste the job post for a sharper letter"}
+                  </p>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+              <span className={`font-serif text-2xl italic text-saffron transition ${showJobInput ? "rotate-45" : ""}`}>+</span>
+            </button>
+            {showJobInput && (
+              <div className="mt-5">
+                <textarea
+                  className="w-full min-h-[140px] resize-none border-2 border-ink-deep bg-paper px-4 py-3 font-serif text-[15px] leading-snug text-ink-deep outline-none placeholder:text-ink-quiet/70 focus:border-saffron"
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste the full job description here — include job title, requirements, responsibilities, and company info for best results..."
+                  value={jobDescription}
+                />
+                {jobDescription.trim() && (
+                  <div className="mt-3 flex items-baseline gap-2 font-serif text-xs italic text-moss">
+                    <span>✓</span>
+                    <span>Job description will tailor the AI-generated copy</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
         <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => (
@@ -575,19 +571,11 @@ export default function CoverLetterPage() {
 
 function ProcessStep({ n, label, active = false }: { n: number; label: string; active?: boolean }) {
   return (
-    <li
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
-        active ? "bg-surface ring-1 ring-primary/20" : "bg-transparent"
-      }`}
-    >
-      <span
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-          active ? "bg-primary text-white" : "bg-surface text-muted ring-1 ring-outline/40"
-        }`}
-      >
-        {active ? <Icon name="check" className="text-[14px]" /> : n}
+    <li className={`flex items-baseline gap-3 px-5 py-3.5 transition ${active ? "bg-saffron text-paper-soft" : "bg-paper-soft text-ink-deep"}`}>
+      <span className={`font-serif text-lg italic ${active ? "text-paper-soft" : "text-saffron"}`}>
+        {n.toString().padStart(2, "0")}
       </span>
-      <span className={`text-sm font-semibold ${active ? "text-ink" : "text-muted"}`}>{label}</span>
+      <span className={`font-serif text-[15px] ${active ? "text-paper-soft" : "text-ink-deep"}`}>{label}</span>
     </li>
   );
 }

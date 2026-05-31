@@ -8,7 +8,6 @@ import { Icon, type IconName } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
 import { PaymentButton } from "@/components/payment-button";
-import { MagneticButton } from "@/components/magnetic-button";
 import type { ResumeData, SelectedTemplate } from "@/types/resume";
 
 type RecentResume = {
@@ -66,8 +65,8 @@ export default function DashboardPage() {
   if (status === "loading") {
     return (
       <AppShell active="dashboard">
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="noise-paper flex min-h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink-deep/20 border-t-saffron" />
         </div>
       </AppShell>
     );
@@ -76,17 +75,17 @@ export default function DashboardPage() {
   if (!session) {
     return (
       <AppShell active="dashboard">
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="dashboard" className="text-[32px]" />
-          </div>
-          <h1 className="text-2xl font-bold text-ink">{t("gate.signInDashboard")}</h1>
-          <p className="max-w-md text-muted">{t("gate.signInDashboardDesc")}</p>
+        <div className="noise-paper flex min-h-screen flex-col items-center justify-center gap-6 px-4 text-center">
+          <p className="font-serif text-sm italic text-saffron">— The Desk —</p>
+          <h1 className="headline-editorial text-4xl md:text-6xl">
+            Sign in to <em>read</em> your desk.
+          </h1>
+          <p className="font-serif max-w-md text-lg italic text-ink-soft">{t("gate.signInDashboardDesc")}</p>
           <div className="flex gap-3">
-            <Link href="/signin" className="rounded-xl primary-gradient px-6 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110">
+            <Link href="/signin" className="btn-editorial">
               {t("nav.signIn")}
             </Link>
-            <Link href="/signup" className="rounded-xl border border-outline/70 bg-surface px-6 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft">
+            <Link href="/signup" className="btn-editorial btn-editorial-ghost">
               {t("auth.signUpBtn")}
             </Link>
           </div>
@@ -99,59 +98,59 @@ export default function DashboardPage() {
   const totalDocs = resumeCount + coverLetterCount;
   const resumeLimit = isPro ? Infinity : 1;
   const letterLimit = isPro ? Infinity : 1;
+  const dateLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric"
+  });
 
   return (
     <AppShell active="dashboard">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 md:px-10 md:py-12">
+      <div className="noise-paper min-h-screen">
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-12 px-4 py-8 md:px-10 md:py-12">
 
-        {/* Hero header */}
-        <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="font-label text-xs font-semibold uppercase tracking-[0.14em] text-muted">
-              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h1 className="headline-xl text-4xl text-ink md:text-5xl">
-                Welcome back, {firstName}
-              </h1>
+          {/* ─── Editorial masthead ─── */}
+          <header className="border-b-[3px] border-ink-deep pb-6">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-ink-deep/30 pb-2">
+              <p className="font-edit text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+                The Desk · Daily Edition
+              </p>
+              <p className="font-serif text-xs italic text-saffron">{dateLabel}</p>
               <PlanBadge isPro={isPro} loaded={loaded} />
             </div>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-muted">
-              Your career documents, all in one place. Pick up where you left off or start something new.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <MagneticButton
-              as="a"
-              href="/resume"
-              className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-ambient"
-            >
-              <Icon name="add" className="text-lg" />
-              New Resume
-            </MagneticButton>
-            <MagneticButton
-              as="a"
-              href="/cover-letter"
-              className="btn-spring flex items-center gap-2 rounded-xl border border-outline/60 bg-surface px-5 py-3 text-sm font-bold text-ink"
-            >
-              <Icon name="subject" className="text-lg" />
-              New Cover Letter
-            </MagneticButton>
-          </div>
-        </header>
 
-        {/* Usage strip */}
-        <section className="soft-card rounded-2xl p-1.5">
-          <div className="grid divide-y divide-outline/20 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h1 className="headline-editorial text-[48px] sm:text-[64px] md:text-[80px] lg:text-[92px]">
+                  Welcome back,<br /><em>{firstName}</em>.
+                </h1>
+                <p className="font-serif mt-5 max-w-xl text-[17px] italic leading-snug text-ink-soft">
+                  Your career documents — filed, edited, and ready to publish. Pick up where you left off, or start
+                  something new for tomorrow's edition.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Link href="/resume" className="btn-editorial">
+                  + New résumé
+                </Link>
+                <Link href="/cover-letter" className="btn-editorial btn-editorial-ghost">
+                  + New cover letter
+                </Link>
+              </div>
+            </div>
+          </header>
+
+          {/* ─── Editorial usage strip ─── */}
+          <section className="grid grid-cols-1 gap-0 border-2 border-ink-deep md:grid-cols-3 md:divide-x-2 md:divide-ink-deep">
             <UsageCell
               icon="document"
-              label="Resumes"
+              label="Résumés"
               count={resumeCount}
               limit={resumeLimit}
               isPro={isPro}
               loaded={loaded}
-              accent="primary"
+              accent="saffron"
               href="/resume"
+              marker="§01"
             />
             <UsageCell
               icon="subject"
@@ -160,84 +159,101 @@ export default function DashboardPage() {
               limit={letterLimit}
               isPro={isPro}
               loaded={loaded}
-              accent="secondary"
+              accent="moss"
               href="/cover-letter"
+              marker="§02"
             />
             <PlanCell isPro={isPro} loaded={loaded} totalDocs={totalDocs} />
-          </div>
-        </section>
+          </section>
 
-        {/* Upgrade Banner (Free users only) */}
-        {!isPro && loaded && (
-          <UpgradeBanner totalDocs={totalDocs} resumeCount={resumeCount} coverLetterCount={coverLetterCount} />
-        )}
+          {/* ─── Editorial upgrade banner (Free only) ─── */}
+          {!isPro && loaded && (
+            <UpgradeBanner totalDocs={totalDocs} resumeCount={resumeCount} coverLetterCount={coverLetterCount} />
+          )}
 
-        {/* Recent Documents */}
-        <section>
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="section-title text-2xl font-bold text-ink">Recent documents</h2>
-              <p className="mt-1.5 text-sm text-muted">Pick up where you left off — or create something new.</p>
+          {/* ─── Recent documents ─── */}
+          <section>
+            <div className="mb-6 flex flex-col gap-4 border-b border-ink-deep/30 pb-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="font-serif text-sm italic text-saffron">No. 02 — Files in production</p>
+                <h2 className="headline-editorial mt-1 text-3xl md:text-4xl">Recent <em>documents</em></h2>
+                <p className="font-serif mt-2 text-sm italic text-ink-soft">Pick up where you left off — or start something new.</p>
+              </div>
+              <DocTabs
+                value={tab}
+                onChange={setTab}
+                counts={{ all: resumes.length + coverLetters.length, resumes: resumes.length, letters: coverLetters.length }}
+              />
             </div>
-            <DocTabs
-              value={tab}
-              onChange={setTab}
-              counts={{ all: resumes.length + coverLetters.length, resumes: resumes.length, letters: coverLetters.length }}
-            />
-          </div>
 
-          <RecentDocs
-            tab={tab}
-            resumes={resumes}
-            coverLetters={coverLetters}
-            loaded={docsLoaded}
-          />
-        </section>
+            <RecentDocs
+              tab={tab}
+              resumes={resumes}
+              coverLetters={coverLetters}
+              loaded={docsLoaded}
+            />
+          </section>
 
-        {/* Quick Actions */}
-        <section>
-          <h2 className="section-title mb-5 text-2xl font-bold text-ink">Quick actions</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <ActionTile
-              href="/templates"
-              icon="palette"
-              title="Browse templates"
-              description="100 designs for every career stage."
-              accent="primary"
-            />
-            <ActionTile
-              href="/resume"
-              icon="sparkle"
-              title="AI optimize"
-              description="Refine summary, bullets, and skills."
-              accent="secondary"
-              proOnly={!isPro}
-            />
-            <ActionTile
-              href="/cover-letter"
-              icon="edit"
-              title="Tailored cover letter"
-              description="Generate from a job description."
-              accent="success"
-              proOnly={!isPro}
-            />
-            <ActionTile
-              href="/resume"
-              icon="upload"
-              title="Import from LinkedIn"
-              description="Auto-fill from your existing profile."
-              accent="warning"
-            />
-          </div>
-        </section>
+          {/* ─── Quick actions ─── */}
+          <section>
+            <div className="mb-6 border-b border-ink-deep/30 pb-3">
+              <p className="font-serif text-sm italic text-saffron">No. 03 — Quick assignments</p>
+              <h2 className="headline-editorial mt-1 text-3xl md:text-4xl">From the <em>editor</em></h2>
+            </div>
+            <div className="grid gap-px bg-ink-deep border-2 border-ink-deep md:grid-cols-2 lg:grid-cols-4">
+              <ActionTile
+                href="/templates"
+                icon="palette"
+                title="Browse the anthology"
+                description="100 designs for every career stage."
+                marker="A"
+              />
+              <ActionTile
+                href="/resume"
+                icon="sparkle"
+                title="Send to the AI editor"
+                description="Refine summary, bullets, and skills."
+                marker="B"
+                proOnly={!isPro}
+              />
+              <ActionTile
+                href="/cover-letter"
+                icon="edit"
+                title="Tailored letter"
+                description="Generate from a job description."
+                marker="C"
+                proOnly={!isPro}
+              />
+              <ActionTile
+                href="/resume"
+                icon="upload"
+                title="Import from LinkedIn"
+                description="Autofill from your existing profile."
+                marker="D"
+              />
+            </div>
+          </section>
 
-        {/* Onboarding Modal */}
-        {showOnboarding && (
-          <OnboardingModal onClose={() => {
-            setShowOnboarding(false);
-            localStorage.setItem("onboarding_seen", "1");
-          }} />
-        )}
+          {/* ─── Footer slug ─── */}
+          <footer className="border-t border-ink-deep/30 pt-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="font-serif text-xs italic text-ink-soft">
+                — A daily edition of you, hand-set with care. —
+              </p>
+              <p className="font-edit text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+                CV with AI · The Desk
+              </p>
+            </div>
+          </footer>
+
+          {/* Onboarding modal */}
+          {showOnboarding && (
+            <OnboardingModal onClose={() => {
+              setShowOnboarding(false);
+              localStorage.setItem("onboarding_seen", "1");
+            }} />
+          )}
+        </div>
       </div>
     </AppShell>
   );
@@ -248,22 +264,21 @@ function PlanBadge({ isPro, loaded }: { isPro: boolean; loaded: boolean }) {
   if (!loaded) return null;
   if (isPro) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-warning/20 to-warning/10 px-3 py-1 text-xs font-bold text-warning">
-        <Icon name="sparkle" className="text-sm" />
-        Pro
+      <span className="inline-flex items-center gap-1.5 border border-saffron px-2.5 py-0.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-saffron">
+        ★ Pro subscriber
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-outline/60 bg-surface px-3 py-1 text-xs font-bold text-muted">
-      Free plan
+    <span className="inline-flex items-center gap-1.5 border border-ink-deep/40 px-2.5 py-0.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft">
+      Free reader
     </span>
   );
 }
 
 /* ── Usage Cell ─────────────────────────────────────────── */
 function UsageCell({
-  icon, label, count, limit, isPro, loaded, accent, href
+  icon, label, count, limit, isPro, loaded, accent, href, marker
 }: {
   icon: IconName;
   label: string;
@@ -271,40 +286,39 @@ function UsageCell({
   limit: number;
   isPro: boolean;
   loaded: boolean;
-  accent: "primary" | "secondary";
+  accent: "saffron" | "moss";
   href: string;
+  marker: string;
 }) {
   const percent = isPro ? 100 : Math.min((count / Math.max(limit, 1)) * 100, 100);
   const limitText = isPro ? "Unlimited" : `${count} of ${limit}`;
-  const accentBg = accent === "primary" ? "bg-primary/10 text-primary" : "bg-secondary/10 text-secondary";
-  const barColor = accent === "primary" ? "bg-primary" : "bg-secondary";
+  const accentText = accent === "saffron" ? "text-saffron" : "text-moss";
+  const accentBg = accent === "saffron" ? "bg-saffron" : "bg-moss";
 
   return (
     <Link
       href={href}
-      className="group flex items-center gap-4 rounded-xl px-5 py-4 transition hover:bg-surface-soft sm:px-6 sm:py-5"
+      className="group flex flex-col gap-3 bg-paper-soft px-6 py-6 transition hover:bg-paper-warm"
     >
-      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accentBg}`}>
-        <Icon name={icon} className="text-[20px]" />
+      <div className="flex items-baseline justify-between">
+        <span className={`font-serif text-sm italic ${accentText}`}>{marker} · {label}</span>
+        <Icon name={icon} className={`text-[20px] ${accentText}`} />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="font-label text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{label}</p>
-        <div className="mt-1 flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight text-ink">
-            {loaded ? count : "—"}
-          </p>
-          <p className="text-xs font-semibold text-muted">{loaded ? limitText : ""}</p>
+      <div className="flex items-baseline gap-3">
+        <p className="font-serif text-[48px] leading-none text-ink-deep">{loaded ? count : "—"}</p>
+        <p className="font-serif text-sm italic text-ink-soft">{loaded ? limitText : ""}</p>
+      </div>
+      {!isPro && loaded && (
+        <div className="h-[3px] w-full bg-ink-deep/15">
+          <div
+            className={`h-full transition-all ${percent >= 100 ? "bg-oxblood" : accentBg}`}
+            style={{ width: `${percent}%` }}
+          />
         </div>
-        {!isPro && loaded && (
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-outline/30">
-            <div
-              className={`h-full rounded-full transition-all ${percent >= 100 ? "bg-error" : barColor}`}
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-        )}
-      </div>
-      <Icon name="arrowRight" className="opacity-0 transition group-hover:opacity-100 text-muted text-lg" />
+      )}
+      <p className="font-serif text-xs italic text-ink-soft opacity-0 transition group-hover:opacity-100">
+        Open →
+      </p>
     </Link>
   );
 }
@@ -313,97 +327,83 @@ function UsageCell({
 function PlanCell({ isPro, loaded, totalDocs }: { isPro: boolean; loaded: boolean; totalDocs: number }) {
   if (!loaded) {
     return (
-      <div className="flex items-center gap-4 px-5 py-4 sm:px-6 sm:py-5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-soft">
-          <Icon name="sparkle" className="text-[20px] text-muted" />
-        </div>
-        <div>
-          <p className="font-label text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Plan</p>
-          <p className="mt-1 text-2xl font-bold text-muted">—</p>
-        </div>
+      <div className="flex flex-col gap-3 bg-paper-soft px-6 py-6">
+        <span className="font-serif text-sm italic text-saffron">§03 · Plan</span>
+        <p className="font-serif text-[48px] leading-none text-ink-soft">—</p>
       </div>
     );
   }
 
   if (isPro) {
     return (
-      <div className="flex items-center gap-4 px-5 py-4 sm:px-6 sm:py-5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-warning/10 text-warning">
-          <Icon name="sparkle" className="text-[20px]" />
+      <div className="flex flex-col gap-3 bg-ink-deep px-6 py-6 text-paper-soft">
+        <span className="font-serif text-sm italic" style={{ color: "var(--saffron-bright)" }}>§03 · Plan</span>
+        <div className="flex items-baseline gap-3">
+          <p className="font-serif text-[48px] leading-none text-paper-soft">Pro</p>
+          <p className="font-serif text-sm italic text-paper-soft/65">All features unlocked</p>
         </div>
-        <div>
-          <p className="font-label text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Plan</p>
-          <p className="mt-1 text-xl font-bold tracking-tight text-ink">Pro</p>
-          <p className="mt-0.5 text-xs font-semibold text-muted">All features unlocked</p>
-        </div>
+        <p className="font-serif text-xs italic text-paper-soft/55">★ Subscriber benefits active</p>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5">
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-soft text-muted">
-          <Icon name="sparkle" className="text-[20px]" />
-        </div>
-        <div>
-          <p className="font-label text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Plan</p>
-          <p className="mt-1 text-xl font-bold tracking-tight text-ink">Free</p>
-          <p className="mt-0.5 text-xs font-semibold text-muted">{totalDocs}/2 used</p>
+    <div className="flex flex-col justify-between gap-3 bg-paper-soft px-6 py-6">
+      <div>
+        <span className="font-serif text-sm italic text-saffron">§03 · Plan</span>
+        <div className="mt-2 flex items-baseline gap-3">
+          <p className="font-serif text-[48px] leading-none text-ink-deep">Free</p>
+          <p className="font-serif text-sm italic text-ink-soft">{totalDocs}/2 used</p>
         </div>
       </div>
       <PaymentButton
         price="3"
-        className="badge-shimmer hidden shrink-0 rounded-xl bg-ink px-3 py-2 text-xs font-bold text-background lg:inline-flex"
+        className="self-start bg-ink-deep px-4 py-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron"
       >
-        Upgrade
+        Upgrade — €3/mo
       </PaymentButton>
     </div>
   );
 }
 
-/* ── Upgrade Banner ─────────────────────────────────────── */
+/* ── Upgrade Banner (editorial pull quote) ─────────────── */
 function UpgradeBanner({ totalDocs, resumeCount, coverLetterCount }: { totalDocs: number; resumeCount: number; coverLetterCount: number }) {
   const atLimit = resumeCount >= 1 && coverLetterCount >= 1;
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary via-primary to-secondary text-white shadow-panel">
-      <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-      <div className="relative z-10 grid gap-6 p-6 lg:grid-cols-[1.5fr_1fr] lg:gap-10 lg:p-8">
+    <div className="relative border-2 border-ink-deep bg-ink-deep text-paper-soft">
+      <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_20%_30%,rgba(180,83,10,0.3),transparent_50%),radial-gradient(circle_at_80%_70%,rgba(63,91,71,0.25),transparent_50%)]" />
+      <div className="relative grid gap-8 p-7 md:grid-cols-[1.6fr_1fr] md:items-end md:p-10">
         <div>
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.14em]">
-            <Icon name="sparkle" className="text-sm" />
-            {atLimit ? "You've hit the free limit" : "Get more with Pro"}
-          </div>
-          <h3 className="text-2xl font-bold leading-tight md:text-3xl">
+          <p className="font-serif text-sm italic" style={{ color: "var(--saffron-bright)" }}>
+            Editorial — {atLimit ? "Free limit reached" : "Get more with Pro"}
+          </p>
+          <h3 className="headline-editorial mt-3 text-[36px] leading-[0.95] text-paper-soft md:text-[48px]" style={{ color: "var(--paper-soft)" }}>
             {atLimit
-              ? "Unlock unlimited documents — €3/month (50% off, limited)"
-              : `${totalDocs}/2 documents used. Go unlimited.`}
+              ? <>Subscribe to publish <em style={{ color: "var(--saffron-bright)" }}>unlimited</em> issues.</>
+              : <><em style={{ color: "var(--saffron-bright)" }}>{totalDocs}/2</em> documents used.<br />Go to unlimited.</>}
           </h3>
-          <p className="mt-3 max-w-md text-sm leading-6 text-white/80">
-            Create unlimited resumes and cover letters, unlock AI rewriting, ATS scoring, and high-resolution PDF exports.
+          <p className="font-serif mt-4 max-w-md text-[16px] italic leading-snug text-paper-soft/75">
+            Unlimited résumés &amp; letters, the AI editor, résumé scoring, and high-resolution PDF exports.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
-            {["Unlimited documents", "AI optimization", "ATS scoring", "High-res PDF"].map((feature) => (
-              <span key={feature} className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                <Icon name="check" className="text-sm" />
-                {feature}
+            {["Unlimited", "AI Editor", "ATS scoring", "Hi-res PDF"].map((feature) => (
+              <span key={feature} className="border border-paper-soft/30 px-3 py-1 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft/80">
+                ✓ {feature}
               </span>
             ))}
           </div>
         </div>
-        <div className="flex flex-col items-stretch justify-center gap-3 lg:items-end">
+        <div className="flex flex-col items-stretch gap-3 md:items-end">
+          <p className="font-serif text-right text-xs italic text-paper-soft/60">
+            <span className="line-through decoration-saffron-bright">€6</span> · <em className="not-italic text-paper-soft">€3</em> / month
+          </p>
           <PaymentButton
             price="3"
-            className="btn-glow rounded-xl bg-white px-6 py-3.5 text-sm font-bold text-primary shadow-lg transition hover:scale-[1.02]"
+            className="bg-saffron px-6 py-3.5 font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-paper-soft hover:text-ink-deep"
           >
-            <span className="inline-flex items-center justify-center gap-2">
-              Upgrade to Pro —
-              <span className="text-primary/40 line-through decoration-2">€6</span>
-              €3/mo
-            </span>
+            Subscribe to Pro →
           </PaymentButton>
-          <p className="text-center text-xs text-white/70 lg:text-right">Cancel anytime. No commitment.</p>
+          <p className="text-right font-serif text-[11px] italic text-paper-soft/55">Cancel anytime. No commitment.</p>
         </div>
       </div>
     </div>
@@ -420,25 +420,25 @@ function DocTabs({
 }) {
   const tabs: Array<{ id: "all" | "resumes" | "letters"; label: string; count: number }> = [
     { id: "all", label: "All", count: counts.all },
-    { id: "resumes", label: "Resumes", count: counts.resumes },
-    { id: "letters", label: "Cover letters", count: counts.letters }
+    { id: "resumes", label: "Résumés", count: counts.resumes },
+    { id: "letters", label: "Letters", count: counts.letters }
   ];
   return (
-    <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-outline/40 bg-surface p-1">
-      {tabs.map((tab) => {
+    <div className="inline-flex shrink-0 items-center border-2 border-ink-deep">
+      {tabs.map((tab, i) => {
         const active = value === tab.id;
         return (
           <button
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-              active ? "bg-ink text-background shadow-sm" : "text-muted hover:text-ink"
-            }`}
+            className={`flex items-baseline gap-2 px-4 py-2 font-edit text-[11px] font-bold uppercase tracking-[0.18em] transition ${
+              active ? "bg-ink-deep text-paper-soft" : "bg-paper-soft text-ink-deep hover:bg-paper-warm"
+            } ${i > 0 ? "border-l-2 border-ink-deep" : ""}`}
           >
             {tab.label}
-            <span className={`min-w-[18px] rounded-full px-1.5 text-[10px] ${active ? "bg-background/20 text-background" : "bg-surface-soft text-muted"}`}>
-              {tab.count}
+            <span className={`font-serif text-xs italic normal-case tracking-normal ${active ? "text-saffron-bright" : "text-saffron"}`}>
+              ({tab.count})
             </span>
           </button>
         );
@@ -466,12 +466,12 @@ function RecentDocs({
 
   if (!loaded) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-px bg-ink-deep border-2 border-ink-deep sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="soft-card animate-pulse rounded-2xl p-5">
-            <div className="aspect-[3/4] rounded-xl bg-outline/15" />
-            <div className="mt-4 h-4 w-2/3 rounded bg-outline/15" />
-            <div className="mt-2 h-3 w-1/2 rounded bg-outline/10" />
+          <div key={i} className="bg-paper-soft p-5">
+            <div className="aspect-[3/4] bg-rule-soft/40" />
+            <div className="mt-4 h-4 w-2/3 bg-rule-soft/40" />
+            <div className="mt-2 h-3 w-1/2 bg-rule-soft/30" />
           </div>
         ))}
       </div>
@@ -483,12 +483,12 @@ function RecentDocs({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {items.slice(0, 6).map((item) =>
+    <div className="grid gap-px bg-ink-deep border-2 border-ink-deep sm:grid-cols-2 lg:grid-cols-3">
+      {items.slice(0, 6).map((item, idx) =>
         item.kind === "resume" ? (
-          <ResumeDocCard key={`r-${item.doc.id}`} doc={item.doc} />
+          <ResumeDocCard key={`r-${item.doc.id}`} doc={item.doc} index={idx} />
         ) : (
-          <LetterDocCard key={`l-${item.doc.id}`} doc={item.doc} />
+          <LetterDocCard key={`l-${item.doc.id}`} doc={item.doc} index={idx} />
         )
       )}
     </div>
@@ -496,40 +496,39 @@ function RecentDocs({
 }
 
 /* ── Resume Doc Card ───────────────────────────────────── */
-function ResumeDocCard({ doc }: { doc: RecentResume }) {
+function ResumeDocCard({ doc, index }: { doc: RecentResume; index: number }) {
   const name = [doc.data.firstName, doc.data.lastName].filter(Boolean).join(" ") || doc.title || "Untitled";
   const title = doc.data.title || "—";
   const templateName = doc.template?.name || "Modern Minimalist";
-  const accent = "#0058bc";
 
   return (
     <Link
       href="/resume"
-      className="card-tilt soft-card group flex h-full flex-col overflow-hidden rounded-2xl transition hover:border-primary/40"
+      className="group flex flex-col bg-paper-soft transition hover:bg-paper-warm"
     >
-      <div
-        className="relative flex aspect-[3/4] items-end overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${accent}0d, ${accent}22)` }}
-      >
-        <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-ink shadow-sm backdrop-blur">
-          <Icon name="document" className="text-sm" />
-          Resume
+      <div className="relative flex aspect-[3/4] items-end overflow-hidden border-b-2 border-ink-deep bg-paper">
+        <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 border border-ink-deep bg-paper-soft px-2 py-0.5 font-edit text-[9px] font-bold uppercase tracking-[0.18em] text-ink-deep">
+          Résumé
         </div>
-        <div className="absolute inset-x-0 top-1/3 px-5">
-          <p className="truncate text-lg font-bold tracking-tight text-ink">{name}</p>
-          <p className="mt-1 truncate text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: accent }}>
-            {title}
-          </p>
-          <div className="mt-2 h-px w-12" style={{ background: accent }} />
+        <div className="absolute left-3 top-3 font-serif text-xs italic text-saffron">No. {(index + 1).toString().padStart(2, "0")}</div>
+        <div className="absolute inset-x-0 top-1/4 px-6">
+          <p className="font-serif text-xs italic text-ink-soft">{title}</p>
+          <p className="font-serif mt-1 text-3xl leading-tight text-ink-deep">{name}</p>
+          <div className="mt-3 h-px w-12 bg-saffron" />
+          <div className="mt-4 space-y-1.5">
+            <div className="h-1.5 w-3/4 bg-ink-deep/30" />
+            <div className="h-1.5 w-full bg-ink-deep/15" />
+            <div className="h-1.5 w-2/3 bg-ink-deep/15" />
+          </div>
         </div>
       </div>
-      <div className="flex flex-1 items-center justify-between gap-3 p-4">
+      <div className="flex flex-1 items-baseline justify-between gap-3 px-5 py-4">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-ink">{templateName}</p>
-          <p className="mt-0.5 text-xs text-muted">Updated {formatRelativeTime(doc.updatedAt)}</p>
+          <p className="font-serif truncate text-[16px] italic text-ink-deep">{templateName}</p>
+          <p className="font-serif mt-0.5 text-xs italic text-ink-soft">Updated {formatRelativeTime(doc.updatedAt)}</p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary transition group-hover:bg-primary group-hover:text-white">
-          Open <Icon name="arrowRight" className="text-sm" />
+        <span className="font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-saffron transition group-hover:text-ink-deep">
+          Edit →
         </span>
       </div>
     </Link>
@@ -537,40 +536,37 @@ function ResumeDocCard({ doc }: { doc: RecentResume }) {
 }
 
 /* ── Letter Doc Card ───────────────────────────────────── */
-function LetterDocCard({ doc }: { doc: RecentCoverLetter }) {
-  const accent = "#4648d4";
+function LetterDocCard({ doc, index }: { doc: RecentCoverLetter; index: number }) {
   return (
     <Link
       href="/cover-letter"
-      className="card-tilt soft-card group flex h-full flex-col overflow-hidden rounded-2xl transition hover:border-secondary/40"
+      className="group flex flex-col bg-paper-soft transition hover:bg-paper-warm"
     >
-      <div
-        className="relative flex aspect-[3/4] items-end overflow-hidden"
-        style={{ background: `linear-gradient(135deg, ${accent}0d, ${accent}22)` }}
-      >
-        <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold text-ink shadow-sm backdrop-blur">
-          <Icon name="subject" className="text-sm" />
-          Cover letter
+      <div className="relative flex aspect-[3/4] flex-col justify-end overflow-hidden border-b-2 border-ink-deep bg-paper">
+        <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 border border-moss bg-paper-soft px-2 py-0.5 font-edit text-[9px] font-bold uppercase tracking-[0.18em] text-moss">
+          Letter
         </div>
-        <div className="absolute inset-x-0 top-1/4 px-5">
-          <div className="space-y-2">
-            <div className="h-2 w-24 rounded-full" style={{ background: accent + "44" }} />
-            <div className="h-2 w-40 rounded-full" style={{ background: accent + "22" }} />
-            <div className="h-2 w-32 rounded-full" style={{ background: accent + "22" }} />
-            <div className="mt-4 h-px w-10" style={{ background: accent }} />
-            <div className="h-2 w-36 rounded-full" style={{ background: accent + "44" }} />
-            <div className="h-2 w-44 rounded-full" style={{ background: accent + "22" }} />
-            <div className="h-2 w-28 rounded-full" style={{ background: accent + "22" }} />
+        <div className="absolute left-3 top-3 font-serif text-xs italic text-moss">№ {(index + 1).toString().padStart(2, "0")}</div>
+        <div className="absolute inset-x-0 top-1/4 px-6">
+          <p className="font-serif text-sm italic text-ink-soft">Dear hiring manager,</p>
+          <div className="mt-3 space-y-1.5">
+            <div className="h-1.5 w-full bg-ink-deep/30" />
+            <div className="h-1.5 w-5/6 bg-ink-deep/20" />
+            <div className="h-1.5 w-4/5 bg-ink-deep/20" />
+            <div className="mt-3 h-px w-12 bg-moss" />
+            <div className="h-1.5 w-3/4 bg-ink-deep/20" />
+            <div className="h-1.5 w-2/3 bg-ink-deep/15" />
           </div>
+          <p className="font-serif mt-4 text-sm italic text-moss">Sincerely yours,</p>
         </div>
       </div>
-      <div className="flex flex-1 items-center justify-between gap-3 p-4">
+      <div className="flex flex-1 items-baseline justify-between gap-3 px-5 py-4">
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-ink">{doc.title || "Cover letter"}</p>
-          <p className="mt-0.5 text-xs text-muted">Updated {formatRelativeTime(doc.updatedAt)}</p>
+          <p className="font-serif truncate text-[16px] italic text-ink-deep">{doc.title || "Cover letter"}</p>
+          <p className="font-serif mt-0.5 text-xs italic text-ink-soft">Updated {formatRelativeTime(doc.updatedAt)}</p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-lg bg-secondary/10 px-3 py-1.5 text-xs font-bold text-secondary transition group-hover:bg-secondary group-hover:text-white">
-          Open <Icon name="arrowRight" className="text-sm" />
+        <span className="font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-moss transition group-hover:text-ink-deep">
+          Edit →
         </span>
       </div>
     </Link>
@@ -580,25 +576,21 @@ function LetterDocCard({ doc }: { doc: RecentCoverLetter }) {
 /* ── Empty State ───────────────────────────────────────── */
 function EmptyState({ tab }: { tab: "all" | "resumes" | "letters" }) {
   const config = {
-    all: { icon: "sparkle" as IconName, title: "Nothing here yet", desc: "Start with a resume or a cover letter — your work autosaves and lives here.", primary: { href: "/resume", label: "Create resume" }, secondary: { href: "/cover-letter", label: "Cover letter" } },
-    resumes: { icon: "document" as IconName, title: "No resumes yet", desc: "Build your first resume in minutes. Import from LinkedIn or start blank.", primary: { href: "/resume", label: "Create resume" }, secondary: { href: "/templates", label: "Browse templates" } },
-    letters: { icon: "subject" as IconName, title: "No cover letters yet", desc: "Pair every application with a tailored cover letter — pick a template to begin.", primary: { href: "/cover-letter", label: "Create cover letter" }, secondary: { href: "/templates", label: "Browse templates" } }
+    all: { title: "Nothing here yet.", desc: "Start with a résumé or a cover letter — every edit autosaves and lives on this desk.", primary: { href: "/resume", label: "+ New résumé" }, secondary: { href: "/cover-letter", label: "+ Cover letter" } },
+    resumes: { title: "No résumés yet.", desc: "Build your first résumé in minutes. Import from LinkedIn or start blank.", primary: { href: "/resume", label: "+ New résumé" }, secondary: { href: "/templates", label: "Browse anthology" } },
+    letters: { title: "No cover letters yet.", desc: "Pair every application with a tailored letter — pick a template to begin.", primary: { href: "/cover-letter", label: "+ New letter" }, secondary: { href: "/templates", label: "Browse anthology" } }
   }[tab];
 
   return (
-    <div className="soft-card flex flex-col items-center gap-4 rounded-2xl px-6 py-12 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Icon name={config.icon} className="text-[28px]" />
-      </div>
-      <div>
-        <h3 className="text-lg font-bold text-ink">{config.title}</h3>
-        <p className="mx-auto mt-1.5 max-w-sm text-sm leading-6 text-muted">{config.desc}</p>
-      </div>
-      <div className="mt-2 flex flex-wrap justify-center gap-2.5">
-        <Link href={config.primary.href} className="primary-gradient rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-ambient">
+    <div className="border-2 border-ink-deep bg-paper-soft p-10 text-center">
+      <p className="font-serif text-sm italic text-saffron">— Blank page —</p>
+      <h3 className="headline-editorial mt-3 text-3xl md:text-4xl">{config.title}</h3>
+      <p className="font-serif mx-auto mt-3 max-w-md text-base italic leading-snug text-ink-soft">{config.desc}</p>
+      <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <Link href={config.primary.href} className="btn-editorial">
           {config.primary.label}
         </Link>
-        <Link href={config.secondary.href} className="rounded-xl border border-outline/60 bg-surface px-5 py-2.5 text-sm font-bold text-ink">
+        <Link href={config.secondary.href} className="btn-editorial btn-editorial-ghost">
           {config.secondary.label}
         </Link>
       </div>
@@ -608,42 +600,36 @@ function EmptyState({ tab }: { tab: "all" | "resumes" | "letters" }) {
 
 /* ── Action Tile ───────────────────────────────────────── */
 function ActionTile({
-  href, icon, title, description, accent, proOnly
+  href, icon, title, description, marker, proOnly
 }: {
   href: string;
   icon: IconName;
   title: string;
   description: string;
-  accent: "primary" | "secondary" | "success" | "warning";
+  marker: string;
   proOnly?: boolean;
 }) {
-  const colorMap = {
-    primary: { bg: "bg-primary/10", text: "text-primary", glow: "from-primary/15 to-primary/0" },
-    secondary: { bg: "bg-secondary/10", text: "text-secondary", glow: "from-secondary/15 to-secondary/0" },
-    success: { bg: "bg-success/10", text: "text-success", glow: "from-success/15 to-success/0" },
-    warning: { bg: "bg-warning/10", text: "text-warning", glow: "from-warning/15 to-warning/0" }
-  }[accent];
-
   return (
     <Link
       href={href}
-      className="card-tilt soft-card group relative overflow-hidden rounded-2xl p-5 transition hover:border-outline/60"
+      className="group flex flex-col gap-3 bg-paper-soft p-6 transition hover:bg-paper-warm"
     >
-      <div className={`absolute -right-12 -top-12 h-32 w-32 rounded-full bg-gradient-to-br ${colorMap.glow} blur-2xl transition-transform duration-500 group-hover:scale-150`} />
-      <div className="relative z-10 flex items-start gap-3">
-        <div className={`icon-bounce flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${colorMap.bg} ${colorMap.text}`}>
-          <Icon name={icon} className="text-[20px]" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-bold text-ink">{title}</h3>
-            {proOnly && (
-              <span className="rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-warning">Pro</span>
-            )}
-          </div>
-          <p className="mt-1 text-xs leading-5 text-muted">{description}</p>
-        </div>
+      <div className="flex items-baseline justify-between">
+        <span className="font-serif text-sm italic text-saffron">Assignment {marker}</span>
+        <Icon name={icon} className="text-[22px] text-ink-deep transition group-hover:text-saffron" />
       </div>
+      <div>
+        <div className="flex items-baseline gap-2">
+          <h3 className="font-serif text-[24px] leading-tight text-ink-deep">{title}</h3>
+          {proOnly && (
+            <span className="border border-saffron px-1.5 py-0.5 font-edit text-[9px] font-bold uppercase tracking-[0.16em] text-saffron">Pro</span>
+          )}
+        </div>
+        <p className="font-serif mt-2 text-sm italic leading-snug text-ink-soft">{description}</p>
+      </div>
+      <span className="mt-auto font-edit text-[10px] font-bold uppercase tracking-[0.2em] text-ink-deep opacity-0 transition group-hover:opacity-100">
+        Open →
+      </span>
     </Link>
   );
 }
@@ -663,34 +649,30 @@ function formatRelativeTime(iso: string): string {
   return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
-/* ── Onboarding Modal (unchanged) ──────────────────────── */
+/* ── Onboarding Modal (editorial) ──────────────────────── */
 function OnboardingModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0);
 
   const steps = [
     {
-      icon: "sparkle" as IconName,
-      title: "Welcome to CV with AI",
-      description: "Build professional, ATS-optimized resumes and cover letters in minutes. Our AI helps you craft content that gets noticed by recruiters.",
-      gradient: "from-primary to-secondary"
+      marker: "01",
+      title: "Welcome to The Desk.",
+      description: "Build professional, ATS-optimised résumés and letters in minutes. Our AI editor crafts content that recruiters actually want to read."
     },
     {
-      icon: "edit" as IconName,
-      title: "Create your resume",
-      description: "Choose from 100 templates, fill in your details, and let AI optimize your content for maximum impact. Import from LinkedIn to save time.",
-      gradient: "from-secondary to-primary"
+      marker: "02",
+      title: "Set your first manuscript.",
+      description: "Pick from 100 typeset templates, fill in your details, then let the AI editor optimise your copy. Import from LinkedIn to save time."
     },
     {
-      icon: "subject" as IconName,
-      title: "Generate cover letters",
-      description: "Paste a job description and our AI generates a tailored cover letter that matches your experience to the role requirements.",
-      gradient: "from-primary to-success"
+      marker: "03",
+      title: "Pair it with a letter.",
+      description: "Paste a job listing and the AI dictates a tailored cover letter that matches your experience to the role."
     },
     {
-      icon: "analytics" as IconName,
-      title: "Score & export",
-      description: "Get your resume scored for ATS compatibility, then export high-resolution PDFs ready to submit. You're all set to land your dream job!",
-      gradient: "from-success to-primary"
+      marker: "04",
+      title: "Score, sign, send.",
+      description: "Get an ATS score, export a hi-res PDF, and ship it. You're ready for the front page."
     }
   ];
 
@@ -698,49 +680,52 @@ function OnboardingModal({ onClose }: { onClose: () => void }) {
   const isLast = step === steps.length - 1;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-surface shadow-2xl">
-        <div className="flex justify-center gap-2 px-8 pt-8">
-          {steps.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${
-                i === step ? "w-8 bg-primary" : i < step ? "w-4 bg-primary/40" : "w-4 bg-outline/30"
-              }`}
-            />
-          ))}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink-deep/55 px-4">
+      <div className="w-full max-w-md overflow-hidden border-2 border-ink-deep bg-paper-soft shadow-[12px_12px_0_0_rgba(20,19,15,0.4)]">
+        <div className="flex items-baseline justify-between border-b-2 border-ink-deep px-7 py-3">
+          <p className="font-serif text-sm italic text-saffron">Introduction · {current.marker}/04</p>
+          <button onClick={onClose} className="font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep">Skip ×</button>
         </div>
 
-        <div className="px-8 pb-4 pt-8 text-center">
-          <div className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${current.gradient} shadow-lg`}>
-            <Icon name={current.icon} className="text-[36px] text-white" />
+        <div className="px-7 py-8">
+          <div className="flex gap-1">
+            {steps.map((_, i) => (
+              <div
+                key={i}
+                className={`h-[3px] flex-1 ${
+                  i === step ? "bg-saffron" : i < step ? "bg-ink-deep" : "bg-rule-soft"
+                }`}
+              />
+            ))}
           </div>
-          <h2 className="text-2xl font-bold text-ink">{current.title}</h2>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
+
+          <h2 className="headline-editorial mt-6 text-3xl md:text-4xl">{current.title}</h2>
+          <p className="font-serif mt-3 text-base italic leading-snug text-ink-soft">
             {current.description}
           </p>
         </div>
 
-        <div className="flex gap-3 px-8 pb-8 pt-4">
+        <div className="flex gap-0 border-t-2 border-ink-deep">
           {step > 0 ? (
             <button
-              className="flex-1 rounded-xl border border-outline/50 bg-surface px-5 py-3 text-sm font-bold text-ink transition hover:bg-surface-soft"
+              className="flex-1 bg-paper-soft px-5 py-4 font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-paper-warm"
               onClick={() => setStep(step - 1)}
               type="button"
             >
-              Back
+              ← Back
             </button>
           ) : (
             <button
-              className="flex-1 rounded-xl border border-outline/50 bg-surface px-5 py-3 text-sm font-bold text-muted transition hover:bg-surface-soft"
+              className="flex-1 bg-paper-soft px-5 py-4 font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-soft transition hover:bg-paper-warm"
               onClick={onClose}
               type="button"
             >
               Skip
             </button>
           )}
+          <div className="w-px bg-ink-deep" />
           <button
-            className="flex-1 primary-gradient rounded-xl px-5 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-105"
+            className="flex-1 bg-ink-deep px-5 py-4 font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron"
             onClick={() => {
               if (isLast) {
                 onClose();
@@ -750,7 +735,7 @@ function OnboardingModal({ onClose }: { onClose: () => void }) {
             }}
             type="button"
           >
-            {isLast ? "Get started" : "Next"}
+            {isLast ? "Get started →" : "Next →"}
           </button>
         </div>
       </div>

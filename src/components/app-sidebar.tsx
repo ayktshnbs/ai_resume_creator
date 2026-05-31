@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "@/components/icon";
-import { AuroraBackground } from "@/components/aurora-background";
 import { useSession, signOut } from "next-auth/react";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useTheme } from "@/lib/use-theme";
@@ -17,10 +16,10 @@ type AppShellProps = {
 };
 
 const navItems = [
-  { href: "/dashboard", id: "dashboard", labelKey: "nav.dashboard", icon: "dashboard" },
-  { href: "/resume", id: "resume", labelKey: "nav.resume", icon: "resume" },
-  { href: "/templates", id: "templates", labelKey: "nav.templates", icon: "template" },
-  { href: "/cover-letter", id: "cover-letter", labelKey: "nav.coverLetter", icon: "document" },
+  { href: "/dashboard", id: "dashboard", labelKey: "nav.dashboard", icon: "dashboard", marker: "01" },
+  { href: "/resume", id: "resume", labelKey: "nav.resume", icon: "resume", marker: "02" },
+  { href: "/templates", id: "templates", labelKey: "nav.templates", icon: "template", marker: "03" },
+  { href: "/cover-letter", id: "cover-letter", labelKey: "nav.coverLetter", icon: "document", marker: "04" },
 ] as const;
 
 export function AppShell({ children, active, fullHeight = false }: AppShellProps) {
@@ -31,103 +30,108 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className={`min-h-screen text-ink ${fullHeight ? "h-screen overflow-hidden" : ""}`}>
-      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 border-r border-outline bg-surface/90 shadow-ambient backdrop-blur lg:flex lg:flex-col">
-        <div className="flex-1 overflow-y-auto px-5 pt-6">
-          <Link href={session ? "/dashboard" : "/"} className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-ambient">
-              <Icon name="sparkle" className="text-[22px]" />
-            </div>
-            <div>
-              <p className="font-label text-lg font-bold text-ink">CV with AI</p>
-              <p className="text-xs text-muted">{t("common.workspace")}</p>
-            </div>
+    <div className={`min-h-screen noise-paper text-ink-deep ${fullHeight ? "h-screen overflow-hidden" : ""}`}>
+      {/* Desktop sidebar — editorial column */}
+      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-72 flex-col border-r-2 border-ink-deep bg-paper-soft lg:flex">
+        <div className="flex-1 overflow-y-auto px-5 pt-7">
+          <Link href={session ? "/dashboard" : "/"} className="block">
+            <p className="font-serif text-[10px] italic text-ink-soft">The Resumé Press</p>
+            <p className="font-serif text-[32px] leading-[0.95] text-ink-deep">
+              CV <em className="italic text-saffron">with</em> AI
+            </p>
+            <p className="font-edit mt-1 text-[9px] font-bold uppercase tracking-[0.22em] text-ink-soft">
+              {t("common.workspace")}
+            </p>
           </Link>
 
-          <nav className="mt-8 space-y-2">
+          <div className="my-6 rule-thin" />
+
+          <nav className="space-y-1">
             {navItems.map((item) => {
               const isActive = active === item.id;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  className={`group relative flex items-baseline gap-3 px-3 py-3 transition ${
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted hover:bg-surface-soft hover:text-ink"
+                      ? "bg-ink-deep text-paper-soft"
+                      : "text-ink-deep hover:bg-paper-warm"
                   }`}
                 >
-                  <Icon name={item.icon} className="text-[20px]" />
-                  {t(item.labelKey)}
+                  <span className={`font-serif text-sm italic ${isActive ? "text-saffron-bright" : "text-saffron"}`}>
+                    {item.marker}
+                  </span>
+                  <span className="font-serif text-[18px] capitalize">
+                    {t(item.labelKey)}
+                  </span>
+                  {isActive && (
+                    <span className="ml-auto self-center font-serif text-base italic text-saffron-bright">→</span>
+                  )}
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        <div className="shrink-0 space-y-4 border-t border-outline/40 px-5 py-6">
+        <div className="shrink-0 space-y-4 border-t-2 border-ink-deep px-5 py-5">
           <div className="flex gap-2">
             <button
               onClick={toggleTheme}
-              className="flex flex-1 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
+              className="flex flex-1 items-center justify-center gap-2 border border-ink-deep px-3 py-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
             >
-              <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
+              <Icon name={dark ? "lightMode" : "darkMode"} className="text-[16px]" />
               {dark ? t("nav.lightMode") : t("nav.darkMode")}
             </button>
             <button
               onClick={() => setLang(lang === "en" ? "tr" : "en")}
-              className="flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-bold text-muted transition hover:bg-surface-soft hover:text-ink"
+              className="border border-ink-deep px-3 py-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
             >
               {lang === "en" ? "TR" : "EN"}
             </button>
           </div>
           {session ? (
-            <div className="flex items-center justify-between gap-3 px-2">
-              <div className="flex items-center gap-3">
-                {session.user?.image ? (
-                  <img src={session.user.image} alt={session.user.name || "User"} className="h-10 w-10 rounded-xl object-cover" />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <Icon name="user" />
-                  </div>
+            <div className="border-t border-ink-deep/20 pt-4">
+              <p className="font-serif text-[10px] italic text-saffron">— Subscriber —</p>
+              <div className="mt-1 flex items-baseline justify-between gap-2">
+                <p className="font-serif truncate text-[17px] text-ink-deep">{session.user?.name}</p>
+                {isPro && (
+                  <span className="border border-saffron px-1.5 py-0 font-edit text-[9px] font-bold uppercase tracking-[0.18em] text-saffron">Pro</span>
                 )}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
-                    {isPro && <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-black text-primary">PRO</span>}
-                  </div>
-                  <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
-                    {t("nav.signOut")}
-                  </button>
-                </div>
               </div>
+              <button
+                onClick={() => void signOut()}
+                className="mt-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft transition hover:text-oxblood"
+              >
+                {t("nav.signOut")} →
+              </button>
             </div>
           ) : (
             <Link
               href="/signin"
-              className="mx-2 flex items-center gap-3 rounded-2xl primary-gradient px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+              className="flex items-center justify-center gap-2 bg-ink-deep px-4 py-3 font-edit text-[11px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron"
             >
-              <Icon name="user" className="text-[20px]" />
-              {t("nav.signIn")}
+              {t("nav.signIn")} →
             </Link>
           )}
         </div>
       </aside>
 
-      <header className="sticky top-0 z-20 border-b border-outline bg-surface/90 px-4 py-3 backdrop-blur lg:hidden">
+      {/* Mobile editorial header */}
+      <header className="sticky top-0 z-20 border-b-2 border-ink-deep bg-paper-soft px-4 py-3 lg:hidden">
         <div className="flex items-center justify-between">
-          <Link href={session ? "/dashboard" : "/"} className="font-label text-lg font-bold text-ink">
-            CV with AI
+          <Link href={session ? "/dashboard" : "/"} className="font-serif text-2xl text-ink-deep">
+            CV <em className="italic text-saffron">with</em> AI
           </Link>
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-ink transition hover:bg-surface-soft"
+            className="flex h-10 w-10 items-center justify-center border border-ink-deep text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
             onClick={() => setDrawerOpen(!drawerOpen)}
             aria-label="Toggle navigation"
           >
             {drawerOpen ? (
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             ) : (
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
             )}
           </button>
         </div>
@@ -135,20 +139,27 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
 
       {drawerOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
-          <aside className="absolute left-0 top-0 flex h-full w-72 flex-col border-r border-outline bg-surface px-5 py-6 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <Link href={session ? "/dashboard" : "/"} className="flex items-center gap-3" onClick={() => setDrawerOpen(false)}>
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-ambient">
-                  <Icon name="sparkle" className="text-[22px]" />
-                </div>
-                <div>
-                  <p className="font-label text-lg font-bold text-ink">CV with AI</p>
-                  <p className="text-xs text-muted">{t("common.workspace")}</p>
-                </div>
+          <div className="absolute inset-0 bg-ink-deep/55" onClick={() => setDrawerOpen(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-80 max-w-[88vw] flex-col border-r-2 border-ink-deep bg-paper-soft px-6 py-7 shadow-2xl">
+            <div className="flex items-baseline justify-between">
+              <Link href={session ? "/dashboard" : "/"} className="block" onClick={() => setDrawerOpen(false)}>
+                <p className="font-serif text-[10px] italic text-ink-soft">The Resumé Press</p>
+                <p className="font-serif text-[28px] leading-[0.95] text-ink-deep">
+                  CV <em className="italic text-saffron">with</em> AI
+                </p>
               </Link>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep"
+                aria-label="Close menu"
+              >
+                Close ×
+              </button>
             </div>
-            <nav className="mt-8 space-y-2">
+
+            <div className="my-6 rule-thin" />
+
+            <nav className="space-y-1">
               {navItems.map((item) => {
                 const isActive = active === item.id;
                 return (
@@ -156,56 +167,55 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
                     key={item.href}
                     href={item.href}
                     onClick={() => setDrawerOpen(false)}
-                    className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    className={`flex items-baseline gap-3 px-3 py-3 transition ${
                       isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted hover:bg-surface-soft hover:text-ink"
+                        ? "bg-ink-deep text-paper-soft"
+                        : "text-ink-deep hover:bg-paper-warm"
                     }`}
                   >
-                    <Icon name={item.icon} className="text-[20px]" />
-                    {t(item.labelKey)}
+                    <span className={`font-serif text-sm italic ${isActive ? "text-saffron-bright" : "text-saffron"}`}>
+                      {item.marker}
+                    </span>
+                    <span className="font-serif text-xl capitalize">{t(item.labelKey)}</span>
                   </Link>
                 );
               })}
             </nav>
-            <div className="mt-auto space-y-4 border-t border-outline/40 pt-6">
+
+            <div className="mt-auto space-y-4 border-t-2 border-ink-deep pt-5">
               <div className="flex gap-2">
                 <button
                   onClick={toggleTheme}
-                  className="flex flex-1 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-soft hover:text-ink"
+                  className="flex flex-1 items-center justify-center gap-2 border border-ink-deep px-3 py-2.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
                 >
-                  <Icon name={dark ? "lightMode" : "darkMode"} className="text-[20px]" />
+                  <Icon name={dark ? "lightMode" : "darkMode"} className="text-[16px]" />
                   {dark ? t("nav.lightMode") : t("nav.darkMode")}
                 </button>
                 <button
                   onClick={() => setLang(lang === "en" ? "tr" : "en")}
-                  className="flex items-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-bold text-muted transition hover:bg-surface-soft hover:text-ink"
+                  className="border border-ink-deep px-3 py-2.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
                 >
                   {lang === "en" ? "TR" : "EN"}
                 </button>
               </div>
               {session ? (
-                <div className="flex items-center justify-between gap-3 px-2">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon name="user" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-ink">{session.user?.name}</p>
-                      <button onClick={() => void signOut()} className="text-xs font-semibold text-muted hover:text-error transition">
-                        {t("nav.signOut")}
-                      </button>
-                    </div>
-                  </div>
+                <div className="border-t border-ink-deep/20 pt-3">
+                  <p className="font-serif text-[10px] italic text-saffron">— Subscriber —</p>
+                  <p className="mt-1 truncate font-serif text-lg text-ink-deep">{session.user?.name}</p>
+                  <button
+                    onClick={() => void signOut()}
+                    className="mt-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft transition hover:text-oxblood"
+                  >
+                    {t("nav.signOut")} →
+                  </button>
                 </div>
               ) : (
                 <Link
                   href="/signin"
                   onClick={() => setDrawerOpen(false)}
-                  className="flex items-center gap-3 rounded-2xl primary-gradient px-4 py-3 text-sm font-bold text-white shadow-ambient transition hover:brightness-110"
+                  className="flex items-center justify-center gap-2 bg-ink-deep px-4 py-3 font-edit text-[11px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron"
                 >
-                  <Icon name="user" className="text-[20px]" />
-                  {t("nav.signIn")}
+                  {t("nav.signIn")} →
                 </Link>
               )}
             </div>
@@ -213,7 +223,6 @@ export function AppShell({ children, active, fullHeight = false }: AppShellProps
         </div>
       )}
 
-      <AuroraBackground />
       <main className={`${fullHeight ? "h-screen overflow-hidden" : "min-h-screen"} relative z-10 lg:pl-72`}>
         {children}
       </main>

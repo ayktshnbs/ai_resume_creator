@@ -85,7 +85,7 @@ function TemplateCardPreview({ templateName }: { templateName: string }) {
   }, []);
 
   return (
-    <div ref={ref} className="relative aspect-[1/1.38] overflow-hidden bg-surface">
+    <div ref={ref} className="relative aspect-[1/1.38] overflow-hidden bg-white">
       {scale > 0 && (
         <div
           style={{
@@ -109,9 +109,6 @@ export default function TemplatesPage() {
   const filtered = filter === "All" ? ALL_TEMPLATES : ALL_TEMPLATES.filter((t) => t.category === filter);
   const { quota } = useUsageQuota();
 
-  // Template selection has no paywall — anyone can pick any template and edit
-  // freely. The paywall fires on PDF export (premium-template lock, free-tier
-  // cap, and rate-limiting all run server-side in /api/usage/consume).
   function useTemplate(template: TemplateCard) {
     saveSelectedTemplate({
       templateId: template.templateId,
@@ -125,93 +122,120 @@ export default function TemplatesPage() {
 
   return (
     <AppShell active="templates">
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-10 md:py-12">
-        <header className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-          <div className="max-w-2xl">
-            <p className="mb-3 w-fit rounded-full border border-outline/70 bg-surface px-3 py-1 font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
-              {t("templates.badge")}
-            </p>
-            <h1 className="text-3xl font-bold tracking-normal text-ink md:text-4xl">{t("templates.title")}</h1>
-            <p className="mt-3 text-lg leading-8 text-muted">
-              {ALL_TEMPLATES.length} ATS-optimized layouts designed to highlight your professional story.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-outline/50 bg-surface-soft px-5 py-4 text-sm leading-6 text-muted">
-            <strong className="block text-ink">{t("templates.tip")}</strong>
-            {t("templates.tipText")}
-          </div>
-        </header>
+      <div className="noise-paper min-h-screen">
+        <div className="mx-auto w-full max-w-[1400px] px-4 py-8 md:px-10 md:py-12">
 
-        <div className="mb-8 flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                filter === cat
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-surface-soft text-muted hover:bg-surface hover:text-ink"
-              }`}
-            >
-              {cat}
-              {cat !== "All" && (
-                <span className="ml-1.5 text-xs opacity-60">
-                  {ALL_TEMPLATES.filter((t) => t.category === cat).length}
+          {/* Editorial masthead */}
+          <header className="border-b-[3px] border-ink-deep pb-6">
+            <div className="flex items-baseline justify-between border-b border-ink-deep/30 pb-2">
+              <p className="font-edit text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-soft">
+                The Anthology · Catalogue No. 02
+              </p>
+              <p className="font-serif text-xs italic text-saffron">{ALL_TEMPLATES.length} typeset templates</p>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl">
+                <h1 className="headline-editorial text-[48px] sm:text-[60px] md:text-[80px]">
+                  The <em>Anthology</em>.
+                </h1>
+                <p className="font-serif mt-4 text-[17px] italic leading-snug text-ink-soft">
+                  {ALL_TEMPLATES.length} ATS-optimised layouts, each typeset with the same craft as the front page — pick the one
+                  that fits the role and we'll wire your data in.
+                </p>
+              </div>
+              <div className="border-2 border-ink-deep bg-paper-soft p-5">
+                <p className="font-serif text-sm italic text-saffron">— Editor's note —</p>
+                <p className="font-serif mt-1.5 text-[15px] italic leading-snug text-ink-deep">
+                  {t("templates.tipText")}
+                </p>
+              </div>
+            </div>
+          </header>
+
+          {/* Filter tabs as editorial chips */}
+          <div className="mt-8 mb-8 flex flex-wrap gap-0 border-2 border-ink-deep">
+            {CATEGORIES.map((cat, i) => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`flex items-baseline gap-2 px-4 py-2.5 font-edit text-[11px] font-bold uppercase tracking-[0.18em] transition ${
+                  filter === cat
+                    ? "bg-ink-deep text-paper-soft"
+                    : "bg-paper-soft text-ink-deep hover:bg-paper-warm"
+                } ${i > 0 ? "border-l-2 border-ink-deep" : ""}`}
+              >
+                {cat}
+                <span className={`font-serif text-xs italic normal-case tracking-normal ${filter === cat ? "text-saffron-bright" : "text-saffron"}`}>
+                  ({cat === "All" ? ALL_TEMPLATES.length : ALL_TEMPLATES.filter((t) => t.category === cat).length})
                 </span>
-              )}
-            </button>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
 
-        <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {filtered.map((template) => (
-            <article
-              className="group cursor-pointer overflow-hidden rounded-3xl border border-outline/30 bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-panel"
-              key={template.name}
-              onClick={() => useTemplate(template)}
-            >
-              <div className="relative">
-                <TemplateCardPreview templateName={template.name} />
-                {template.premium && !quota?.isPro && (
-                  <span className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-ink/85 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-lg backdrop-blur">
-                    <Icon name="sparkle" className="text-[12px]" />
-                    Pro
-                  </span>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center bg-surface/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
-                  <div className="primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel transition hover:-translate-y-0.5">
-                    <Icon name="edit" />
-                    {t("templates.useTemplate")}
+          {/* Editorial grid of templates */}
+          <div className="grid gap-px bg-ink-deep border-2 border-ink-deep sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((template, idx) => (
+              <article
+                className="group flex cursor-pointer flex-col bg-paper-soft transition hover:bg-paper-warm"
+                key={template.name}
+                onClick={() => useTemplate(template)}
+              >
+                <div className="relative border-b-2 border-ink-deep">
+                  <TemplateCardPreview templateName={template.name} />
+                  <div className="absolute left-3 top-3 font-serif text-xs italic text-saffron">
+                    Plate {(idx + 1).toString().padStart(2, "0")}
                   </div>
-                </div>
-              </div>
-
-              <div className="p-5">
-                <div className="mb-3 flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h2 className="text-lg font-bold text-ink transition-colors group-hover:text-primary">{template.name}</h2>
-                    <p className="font-label text-xs font-bold uppercase tracking-[0.12em] text-primary">
-                      {template.category}
-                    </p>
-                  </div>
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: (template.themeColor || "#6366f1") + "18" }}>
-                    <div className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: template.themeColor || "#6366f1" }} />
-                  </div>
-                </div>
-                <p className="min-h-12 text-sm leading-6 text-muted line-clamp-2">{template.text}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {template.tags.map((tag, index) => (
-                    <span
-                      className={`rounded-full px-3 py-1 font-label text-xs font-bold ${index === 0 ? "bg-primary/10 text-primary" : "bg-surface-soft text-muted"}`}
-                      key={tag}
-                    >
-                      {tag}
+                  {template.premium && !quota?.isPro && (
+                    <span className="absolute right-3 top-3 z-10 border border-saffron bg-paper-soft px-2 py-0.5 font-edit text-[9px] font-bold uppercase tracking-[0.18em] text-saffron">
+                      ★ Pro
                     </span>
-                  ))}
+                  )}
+                  <div className="absolute inset-0 flex items-end justify-center bg-ink-deep/0 opacity-0 transition duration-300 group-hover:bg-ink-deep/30 group-hover:opacity-100">
+                    <div className="mb-4 inline-flex items-center gap-2 bg-saffron px-4 py-2.5 font-edit text-[11px] font-bold uppercase tracking-[0.18em] text-paper-soft">
+                      <Icon name="edit" className="text-[14px]" />
+                      {t("templates.useTemplate")} →
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="font-serif text-xs italic text-saffron">{template.category}</p>
+                    <div className="h-3 w-3 rounded-full border border-ink-deep" style={{ backgroundColor: template.themeColor || "#14130f" }} />
+                  </div>
+                  <h2 className="font-serif mt-1 text-[22px] leading-tight text-ink-deep transition-colors group-hover:text-saffron">
+                    {template.name}
+                  </h2>
+                  <p className="font-serif mt-2 line-clamp-2 text-sm italic leading-snug text-ink-soft">
+                    {template.text}
+                  </p>
+                  <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+                    {template.tags.slice(0, 3).map((tag, index) => (
+                      <span
+                        className={`border px-2 py-0.5 font-edit text-[9px] font-bold uppercase tracking-[0.18em] ${index === 0 ? "border-saffron text-saffron" : "border-ink-deep/40 text-ink-soft"}`}
+                        key={tag}
+                      >
+                        {tag.replace(/^#/, "")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="mt-6 border-2 border-ink-deep bg-paper-soft p-10 text-center">
+              <p className="font-serif text-sm italic text-saffron">— Empty shelf —</p>
+              <h3 className="headline-editorial mt-3 text-3xl">No templates in this category.</h3>
+              <p className="font-serif mt-2 italic text-ink-soft">Try the &quot;All&quot; shelf to see every typeset layout.</p>
+            </div>
+          )}
+
+          <footer className="mt-12 border-t border-ink-deep/30 pt-5">
+            <p className="byline text-center">— Hand-set with care · {ALL_TEMPLATES.length} templates total —</p>
+          </footer>
         </div>
       </div>
     </AppShell>

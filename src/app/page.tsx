@@ -68,7 +68,7 @@ const copy = {
       { label: "Toolkit", marker: "03", href: "#features" },
       { label: "Field Notes", marker: "04", href: "#before-after" },
       { label: "The Desk", marker: "05", href: "#management" },
-      { label: "Letters", marker: "06", href: "#testimonials" },
+      { label: "Principles", marker: "06", href: "#principles" },
       { label: "Subscribe", marker: "07", href: "#pricing" },
     ],
     // Hero
@@ -258,7 +258,7 @@ const copy = {
       { label: "Araç Kutusu", marker: "03", href: "#features" },
       { label: "Saha Notları", marker: "04", href: "#before-after" },
       { label: "Masa", marker: "05", href: "#management" },
-      { label: "Mektuplar", marker: "06", href: "#testimonials" },
+      { label: "İlkeler", marker: "06", href: "#principles" },
       { label: "Abonelik", marker: "07", href: "#pricing" },
     ],
     heroEyebrow: "No. 01 — Manşet",
@@ -911,8 +911,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─────────── LETTERS TO THE EDITOR (Testimonials) ─────────── */}
-      <section id="testimonials" className="noise-paper">
+      {/* ─────────── EDITORIAL PRINCIPLES ─────────── */}
+      <section id="principles" className="noise-paper">
         <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
           <div className="mb-12 grid gap-6 md:grid-cols-[1.6fr_2.4fr] md:items-end">
             <div>

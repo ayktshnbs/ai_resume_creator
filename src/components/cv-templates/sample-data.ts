@@ -24,9 +24,9 @@ export const sampleResume: ResumeData = {
       endDate: "",
       current: true,
       bullets: [
-        "Owned the merchant onboarding roadmap end-to-end; reduced time-to-first-payment by 47% and lifted activation conversion from 58% to 81% across 120K+ new accounts.",
+        "Owned the merchant onboarding roadmap end-to-end; reduced time-to-first-payment by 47% and lifted activation conversion from 58% to 81%.",
         "Led a cross-functional team of 9 engineers, 2 designers, and 3 data scientists shipping 14 experiments per quarter through a rigorous A/B testing program.",
-        "Authored the company-wide pricing experimentation framework now used by 6 product teams to validate packaging changes prior to launch.",
+        "Authored the company-wide pricing experimentation framework that became the standard playbook for packaging validation prior to launch.",
         "Drove $18M of incremental annualized revenue in FY24 through checkout optimization and dynamic merchant pricing tiers."
       ]
     },
@@ -39,9 +39,9 @@ export const sampleResume: ResumeData = {
       endDate: "Feb 2022",
       current: false,
       bullets: [
-        "Launched Plaid's identity verification product from 0→1, reaching $7M ARR and 220 active customers within 14 months of GA.",
-        "Partnered with compliance and risk to expand bank coverage from 11K to 18K institutions across the US, Canada, and UK.",
-        "Defined the OKR cadence for the Consumer Platform org (40+ people); model adopted org-wide the following fiscal year."
+        "Launched Plaid's identity verification product from 0→1, reaching $7M ARR within 14 months of GA.",
+        "Partnered with compliance and risk to expand bank coverage across the US, Canada, and UK.",
+        "Defined the OKR cadence for the Consumer Platform organization; the framework was adopted org-wide the following fiscal year."
       ]
     },
     {
@@ -53,8 +53,8 @@ export const sampleResume: ResumeData = {
       endDate: "Jun 2019",
       current: false,
       bullets: [
-        "Shipped the Timeline view feature, used by 65% of paying customers within 6 months and credited in 22% of annual contract upgrades.",
-        "Built and ran the in-product feedback program, processing 4K+ pieces of qualitative input per quarter into a prioritized roadmap."
+        "Shipped the Timeline view feature, which drove a 22% increase in annual contract upgrades within 6 months of launch.",
+        "Built and ran the in-product feedback program, turning qualitative input into a prioritized quarterly roadmap."
       ]
     }
   ],

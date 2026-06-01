@@ -554,8 +554,8 @@ export default function Home() {
       {/* ─────────── HERO ─────────── */}
       <section id="hero" className="relative noise-paper">
         <div className="mx-auto max-w-[1400px] px-6 pt-10 pb-16 md:px-12 md:pt-16 md:pb-24">
-          <div className="grid gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-            <div className="flex flex-col justify-center">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+            <div className="flex min-w-0 flex-col justify-center">
               {/* Eyebrow with rule */}
               <div className="ink-reveal mb-7 flex items-center gap-4">
                 <div className="h-px w-12 bg-ink-deep" />

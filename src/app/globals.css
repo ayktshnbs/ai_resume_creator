@@ -161,6 +161,19 @@ body {
   color: var(--ink);
   font-family: Inter, Arial, sans-serif;
   overflow-x: hidden;
+  /* Hard guarantee body never exceeds the viewport, even if a descendant
+     has explicit pixel widths that would normally widen the document. */
+  max-width: 100vw;
+}
+
+/* Every top-level page section clips horizontal overflow at its own
+   boundary. This way no single section's contents (wide template
+   previews, max-content marquees, large headlines, decorative
+   absolute-positioned borders, etc.) can ever push the rest of the
+   layout sideways on mobile. */
+section {
+  overflow-x: clip;
+  max-width: 100vw;
 }
 
 button,

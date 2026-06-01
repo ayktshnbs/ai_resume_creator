@@ -563,7 +563,7 @@ export default function Home() {
                 <div className="h-px flex-1 bg-ink-deep/30" />
               </div>
 
-              <h1 className="ink-reveal headline-editorial text-[56px] sm:text-[80px] md:text-[104px] lg:text-[116px]" style={{ animationDelay: "0.1s" }}>
+              <h1 className="ink-reveal headline-editorial text-[44px] sm:text-[72px] md:text-[104px] lg:text-[116px] break-words [overflow-wrap:anywhere]" style={{ animationDelay: "0.1s" }}>
                 {c.heroHeadParts[0]}<em>{c.heroHeadParts[1]}</em>{c.heroHeadParts[2]}
               </h1>
 
@@ -588,9 +588,9 @@ export default function Home() {
                   ...c.stats,
                   { num: String(ALL_TEMPLATES.length), label: c.statsTemplatesLabel },
                 ].map((stat, i) => (
-                  <div key={stat.label} className={`flex flex-col gap-1 px-4 ${i > 0 ? "border-l border-ink-deep/30" : ""}`}>
-                    <p className="font-serif text-[40px] leading-none text-ink-deep md:text-[52px]">{stat.num}</p>
-                    <p className="font-serif text-xs italic text-ink-soft">{stat.label}</p>
+                  <div key={stat.label} className={`flex min-w-0 flex-col gap-1 px-2 sm:px-4 ${i > 0 ? "border-l border-ink-deep/30" : ""}`}>
+                    <p className="font-serif text-[24px] leading-none text-ink-deep sm:text-[34px] md:text-[52px] break-words [overflow-wrap:anywhere]">{stat.num}</p>
+                    <p className="font-serif text-[11px] italic text-ink-soft sm:text-xs">{stat.label}</p>
                   </div>
                 ))}
               </div>

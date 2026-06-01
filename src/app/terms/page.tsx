@@ -22,7 +22,7 @@ export default function TermsPage() {
           <p className="byline mt-4">{tr ? "Son güncelleme: 1 Haziran 2026" : "Last updated: June 1, 2026"}</p>
         </header>
 
-        <p className="font-serif dropcap mt-10 text-[18px] leading-[1.55] text-ink-deep">
+        <p className="font-serif mt-10 text-[18px] leading-[1.55] text-ink-deep">
           {tr
             ? "Yayını okumak için birkaç temel kural. Bu Kullanım Şartları, sizinle CV with AI arasındaki yasal sözleşmeyi düzenler. Platformu kullanarak bu şartları kabul etmiş sayılırsınız. Lütfen dikkatle okuyun; haklarınızı ve yükümlülüklerinizi etkiler."
             : "A few ground rules for using the press. These Terms of Service set out the legal contract between you and CV with AI. By accessing the platform, you agree to be bound by them. Please read carefully — they affect your rights and obligations."}

@@ -21,7 +21,7 @@ export default function RefundPage() {
           <p className="byline mt-4">{tr ? "Son güncelleme: 22 Mayıs 2026" : "Last updated: May 22, 2026"}</p>
         </header>
 
-        <p className="font-serif dropcap mt-10 text-[18px] leading-[1.55] text-ink-deep">
+        <p className="font-serif mt-10 text-[18px] leading-[1.55] text-ink-deep">
           {tr
             ? "Abonelik, fatura, iade — kısa açıklamayla. Pro plan dijital bir hizmet, satın aldığınız anda erişim açılıyor; o yüzden iade politikamız belirgin."
             : "Subscription, billing, refunds — in plain prose. The Pro plan is a digital service: access opens the moment you subscribe, so our refund stance is straightforward."}

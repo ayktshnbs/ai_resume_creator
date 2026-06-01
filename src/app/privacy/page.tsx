@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <p className="byline mt-4">{tr ? "Son güncelleme: 22 Mayıs 2026" : "Last updated: May 22, 2026"}</p>
         </header>
 
-        <p className="font-serif dropcap mt-10 text-[18px] leading-[1.55] text-ink-deep">
+        <p className="font-serif mt-10 text-[18px] leading-[1.55] text-ink-deep">
           {tr
             ? "Verileriniz, mürekkep gibi — bizim sorumluluğumuz altında, saygıyla muamele edilir. Bu sayfada hangi verileri topladığımızı, ne için kullandığımızı ve haklarınızı düz bir dille anlatıyoruz."
             : "Your data is like ink — handled with care, under our responsibility. This page explains what we collect, why we use it, and the rights you keep — in plain language, the way we'd write any front-page story."}

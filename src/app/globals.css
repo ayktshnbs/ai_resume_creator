@@ -91,6 +91,54 @@
   --card-border: rgba(51, 65, 85, 0.55);
   --glass-bg: rgba(30, 41, 59, 0.74);
   --glass-border: rgba(51, 65, 85, 0.5);
+
+  /* ── Editorial Press · Dark mode (deep-press) ── */
+  /* Cream paper inverts to deep midnight; ink becomes warm cream */
+  --paper: #15140f;            /* deep press night */
+  --paper-soft: #1c1b15;       /* card surface */
+  --paper-warm: #26241c;       /* hover surface */
+  --paper-deep: #f3ecdf;       /* inverted: cream "paper deep" for accents */
+  --ink-deep: #f3ecdf;         /* warm cream text */
+  --ink-soft: #c9bfaa;         /* secondary text */
+  --ink-quiet: #8a8270;        /* tertiary text */
+  --rule: #c9bfaa;             /* rule color stays warm cream */
+  --rule-soft: #46433a;        /* faint divider */
+  --saffron: #e9942d;          /* brighter saffron pops on dark */
+  --saffron-bright: #f5b75c;
+  --saffron-soft: #46342c;
+  --moss: #7da183;             /* lighter moss */
+  --moss-bright: #9bc7a3;
+  --oxblood: #d96c6c;           /* lifted oxblood for readability */
+
+  --paper-rgb: 21 20 15;
+  --paper-soft-rgb: 28 27 21;
+  --paper-warm-rgb: 38 36 28;
+  --paper-deep-rgb: 243 236 223;
+  --ink-deep-rgb: 243 236 223;
+  --ink-soft-rgb: 201 191 170;
+  --ink-quiet-rgb: 138 130 112;
+  --rule-rgb: 201 191 170;
+  --rule-soft-rgb: 70 67 58;
+  --saffron-rgb: 233 148 45;
+  --saffron-bright-rgb: 245 183 92;
+  --saffron-soft-rgb: 70 52 44;
+  --moss-rgb: 125 161 131;
+  --moss-bright-rgb: 155 199 163;
+  --oxblood-rgb: 217 108 108;
+}
+
+/* Adjust noise-paper background in dark mode so it doesn't look washed out */
+.dark .noise-paper {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(233, 148, 45, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 60%, rgba(125, 161, 131, 0.05) 0%, transparent 50%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(243, 236, 223, 0.012) 0px, transparent 1.5px, transparent 4px);
+}
+
+/* Dark mode: dropcap stays a warm saffron, but slightly brighter */
+.dark .dropcap::first-letter {
+  color: var(--saffron-bright);
 }
 
 * {

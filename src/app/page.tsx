@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
+import { useTheme } from "@/lib/use-theme";
 import { PARAMETRIC_CONFIGS } from "@/components/cv-templates/parametric-template";
 import { TemplateRenderer } from "@/components/cv-templates/template-renderer";
 import { sampleResume } from "@/components/cv-templates/sample-data";
@@ -47,9 +48,373 @@ const ALL_TEMPLATES: TemplateCard[] = [...handcraftedTemplates, ...parametricCar
 
 const ISSUE_DATE = "VOL. MMXXVI · NO. 01";
 
+const copy = {
+  en: {
+    // Masthead
+    tagline: "— Hand-set for ambitious careers —",
+    geo: "Worldwide · Print & Web",
+    pressLabel: "The Resumé Press",
+    estLine: "Est. 2026 · Worldwide circulation",
+    signIn: "Sign in",
+    subscribe: "Subscribe →",
+    menu: "Menu",
+    close: "Close ×",
+    toDark: "Dark mode",
+    toLight: "Light mode",
+    dailyEdition: "A daily edition · One reader at a time",
+    nav: [
+      { label: "Front Page", marker: "01", href: "#hero" },
+      { label: "Anthology", marker: "02", href: "#templates" },
+      { label: "Toolkit", marker: "03", href: "#features" },
+      { label: "Field Notes", marker: "04", href: "#before-after" },
+      { label: "The Desk", marker: "05", href: "#management" },
+      { label: "Letters", marker: "06", href: "#testimonials" },
+      { label: "Subscribe", marker: "07", href: "#pricing" },
+    ],
+    // Hero
+    heroEyebrow: "No. 01 — The Front Page",
+    heroHeadParts: ["The ", "smarter", " way to build your résumé."],
+    heroLeadAccent: "Stop fighting with Word.",
+    heroLeadBody: " Use a print-grade typesetter, AI editorials that rewrite your bullets, and one-click export to land your next interview — set in the same press that designed this page.",
+    ctaPrimary: "Start a new manuscript",
+    ctaSecondary: "Browse the anthology",
+    stats: [
+      { num: "50K+", label: "subscribers writing" },
+      { num: "4.9", label: "average reader rating" },
+    ],
+    statsTemplatesLabel: "templates in press",
+    byline: (year: number) => `Reported and typeset for ambitious professionals — Worldwide · ${year}.`,
+    plateCaption: "Plate I — Academic Classic, set in Fraunces & Geist",
+    plateNumber: "No. 01",
+    handsetExample: "— Hand-set example —",
+    sheetSize: "A4 · 210 × 297 mm",
+    marginalia: "Marginalia",
+    marginaliaQuote: '"Edited my CV during a coffee — landed three callbacks the next week."',
+    marginaliaSig: "— S. Mitchell, Spotify",
+    pressNotes: "Press notes",
+    pressNotesQuote: '"Finally, a builder that doesn\'t look generic. The press aesthetic just hits."',
+    pressNotesSig: "— D. Chen, Amazon",
+    // Anthology
+    anthologyEyebrow: "No. 02 — The Anthology",
+    anthologyTitleParts: ["Designed for ", "every", " career stage."],
+    anthologyLead: (n: number) => `${n} typeset templates, anthology-grade — from entry-level to executive.`,
+    viewAll: (n: number) => `View all ${n} templates`,
+    setTemplate: "Set this template →",
+    plate: "Plate",
+    // Toolkit (features)
+    toolkitEyebrow: "No. 03 — The Toolkit",
+    toolkitTitleParts: ["Built for ", "precision", " and speed."],
+    toolkitLead: "A streamlined newsroom workflow — from blank page to polished print. No learning curve, no marketing fluff, no purple gradients.",
+    filedUnder: "Filed under: AI · Typography · Export · Live preview",
+    f1Marker: "Feature № 01",
+    f1Section: "AI desk",
+    f1TitleParts: ["The ", "AI Editor", " rewrites your draft."],
+    f1Body: "One click and weak bullets become ATS-friendly, achievement-driven sentences. The AI reads the job description, hunts for the keywords that pass automated screens, then sets the language so a hiring manager actually wants to read it.",
+    beforeManuscript: "Before · Manuscript",
+    beforeSample: '"Managed social media accounts for the company and posted regularly."',
+    afterEdit: "After · AI Edit",
+    afterSamplePre: '"Grew social engagement ',
+    afterSampleAccent: "+156%",
+    afterSamplePost: ' across 4 platforms in six months, managing a 40-post weekly cadence."',
+    f2Marker: "№ 02",
+    f2Section: "Live press",
+    f2TitleParts: ["Live ", "preview", ", like a working printer's proof."],
+    f2Body: "Edit on the left, watch the page ink itself on the right. What you set is exactly what gets exported.",
+    f3Marker: "№ 03",
+    f3Section: "Correspondence",
+    f3TitleParts: ["Tailored ", "cover letters", ", dictated in seconds."],
+    f3Steps: ["Paste the listing", "AI drafts your letter", "Edit, sign, post."],
+    f4Marker: "Feature № 04",
+    f4Section: "The Press",
+    f4TitleParts: ["Pixel-perfect ", "PDF", " — printed on the same press as your favourite magazine."],
+    f4Body: "A4 PDFs that match the on-screen preview character-by-character. Hand off to recruiters or feed straight into ATS readers — every kern and ligature intact.",
+    pdfStats: [
+      { value: "300", unit: "dpi", label: "Resolution" },
+      { value: "A4", unit: "210×297", label: "Format" },
+      { value: "100%", unit: "vector", label: "Sharpness" },
+    ],
+    // Field notes
+    fieldEyebrow: "No. 04 — Field Notes",
+    fieldTitleParts: ["See the ", "difference", " a single edit makes."],
+    fieldLead: "One click. Same words, transformed into achievement-driven copy.",
+    manuscriptLabel: "Manuscript · Before",
+    manuscriptScore: "ATS · 34/100",
+    manuscriptSections: [
+      { title: "Work Experience", text: "Worked on marketing campaigns and helped the team with various projects and tasks." },
+      { title: "Skills", text: "Good at communication, teamwork, and problem solving. Used Excel and PowerPoint." },
+      { title: "Achievement", text: "Was responsible for social media accounts and posting content regularly." },
+    ],
+    manuscriptFooter: "— Likely filtered out by automated readers.",
+    editedBy: "edited by AI",
+    afterLabel: "After · AI Edit",
+    afterScore: "ATS · 92/100",
+    afterSections: [
+      { title: "Work Experience", text: "Spearheaded 12 cross-channel campaigns, driving a 34% increase in qualified leads and reducing CPA by 18%." },
+      { title: "Skills", text: "Strategic communications, cross-functional leadership, data-driven decisioning. Proficient in Excel (VLOOKUP, pivot tables), HubSpot CRM." },
+      { title: "Achievement", text: "Grew organic social engagement by 156% in 6 months, managing a content calendar of 40+ weekly posts across 4 platforms." },
+    ],
+    afterFooter: "— Interview-ready. Sent straight to the recruiter.",
+    tryAi: "Try the AI editor — it's free",
+    // The Desk
+    deskEyebrow: "No. 05 — The Desk",
+    deskTitleParts: ["Your career, ", "filed", " and ready to send."],
+    deskLead: "Save versions for every role. Manage, edit, score and export — all from one dashboard, designed to feel like a writer's desk rather than a software product.",
+    deskStats: ["Templates", "Avg ATS", "Setup time"],
+    deskCtaPrimary: "Start a new draft",
+    deskCtaSecondary: "View dashboard",
+    mockUrl: "The Desk · cv-with-ai.com/dashboard",
+    mockGreeting: "Welcome back, Aykut.",
+    mockToday: "Mon · Today",
+    mockStatLabels: ["Résumés", "Letters", "ATS score"],
+    mockTableHeads: ["Title", "Modified", "Score"],
+    mockDocs: [
+      { title: "Product Manager CV", date: "Updated today", score: 92 as number | null },
+      { title: "SaaS Founder Résumé", date: "Two days ago", score: 88 as number | null },
+      { title: "Consulting Cover Letter", date: "Draft", score: null as number | null },
+    ],
+    mockInProgress: "in progress",
+    mockFooter: "— A daily edition of you. —",
+    // Letters
+    lettersEyebrow: "No. 06 — Letters to the Editor",
+    lettersTitleParts: ["Loved by ", "readers", " in 92 countries."],
+    lettersLead: "Postmarked from the people who used the press, signed off, and landed the job. Names redacted only where the recruiter is still being polite.",
+    starsLead: "★ ★ ★ ★ ★ ",
+    starsValue: "4.9",
+    starsFrom: " from 1,240 verified subscribers",
+    // Footer / colophon
+    colophonAbout: "A typeset newsroom for ambitious careers. Set in Fraunces & Geist, printed on a press of cream & ink.",
+    footerSubscribeFree: "Subscribe — start free",
+    col1: "The Paper",
+    col1Links: [
+      { label: "Builder", href: "/resume" },
+      { label: "Templates", href: "/templates" },
+      { label: "Cover letters", href: "/cover-letter" },
+      { label: "Dashboard", href: "/dashboard" },
+    ],
+    col2: "Subscription",
+    col2Links: [
+      { label: "Pricing", href: "/pricing" },
+      { label: "Sign in", href: "/signin" },
+      { label: "Subscribe", href: "/signup" },
+    ],
+    col3: "Imprint",
+    col3Links: [
+      { label: "Privacy policy", href: "/privacy" },
+      { label: "Terms of service", href: "/terms" },
+      { label: "Refund policy", href: "/refund" },
+    ],
+    rights: (year: number) => `© ${year} CV with AI. All rights reserved. Hand-set with care.`,
+    issueLine: `${ISSUE_DATE} · Worldwide circulation`,
+    // Pricing section
+    pricingEyebrow: "No. 07 — Subscription",
+    pricingTitleParts: ["Simple, ", "honest", " pricing."],
+    pricingLead: "Start free. Upgrade only when you need the press behind you.",
+    monthly: "Monthly",
+    yearly: "Yearly",
+    save: "Save 30%",
+    basic: "Basic",
+    basicTagline: "The cub reporter.",
+    basicPeriod: "forever",
+    basicFeatures: ["1 CV + 1 cover letter", "All standard templates", "Live preview", "PDF export"],
+    startFree: "Start free",
+    pro: "Pro",
+    proTagline: "The full press.",
+    recommended: "Recommended",
+    perMonth: "/month",
+    perMonthBilled: "/mo · billed €25.20/year",
+    proFeatures: [
+      "Unlimited CVs & cover letters",
+      "AI Editor — rewrite & optimise",
+      "AI cover letter generator",
+      "Résumé scoring (ATS)",
+      "High-res PDF exports",
+      "Priority editorial support",
+    ],
+    subscribePro: "Subscribe to Pro",
+    pricingFineprint: "All prices in EUR. Cancel anytime. The free plan stays free, no card required.",
+  },
+  tr: {
+    tagline: "— Geleceğini yazanlar için özenle dizildi —",
+    geo: "Tüm dünyada · Baskı & Web",
+    pressLabel: "Özgeçmiş Matbaası",
+    estLine: "Kuruluş 2026 · Dünya genelinde tiraj",
+    signIn: "Giriş yap",
+    subscribe: "Abone ol →",
+    menu: "Menü",
+    close: "Kapat ×",
+    toDark: "Karanlık tema",
+    toLight: "Aydınlık tema",
+    dailyEdition: "Günlük baskı · Her seferinde tek okura",
+    nav: [
+      { label: "Manşet", marker: "01", href: "#hero" },
+      { label: "Antoloji", marker: "02", href: "#templates" },
+      { label: "Araç Kutusu", marker: "03", href: "#features" },
+      { label: "Saha Notları", marker: "04", href: "#before-after" },
+      { label: "Masa", marker: "05", href: "#management" },
+      { label: "Mektuplar", marker: "06", href: "#testimonials" },
+      { label: "Abonelik", marker: "07", href: "#pricing" },
+    ],
+    heroEyebrow: "No. 01 — Manşet",
+    heroHeadParts: ["Özgeçmiş hazırlamanın ", "daha akıllı", " yolu."],
+    heroLeadAccent: "Word'le boğuşmak artık tarihe karıştı.",
+    heroLeadBody: " Baskı kalitesinde dizgi, satırlarınızı baştan kaleme alan yapay zekâ editör ve tek tıkla PDF çıktısı — sıradaki mülakata giden yol, bu sayfayı da dizen matbaadan geçiyor.",
+    ctaPrimary: "Yeni özgeçmiş hazırla",
+    ctaSecondary: "Şablonları keşfet",
+    stats: [
+      { num: "50K+", label: "aktif abone" },
+      { num: "4.9", label: "ortalama okur puanı" },
+    ],
+    statsTemplatesLabel: "baskıdaki şablon",
+    byline: (year: number) => `İddialı profesyoneller için hazırlandı ve özenle dizildi — Dünya geneli · ${year}.`,
+    plateCaption: "Levha I — Academic Classic, Fraunces & Geist ile dizildi",
+    plateNumber: "No. 01",
+    handsetExample: "— Elde dizilmiş örnek —",
+    sheetSize: "A4 · 210 × 297 mm",
+    marginalia: "Kenar notu",
+    marginaliaQuote: '"Bir kahve molasında özgeçmişimi düzenledim, ertesi hafta üç geri dönüş aldım."',
+    marginaliaSig: "— S. Mitchell, Spotify",
+    pressNotes: "Baskı notu",
+    pressNotesQuote: '"Sonunda tek tip görünmeyen bir araç. Bu matbaa estetiği çok yakışmış."',
+    pressNotesSig: "— D. Chen, Amazon",
+    anthologyEyebrow: "No. 02 — Antoloji",
+    anthologyTitleParts: ["Her ", "kariyer", " aşamasına göre tasarlandı."],
+    anthologyLead: (n: number) => `${n} özenle dizilmiş şablon — yeni mezundan üst düzey yöneticiye kadar herkese.`,
+    viewAll: (n: number) => `${n} şablonun tümünü gör`,
+    setTemplate: "Bu şablonu seç →",
+    plate: "Levha",
+    toolkitEyebrow: "No. 03 — Araç Kutusu",
+    toolkitTitleParts: ["", "Titizlik", " ve hız, bir arada."],
+    toolkitLead: "Boş sayfadan baskıya hazır metne uzanan akıcı bir haber odası düzeni. Öğrenme eğrisi yok, pazarlama palavrası yok, mor degradeler hiç yok.",
+    filedUnder: "Dosya: Yapay zekâ · Tipografi · Dışa aktarma · Canlı önizleme",
+    f1Marker: "Bölüm № 01",
+    f1Section: "Yapay zekâ masası",
+    f1TitleParts: ["Yapay zekâ editör ", "müsveddenizi", " baştan yazar."],
+    f1Body: "Tek tıkla zayıf maddeler, ATS dostu ve başarı odaklı cümlelere dönüşür. Yapay zekâ ilanı okur, otomatik elemeleri geçecek anahtar kelimeleri bulur ve metni bir işe alım yöneticisinin gerçekten okumak isteyeceği biçimde dizer.",
+    beforeManuscript: "Önce · Müsvedde",
+    beforeSample: '"Şirketin sosyal medya hesaplarını yönettim ve düzenli paylaşım yaptım."',
+    afterEdit: "Sonra · Yapay zekâ düzeltisi",
+    afterSamplePre: '"Sosyal medya etkileşimini ',
+    afterSampleAccent: "%156",
+    afterSamplePost: ' artırdım; 4 platformda altı ayda, haftada 40 paylaşımlık tempoyla."',
+    f2Marker: "№ 02",
+    f2Section: "Canlı baskı",
+    f2TitleParts: ["Canlı ", "önizleme", " — tıpkı matbaa provası gibi."],
+    f2Body: "Solda yazın, sağda sayfanın mürekkebe döküldüğünü izleyin. Ne diziyorsanız, dışa aktardığınız tam olarak o.",
+    f3Marker: "№ 03",
+    f3Section: "Yazışma",
+    f3TitleParts: ["Kişiye özel ", "ön yazılar", ", saniyeler içinde."],
+    f3Steps: ["İlanı yapıştırın", "Yapay zekâ taslağı yazsın", "Düzenleyin, imzalayın, gönderin."],
+    f4Marker: "Bölüm № 04",
+    f4Section: "Matbaa",
+    f4TitleParts: ["Piksel piksel kusursuz ", "PDF", " — en sevdiğiniz derginin matbaasından çıkmış gibi."],
+    f4Body: "Ekrandaki önizlemeyle harfi harfine örtüşen A4 PDF'ler. İster işe alımcıya gönderin ister doğrudan ATS sistemine besleyin; her harf, her aralık yerli yerinde.",
+    pdfStats: [
+      { value: "300", unit: "dpi", label: "Çözünürlük" },
+      { value: "A4", unit: "210×297", label: "Boyut" },
+      { value: "100%", unit: "vektör", label: "Netlik" },
+    ],
+    fieldEyebrow: "No. 04 — Saha Notları",
+    fieldTitleParts: ["Tek bir düzeltinin ", "farkını", " görün."],
+    fieldLead: "Tek tık. Aynı kelimeler, başarı odaklı bir metne dönüşüyor.",
+    manuscriptLabel: "Müsvedde · Önce",
+    manuscriptScore: "ATS · 34/100",
+    manuscriptSections: [
+      { title: "İş Deneyimi", text: "Pazarlama kampanyalarında çalıştım, ekibe çeşitli proje ve görevlerde destek oldum." },
+      { title: "Yetkinlikler", text: "İletişim, takım çalışması ve problem çözmede iyiyim. Excel ve PowerPoint kullandım." },
+      { title: "Başarı", text: "Sosyal medya hesaplarından ve düzenli içerik paylaşımından sorumluydum." },
+    ],
+    manuscriptFooter: "— Otomatik sistemlerin elemesi çok olası.",
+    editedBy: "yapay zekâ düzeltti",
+    afterLabel: "Sonra · Yapay zekâ düzeltisi",
+    afterScore: "ATS · 92/100",
+    afterSections: [
+      { title: "İş Deneyimi", text: "Kanallar arası 12 kampanya yürüttüm; nitelikli müşteri adaylarını %34 artırırken edinme maliyetini %18 düşürdüm." },
+      { title: "Yetkinlikler", text: "Stratejik iletişim, ekipler arası liderlik, veriye dayalı karar alma. Excel (VLOOKUP, pivot tablo) ve HubSpot CRM'de uzman." },
+      { title: "Başarı", text: "Organik sosyal medya etkileşimini 6 ayda %156 büyüttüm; 4 platformda haftada 40+ paylaşımlık içerik takvimi yönettim." },
+    ],
+    afterFooter: "— Mülakata hazır. Doğrudan işe alımcıya gitti.",
+    tryAi: "Yapay zekâ editörü ücretsiz deneyin",
+    deskEyebrow: "No. 05 — Masa",
+    deskTitleParts: ["Kariyeriniz ", "dosyalandı", ", göndermeye hazır."],
+    deskLead: "Her pozisyon için ayrı sürüm kaydedin. Yönetin, düzenleyin, puanlayın, dışa aktarın — hepsi tek bir panoda. Bir yazılım arayüzünden çok bir yazar masası gibi.",
+    deskStats: ["Şablon", "Ort. ATS", "Hazırlık"],
+    deskCtaPrimary: "Yeni taslak başlat",
+    deskCtaSecondary: "Panoyu aç",
+    mockUrl: "Masa · cv-with-ai.com/dashboard",
+    mockGreeting: "Tekrar hoş geldiniz, Aykut.",
+    mockToday: "Pzt · Bugün",
+    mockStatLabels: ["Özgeçmiş", "Mektup", "ATS puanı"],
+    mockTableHeads: ["Başlık", "Düzenlenme", "Puan"],
+    mockDocs: [
+      { title: "Product Manager CV", date: "Bugün güncellendi", score: 92 as number | null },
+      { title: "SaaS Kurucu CV'si", date: "İki gün önce", score: 88 as number | null },
+      { title: "Danışmanlık Ön Yazısı", date: "Taslak", score: null as number | null },
+    ],
+    mockInProgress: "hazırlanıyor",
+    mockFooter: "— Sizin günlük baskınız. —",
+    lettersEyebrow: "No. 06 — Okur Mektupları",
+    lettersTitleParts: ["92 ülkede ", "okurların", " gözdesi."],
+    lettersLead: "Matbaayı kullanıp işi kapan okurlardan gelen mektuplar. Bazı isimler yalnızca nezaketen gizlendi.",
+    starsLead: "★ ★ ★ ★ ★ ",
+    starsValue: "4.9",
+    starsFrom: " · 1.240 doğrulanmış aboneden",
+    colophonAbout: "İddialı kariyerler için dizilmiş bir haber odası. Fraunces & Geist ile, krem kâğıt ve mürekkep matbaasında basıldı.",
+    footerSubscribeFree: "Abone ol — ücretsiz başla",
+    col1: "Gazete",
+    col1Links: [
+      { label: "Oluşturucu", href: "/resume" },
+      { label: "Şablonlar", href: "/templates" },
+      { label: "Ön yazılar", href: "/cover-letter" },
+      { label: "Pano", href: "/dashboard" },
+    ],
+    col2: "Abonelik",
+    col2Links: [
+      { label: "Fiyatlandırma", href: "/pricing" },
+      { label: "Giriş", href: "/signin" },
+      { label: "Abone ol", href: "/signup" },
+    ],
+    col3: "Künye",
+    col3Links: [
+      { label: "Gizlilik politikası", href: "/privacy" },
+      { label: "Kullanım şartları", href: "/terms" },
+      { label: "İade politikası", href: "/refund" },
+    ],
+    rights: (year: number) => `© ${year} CV with AI. Tüm hakları saklıdır. Özenle dizilmiştir.`,
+    issueLine: `${ISSUE_DATE} · Dünya genelinde tiraj`,
+    pricingEyebrow: "No. 07 — Abonelik",
+    pricingTitleParts: ["Basit ve ", "dürüst", " fiyatlandırma."],
+    pricingLead: "Ücretsiz başlayın. Matbaanın tüm gücüne ihtiyaç duyduğunuzda yükseltin.",
+    monthly: "Aylık",
+    yearly: "Yıllık",
+    save: "%30 indirim",
+    basic: "Basic",
+    basicTagline: "Çırak muhabir.",
+    basicPeriod: "sonsuza dek",
+    basicFeatures: ["1 özgeçmiş + 1 ön yazı", "Tüm standart şablonlar", "Canlı önizleme", "PDF dışa aktarma"],
+    startFree: "Ücretsiz başla",
+    pro: "Pro",
+    proTagline: "Matbaanın tamamı.",
+    recommended: "Önerilen",
+    perMonth: "/ay",
+    perMonthBilled: "/ay · yıllık €25,20 faturalanır",
+    proFeatures: [
+      "Sınırsız özgeçmiş ve ön yazı",
+      "Yapay zekâ editör — yeniden yaz ve geliştir",
+      "Yapay zekâ ile ön yazı oluşturma",
+      "Özgeçmiş puanlama (ATS)",
+      "Yüksek çözünürlüklü PDF çıktısı",
+      "Öncelikli editör desteği",
+    ],
+    subscribePro: "Pro'ya abone ol",
+    pricingFineprint: "Tüm fiyatlar Euro cinsindendir. İstediğiniz zaman iptal edebilirsiniz. Ücretsiz plan her zaman ücretsiz, kart gerekmez.",
+  },
+};
+
 export default function Home() {
   const router = useRouter();
   const { lang, setLang } = useI18n();
+  const c = copy[lang === "tr" ? "tr" : "en"];
+  const { dark, toggle: toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function selectTemplate(t: TemplateCard) {
@@ -60,15 +425,15 @@ export default function Home() {
   const marqueeTemplates = [...ALL_TEMPLATES, ...ALL_TEMPLATES];
 
   return (
-    <main className="min-h-screen overflow-x-hidden noise-paper text-ink-deep" data-theme="light" style={{ fontFamily: "var(--sans)" }}>
+    <main className="min-h-screen overflow-x-hidden noise-paper text-ink-deep" style={{ fontFamily: "var(--sans)" }}>
       {/* ─────────── MASTHEAD ─────────── */}
       <header className="relative z-50 noise-paper">
         {/* Top thin date strip */}
         <div className="border-b border-ink-deep/15">
           <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-2 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-soft md:px-12">
             <span className="hidden md:inline">{ISSUE_DATE}</span>
-            <span className="font-serif italic tracking-normal text-saffron normal-case">— Hand-set for ambitious careers —</span>
-            <span className="hidden md:inline">Worldwide · Print &amp; Web</span>
+            <span className="font-serif italic tracking-normal text-saffron normal-case">{c.tagline}</span>
+            <span className="hidden md:inline">{c.geo}</span>
           </div>
         </div>
 
@@ -77,14 +442,15 @@ export default function Home() {
           <div className="mx-auto flex max-w-[1400px] flex-col gap-3 px-6 pt-6 pb-4 md:px-12 md:pt-8 md:pb-5">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <p className="font-serif text-[11px] italic text-ink-soft md:text-xs">The Resumé Press</p>
+                <p className="font-serif text-[11px] italic text-ink-soft md:text-xs">{c.pressLabel}</p>
                 <a href="#" className="block font-serif text-[44px] font-medium leading-[0.92] tracking-[-0.04em] text-ink-deep sm:text-[60px] md:text-[84px] lg:text-[104px]">
                   CV <em className="italic text-saffron">with</em> AI
                 </a>
               </div>
               <div className="hidden flex-col items-end gap-2 pt-2 md:flex">
-                <span className="font-serif text-xs italic text-ink-soft">Est. 2026 · Worldwide circulation</span>
+                <span className="font-serif text-xs italic text-ink-soft">{c.estLine}</span>
                 <div className="flex items-center gap-2">
+                  <ThemeToggle dark={dark} toggle={toggleTheme} label={dark ? c.toLight : c.toDark} className="flex h-[30px] w-[34px] items-center justify-center border border-ink-deep text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft" />
                   <button
                     onClick={() => setLang(lang === "en" ? "tr" : "en")}
                     className="border border-ink-deep px-3 py-1.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
@@ -92,10 +458,10 @@ export default function Home() {
                     {lang === "en" ? "TR" : "EN"}
                   </button>
                   <a href="/signin" className="border border-ink-deep px-4 py-1.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft">
-                    Sign in
+                    {c.signIn}
                   </a>
                   <a href="/signup" className="bg-ink-deep px-4 py-1.5 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron">
-                    Subscribe →
+                    {c.subscribe}
                   </a>
                 </div>
               </div>
@@ -118,22 +484,14 @@ export default function Home() {
         <div className="border-b border-ink-deep/30">
           <div className="mx-auto hidden max-w-[1400px] items-center justify-between px-12 py-2.5 md:flex">
             <nav className="flex items-center gap-7">
-              {[
-                { label: "Front Page", href: "#hero", marker: "01" },
-                { label: "Anthology", href: "#templates", marker: "02" },
-                { label: "Toolkit", href: "#features", marker: "03" },
-                { label: "Field Notes", href: "#before-after", marker: "04" },
-                { label: "The Desk", href: "#management", marker: "05" },
-                { label: "Letters", href: "#testimonials", marker: "06" },
-                { label: "Subscribe", href: "#pricing", marker: "07" },
-              ].map((link) => (
+              {c.nav.map((link) => (
                 <a key={link.label} href={link.href} className="group inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-deep transition hover:text-saffron">
                   <span className="font-serif text-[11px] italic text-saffron normal-case tracking-normal">{link.marker} /</span>
                   {link.label}
                 </a>
               ))}
             </nav>
-            <span className="font-serif text-xs italic text-ink-soft">A daily edition · One reader at a time</span>
+            <span className="font-serif text-xs italic text-ink-soft">{c.dailyEdition}</span>
           </div>
         </div>
       </header>
@@ -143,19 +501,11 @@ export default function Home() {
         <div className={`absolute inset-0 bg-ink-deep/40 transition-opacity ${mobileMenuOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setMobileMenuOpen(false)} />
         <nav className={`absolute inset-x-3 top-3 noise-paper border-2 border-ink-deep p-6 transition-all ${mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}`}>
           <div className="mb-4 flex items-center justify-between border-b border-ink-deep pb-3">
-            <p className="font-serif text-2xl text-ink-deep">Menu</p>
-            <button className="font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep" onClick={() => setMobileMenuOpen(false)}>Close ×</button>
+            <p className="font-serif text-2xl text-ink-deep">{c.menu}</p>
+            <button className="font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep" onClick={() => setMobileMenuOpen(false)}>{c.close}</button>
           </div>
           <ul className="space-y-3">
-            {[
-              { label: "Front Page", href: "#hero", marker: "01" },
-              { label: "Anthology", href: "#templates", marker: "02" },
-              { label: "Toolkit", href: "#features", marker: "03" },
-              { label: "Field Notes", href: "#before-after", marker: "04" },
-              { label: "The Desk", href: "#management", marker: "05" },
-              { label: "Letters", href: "#testimonials", marker: "06" },
-              { label: "Subscribe", href: "#pricing", marker: "07" },
-            ].map((link) => (
+            {c.nav.map((link) => (
               <li key={link.label}>
                 <a href={link.href} onClick={() => setMobileMenuOpen(false)} className="flex items-baseline gap-3 border-b border-ink-deep/20 py-2.5">
                   <span className="font-serif text-sm italic text-saffron">{link.marker}</span>
@@ -165,8 +515,24 @@ export default function Home() {
             ))}
           </ul>
           <div className="mt-6 flex gap-2">
-            <a href="/signin" onClick={() => setMobileMenuOpen(false)} className="flex-1 border border-ink-deep px-4 py-3 text-center font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep">Sign in</a>
-            <a href="/signup" onClick={() => setMobileMenuOpen(false)} className="flex-1 bg-ink-deep px-4 py-3 text-center font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft">Subscribe</a>
+            <ThemeToggle
+              dark={dark}
+              toggle={toggleTheme}
+              label={dark ? c.toLight : c.toDark}
+              withText
+              text={dark ? c.toLight : c.toDark}
+              className="flex flex-1 items-center justify-center gap-2 border border-ink-deep px-4 py-3 font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
+            />
+            <button
+              onClick={() => setLang(lang === "en" ? "tr" : "en")}
+              className="border border-ink-deep px-4 py-3 font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep transition hover:bg-ink-deep hover:text-paper-soft"
+            >
+              {lang === "en" ? "TR" : "EN"}
+            </button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <a href="/signin" onClick={() => setMobileMenuOpen(false)} className="flex-1 border border-ink-deep px-4 py-3 text-center font-edit text-xs font-bold uppercase tracking-[0.18em] text-ink-deep">{c.signIn}</a>
+            <a href="/signup" onClick={() => setMobileMenuOpen(false)} className="flex-1 bg-ink-deep px-4 py-3 text-center font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft">{c.subscribe}</a>
           </div>
         </nav>
       </div>
@@ -179,37 +545,34 @@ export default function Home() {
               {/* Eyebrow with rule */}
               <div className="ink-reveal mb-7 flex items-center gap-4">
                 <div className="h-px w-12 bg-ink-deep" />
-                <p className="font-serif text-sm italic text-saffron">No. 01 — The Front Page</p>
+                <p className="font-serif text-sm italic text-saffron">{c.heroEyebrow}</p>
                 <div className="h-px flex-1 bg-ink-deep/30" />
               </div>
 
               <h1 className="ink-reveal headline-editorial text-[56px] sm:text-[80px] md:text-[104px] lg:text-[116px]" style={{ animationDelay: "0.1s" }}>
-                The <em>smarter</em><br />way to build<br />your résumé.
+                {c.heroHeadParts[0]}<em>{c.heroHeadParts[1]}</em>{c.heroHeadParts[2]}
               </h1>
 
               <p className="ink-reveal mt-9 max-w-xl font-serif text-[19px] leading-[1.45] text-ink-soft" style={{ animationDelay: "0.25s" }}>
-                <span className="font-serif italic text-saffron">Stop fighting with Word.</span> Use a print-grade typesetter,
-                AI editorials that rewrite your bullets, and one-click export to land your next interview —
-                set in the same press that designed this page.
+                <span className="font-serif italic text-saffron">{c.heroLeadAccent}</span>{c.heroLeadBody}
               </p>
 
               {/* CTAs */}
               <div className="ink-reveal mt-9 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "0.4s" }}>
                 <a href="/resume" className="btn-editorial group">
-                  Start a new manuscript
+                  {c.ctaPrimary}
                   <span className="font-serif text-base italic">→</span>
                 </a>
                 <a href="/templates" className="btn-editorial btn-editorial-ghost">
-                  Browse the anthology
+                  {c.ctaSecondary}
                 </a>
               </div>
 
               {/* Editorial stats strip */}
               <div className="ink-reveal mt-12 grid grid-cols-3 gap-0 border-y-2 border-ink-deep py-5" style={{ animationDelay: "0.55s" }}>
                 {[
-                  { num: "50K+", label: "subscribers writing" },
-                  { num: "4.9", label: "average reader rating" },
-                  { num: String(ALL_TEMPLATES.length), label: "templates in press" },
+                  ...c.stats,
+                  { num: String(ALL_TEMPLATES.length), label: c.statsTemplatesLabel },
                 ].map((stat, i) => (
                   <div key={stat.label} className={`flex flex-col gap-1 px-4 ${i > 0 ? "border-l border-ink-deep/30" : ""}`}>
                     <p className="font-serif text-[40px] leading-none text-ink-deep md:text-[52px]">{stat.num}</p>
@@ -219,37 +582,35 @@ export default function Home() {
               </div>
 
               {/* Byline */}
-              <p className="byline mt-6">
-                Reported and typeset for ambitious professionals — Worldwide · {new Date().getFullYear()}.
-              </p>
+              <p className="byline mt-6">{c.byline(new Date().getFullYear())}</p>
             </div>
 
             {/* Right: framed preview */}
             <div className="relative flex flex-col items-center">
               <div className="w-full max-w-[460px]">
                 <div className="mb-2 flex items-end justify-between">
-                  <p className="font-serif text-xs italic text-ink-soft">Plate I — Academic Classic, set in Fraunces &amp; Geist</p>
-                  <p className="font-serif text-[10px] italic text-saffron">No. 01</p>
+                  <p className="font-serif text-xs italic text-ink-soft">{c.plateCaption}</p>
+                  <p className="font-serif text-[10px] italic text-saffron">{c.plateNumber}</p>
                 </div>
                 <div className="thumb-frame p-3 border-2">
                   <HeroPreview />
                 </div>
                 <div className="mt-2 flex items-center justify-between">
-                  <p className="font-serif text-[11px] italic text-ink-soft">— Hand-set example —</p>
-                  <p className="font-serif text-[11px] italic text-ink-soft">A4 · 210 × 297 mm</p>
+                  <p className="font-serif text-[11px] italic text-ink-soft">{c.handsetExample}</p>
+                  <p className="font-serif text-[11px] italic text-ink-soft">{c.sheetSize}</p>
                 </div>
 
                 {/* margin notes */}
                 <div className="mt-10 grid grid-cols-2 gap-4">
                   <div className="border-l-2 border-saffron pl-3">
-                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-saffron">Marginalia</p>
-                    <p className="font-serif mt-1 text-sm italic text-ink-deep">"Edited my CV during a coffee — landed three callbacks the next week."</p>
-                    <p className="mt-2 font-serif text-[11px] italic text-ink-soft">— S. Mitchell, Spotify</p>
+                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-saffron">{c.marginalia}</p>
+                    <p className="font-serif mt-1 text-sm italic text-ink-deep">{c.marginaliaQuote}</p>
+                    <p className="mt-2 font-serif text-[11px] italic text-ink-soft">{c.marginaliaSig}</p>
                   </div>
                   <div className="border-l-2 border-moss pl-3">
-                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-moss">Press notes</p>
-                    <p className="font-serif mt-1 text-sm italic text-ink-deep">"Finally, a builder that doesn't look generic. The press aesthetic just hits."</p>
-                    <p className="mt-2 font-serif text-[11px] italic text-ink-soft">— D. Chen, Amazon</p>
+                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-moss">{c.pressNotes}</p>
+                    <p className="font-serif mt-1 text-sm italic text-ink-deep">{c.pressNotesQuote}</p>
+                    <p className="mt-2 font-serif text-[11px] italic text-ink-soft">{c.pressNotesSig}</p>
                   </div>
                 </div>
               </div>
@@ -264,7 +625,7 @@ export default function Home() {
       </section>
 
       {/* ─────────── ANTHOLOGY (Templates marquee, dark) ─────────── */}
-      <LazyTemplateMarquee templates={marqueeTemplates} onSelect={selectTemplate} totalCount={ALL_TEMPLATES.length} />
+      <LazyTemplateMarquee templates={marqueeTemplates} onSelect={selectTemplate} totalCount={ALL_TEMPLATES.length} c={c} />
 
       {/* ─────────── TOOLKIT (Features) ─────────── */}
       <section id="features" className="noise-paper">
@@ -272,17 +633,15 @@ export default function Home() {
           {/* Section heading */}
           <div className="mb-14 grid gap-6 md:grid-cols-[2fr_3fr] md:items-end">
             <div>
-              <p className="font-serif text-sm italic text-saffron">No. 03 — The Toolkit</p>
+              <p className="font-serif text-sm italic text-saffron">{c.toolkitEyebrow}</p>
               <h2 className="headline-editorial mt-3 text-[44px] sm:text-[60px] md:text-[72px]">
-                Built for <em>precision</em><br />and speed.
+                {c.toolkitTitleParts[0]}<em>{c.toolkitTitleParts[1]}</em>{c.toolkitTitleParts[2]}
               </h2>
             </div>
             <div className="md:pl-12">
-              <p className="font-serif text-lg italic leading-snug text-ink-soft">
-                A streamlined newsroom workflow — from blank page to polished print. No learning curve, no marketing fluff, no purple gradients.
-              </p>
+              <p className="font-serif text-lg italic leading-snug text-ink-soft">{c.toolkitLead}</p>
               <div className="mt-4 h-px w-full bg-ink-deep/30" />
-              <p className="mt-3 font-serif text-xs italic text-ink-soft">Filed under: AI · Typography · Export · Live preview</p>
+              <p className="mt-3 font-serif text-xs italic text-ink-soft">{c.filedUnder}</p>
             </div>
           </div>
 
@@ -291,28 +650,22 @@ export default function Home() {
             {/* Feature 01 — AI Editor (big, 8 cols, taller) */}
             <article className="col-span-12 lg:col-span-8 noise-paper p-7 md:p-10">
               <div className="flex items-baseline justify-between">
-                <span className="font-serif text-sm italic text-saffron">Feature № 01</span>
-                <span className="smallcaps text-ink-soft">AI desk</span>
+                <span className="font-serif text-sm italic text-saffron">{c.f1Marker}</span>
+                <span className="smallcaps text-ink-soft">{c.f1Section}</span>
               </div>
               <h3 className="headline-editorial mt-4 text-[40px] leading-[0.95] md:text-[56px]">
-                The <em>AI Editor</em><br />rewrites your draft.
+                {c.f1TitleParts[0]}<em>{c.f1TitleParts[1]}</em>{c.f1TitleParts[2]}
               </h3>
-              <p className="font-serif dropcap mt-6 max-w-2xl text-[17px] leading-[1.5] text-ink-soft">
-                One click and weak bullets become ATS-friendly, achievement-driven sentences. The AI reads the job
-                description, hunts for the keywords that pass automated screens, then sets the language so a hiring
-                manager actually wants to read it.
-              </p>
+              <p className="font-serif dropcap mt-6 max-w-2xl text-[17px] leading-[1.5] text-ink-soft">{c.f1Body}</p>
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 <div className="border border-oxblood/30 bg-oxblood/[0.05] p-4">
-                  <p className="smallcaps text-oxblood">Before · Manuscript</p>
-                  <p className="mt-2 font-serif text-[15px] italic leading-snug text-ink-soft">
-                    "Managed social media accounts for the company and posted regularly."
-                  </p>
+                  <p className="smallcaps text-oxblood">{c.beforeManuscript}</p>
+                  <p className="mt-2 font-serif text-[15px] italic leading-snug text-ink-soft">{c.beforeSample}</p>
                 </div>
                 <div className="border border-moss/30 bg-moss/[0.05] p-4">
-                  <p className="smallcaps text-moss">After · AI Edit</p>
+                  <p className="smallcaps text-moss">{c.afterEdit}</p>
                   <p className="mt-2 font-serif text-[15px] italic leading-snug text-ink-deep">
-                    "Grew social engagement <em className="not-italic text-saffron">+156%</em> across 4 platforms in six months, managing a 40-post weekly cadence."
+                    {c.afterSamplePre}<em className="not-italic text-saffron">{c.afterSampleAccent}</em>{c.afterSamplePost}
                   </p>
                 </div>
               </div>
@@ -321,15 +674,13 @@ export default function Home() {
             {/* Feature 02 — Live Preview (4 cols) */}
             <article className="col-span-12 sm:col-span-6 lg:col-span-4 noise-paper p-7 md:p-10">
               <div className="flex items-baseline justify-between">
-                <span className="font-serif text-sm italic text-saffron">№ 02</span>
-                <span className="smallcaps text-ink-soft">Live press</span>
+                <span className="font-serif text-sm italic text-saffron">{c.f2Marker}</span>
+                <span className="smallcaps text-ink-soft">{c.f2Section}</span>
               </div>
               <h3 className="headline-editorial mt-4 text-[28px] md:text-[34px]">
-                Live <em>preview</em>, like a working printer's proof.
+                {c.f2TitleParts[0]}<em>{c.f2TitleParts[1]}</em>{c.f2TitleParts[2]}
               </h3>
-              <p className="font-serif mt-4 text-[15px] leading-[1.5] text-ink-soft">
-                Edit on the left, watch the page ink itself on the right. What you set is exactly what gets exported.
-              </p>
+              <p className="font-serif mt-4 text-[15px] leading-[1.5] text-ink-soft">{c.f2Body}</p>
               <div className="mt-6 flex gap-2">
                 <div className="flex-1 border border-rule-soft bg-paper p-3">
                   <div className="space-y-1.5">
@@ -353,14 +704,14 @@ export default function Home() {
             {/* Feature 03 — Cover letter */}
             <article className="col-span-12 sm:col-span-6 lg:col-span-4 noise-paper p-7 md:p-10">
               <div className="flex items-baseline justify-between">
-                <span className="font-serif text-sm italic text-saffron">№ 03</span>
-                <span className="smallcaps text-ink-soft">Correspondence</span>
+                <span className="font-serif text-sm italic text-saffron">{c.f3Marker}</span>
+                <span className="smallcaps text-ink-soft">{c.f3Section}</span>
               </div>
               <h3 className="headline-editorial mt-4 text-[28px] md:text-[34px]">
-                Tailored <em>cover letters</em>, dictated in seconds.
+                {c.f3TitleParts[0]}<em>{c.f3TitleParts[1]}</em>{c.f3TitleParts[2]}
               </h3>
               <ol className="mt-6 space-y-3">
-                {["Paste the listing", "AI drafts your letter", "Edit, sign, post."].map((step, i) => (
+                {c.f3Steps.map((step, i) => (
                   <li key={step} className="flex items-baseline gap-3 border-b border-ink-deep/15 pb-2.5">
                     <span className="font-serif text-base italic text-saffron">{(i + 1).toString().padStart(2, "0")}</span>
                     <span className="font-serif text-[15px] text-ink-deep">{step}</span>
@@ -372,22 +723,15 @@ export default function Home() {
             {/* Feature 04 — PDF Export (big, 8 cols) */}
             <article className="col-span-12 lg:col-span-8 noise-paper p-7 md:p-10">
               <div className="flex items-baseline justify-between">
-                <span className="font-serif text-sm italic text-saffron">Feature № 04</span>
-                <span className="smallcaps text-ink-soft">The Press</span>
+                <span className="font-serif text-sm italic text-saffron">{c.f4Marker}</span>
+                <span className="smallcaps text-ink-soft">{c.f4Section}</span>
               </div>
               <h3 className="headline-editorial mt-4 text-[36px] md:text-[48px]">
-                Pixel-perfect <em>PDF</em> — printed on the same press as your favourite magazine.
+                {c.f4TitleParts[0]}<em>{c.f4TitleParts[1]}</em>{c.f4TitleParts[2]}
               </h3>
-              <p className="font-serif mt-5 max-w-2xl text-[16px] leading-[1.5] text-ink-soft">
-                A4 PDFs that match the on-screen preview character-by-character. Hand off to recruiters or feed straight
-                into ATS readers — every kern and ligature intact.
-              </p>
+              <p className="font-serif mt-5 max-w-2xl text-[16px] leading-[1.5] text-ink-soft">{c.f4Body}</p>
               <div className="mt-8 grid grid-cols-3 divide-x divide-ink-deep/20 border-y border-ink-deep">
-                {[
-                  { value: "300", unit: "dpi", label: "Resolution" },
-                  { value: "A4", unit: "210×297", label: "Format" },
-                  { value: "100%", unit: "vector", label: "Sharpness" },
-                ].map((stat) => (
+                {c.pdfStats.map((stat) => (
                   <div key={stat.label} className="px-5 py-4 text-center">
                     <p className="font-serif text-[38px] leading-none text-ink-deep md:text-[48px]">{stat.value}</p>
                     <p className="font-serif text-[12px] italic text-saffron">{stat.unit}</p>
@@ -404,40 +748,36 @@ export default function Home() {
       <section id="before-after" className="relative noise-paper">
         <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
           <div className="mb-12 text-center">
-            <p className="font-serif text-sm italic text-saffron">No. 04 — Field Notes</p>
+            <p className="font-serif text-sm italic text-saffron">{c.fieldEyebrow}</p>
             <h2 className="headline-editorial mx-auto mt-3 max-w-3xl text-[44px] sm:text-[60px] md:text-[76px]">
-              See the <em>difference</em><br />a single edit makes.
+              {c.fieldTitleParts[0]}<em>{c.fieldTitleParts[1]}</em>{c.fieldTitleParts[2]}
             </h2>
-            <p className="byline mt-4">One click. Same words, transformed into achievement-driven copy.</p>
+            <p className="byline mt-4">{c.fieldLead}</p>
           </div>
 
           <div className="grid gap-0 lg:grid-cols-[1fr_auto_1fr]">
             {/* Manuscript */}
             <article className="border-2 border-oxblood/40 bg-oxblood/[0.04] p-7 md:p-10">
               <div className="mb-6 flex items-baseline justify-between">
-                <p className="smallcaps text-oxblood">Manuscript · Before</p>
-                <p className="font-serif text-xs italic text-oxblood">ATS · 34/100</p>
+                <p className="smallcaps text-oxblood">{c.manuscriptLabel}</p>
+                <p className="font-serif text-xs italic text-oxblood">{c.manuscriptScore}</p>
               </div>
               <div className="space-y-6">
-                {[
-                  { title: "Work Experience", text: "Worked on marketing campaigns and helped the team with various projects and tasks." },
-                  { title: "Skills", text: "Good at communication, teamwork, and problem solving. Used Excel and PowerPoint." },
-                  { title: "Achievement", text: "Was responsible for social media accounts and posting content regularly." },
-                ].map((item, i) => (
+                {c.manuscriptSections.map((item, i) => (
                   <div key={item.title} className={i > 0 ? "border-t border-oxblood/20 pt-5" : ""}>
                     <p className="font-serif text-[11px] italic text-oxblood">§{(i + 1).toString().padStart(2, "0")} — {item.title}</p>
                     <p className="font-serif mt-2 text-[16px] leading-[1.45] italic text-ink-soft">{item.text}</p>
                   </div>
                 ))}
               </div>
-              <p className="byline mt-6 text-oxblood">— Likely filtered out by automated readers.</p>
+              <p className="byline mt-6 text-oxblood">{c.manuscriptFooter}</p>
             </article>
 
             {/* Separator with arrow */}
             <div className="my-6 flex items-center justify-center lg:my-0 lg:flex-col lg:px-4">
               <div className="hidden h-px w-full bg-ink-deep lg:h-full lg:w-px" />
               <div className="bg-paper border-2 border-ink-deep px-5 py-3">
-                <p className="font-serif text-base italic text-ink-deep">edited by AI <em className="not-italic text-saffron">→</em></p>
+                <p className="font-serif text-base italic text-ink-deep">{c.editedBy} <em className="not-italic text-saffron">→</em></p>
               </div>
               <div className="hidden h-px w-full bg-ink-deep lg:h-full lg:w-px" />
             </div>
@@ -445,28 +785,24 @@ export default function Home() {
             {/* AI Edit */}
             <article className="border-2 border-moss/40 bg-moss/[0.04] p-7 md:p-10">
               <div className="mb-6 flex items-baseline justify-between">
-                <p className="smallcaps text-moss">After · AI Edit</p>
-                <p className="font-serif text-xs italic text-moss">ATS · 92/100</p>
+                <p className="smallcaps text-moss">{c.afterLabel}</p>
+                <p className="font-serif text-xs italic text-moss">{c.afterScore}</p>
               </div>
               <div className="space-y-6">
-                {[
-                  { title: "Work Experience", text: "Spearheaded 12 cross-channel campaigns, driving a 34% increase in qualified leads and reducing CPA by 18%." },
-                  { title: "Skills", text: "Strategic communications, cross-functional leadership, data-driven decisioning. Proficient in Excel (VLOOKUP, pivot tables), HubSpot CRM." },
-                  { title: "Achievement", text: "Grew organic social engagement by 156% in 6 months, managing a content calendar of 40+ weekly posts across 4 platforms." },
-                ].map((item, i) => (
+                {c.afterSections.map((item, i) => (
                   <div key={item.title} className={i > 0 ? "border-t border-moss/20 pt-5" : ""}>
                     <p className="font-serif text-[11px] italic text-moss">§{(i + 1).toString().padStart(2, "0")} — {item.title}</p>
                     <p className="font-serif mt-2 text-[16px] leading-[1.45] text-ink-deep">{item.text}</p>
                   </div>
                 ))}
               </div>
-              <p className="byline mt-6 text-moss">— Interview-ready. Sent straight to the recruiter.</p>
+              <p className="byline mt-6 text-moss">{c.afterFooter}</p>
             </article>
           </div>
 
           <div className="mt-12 text-center">
             <a href="/resume" className="btn-editorial btn-editorial-saffron inline-flex">
-              Try the AI editor — it&apos;s free
+              {c.tryAi}
               <span className="font-serif text-base italic">→</span>
             </a>
           </div>
@@ -479,20 +815,17 @@ export default function Home() {
         <div className="relative mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
           <div className="grid gap-14 lg:grid-cols-[1fr_1.4fr] lg:items-center">
             <div>
-              <p className="font-serif text-sm italic text-saffron-bright">No. 05 — The Desk</p>
+              <p className="font-serif text-sm italic text-saffron-bright">{c.deskEyebrow}</p>
               <h2 className="headline-editorial mt-3 text-[44px] text-paper-soft sm:text-[60px] md:text-[80px]" style={{ color: "var(--paper-soft)" }}>
-                Your career, <em style={{ color: "var(--saffron-bright)" }}>filed</em><br />and ready to send.
+                {c.deskTitleParts[0]}<em style={{ color: "var(--saffron-bright)" }}>{c.deskTitleParts[1]}</em>{c.deskTitleParts[2]}
               </h2>
-              <p className="font-serif mt-6 max-w-md text-[18px] italic leading-[1.45] text-paper-soft/75">
-                Save versions for every role. Manage, edit, score and export — all from one dashboard, designed to feel
-                like a writer's desk rather than a software product.
-              </p>
+              <p className="font-serif mt-6 max-w-md text-[18px] italic leading-[1.45] text-paper-soft/75">{c.deskLead}</p>
 
               <div className="mt-8 grid grid-cols-3 divide-x divide-paper-soft/15 border-y border-paper-soft/25 py-4">
                 {[
-                  { value: String(ALL_TEMPLATES.length), label: "Templates" },
-                  { value: "92%", label: "Avg ATS" },
-                  { value: "2 min", label: "Setup time" },
+                  { value: String(ALL_TEMPLATES.length), label: c.deskStats[0] },
+                  { value: "92%", label: c.deskStats[1] },
+                  { value: "2 min", label: c.deskStats[2] },
                 ].map((stat, i) => (
                   <div key={stat.label} className={`flex flex-col items-center gap-1 ${i > 0 ? "px-4" : "pr-4"}`}>
                     <p className="font-serif text-[38px] leading-none text-paper-soft">{stat.value}</p>
@@ -503,11 +836,11 @@ export default function Home() {
 
               <div className="mt-9 flex flex-wrap gap-3">
                 <a href="/resume" className="btn-editorial-saffron btn-editorial">
-                  Start a new draft
+                  {c.deskCtaPrimary}
                   <span className="font-serif text-base italic">→</span>
                 </a>
                 <a href="/dashboard" className="btn-editorial inline-flex border-paper-soft/40 bg-transparent text-paper-soft hover:bg-paper-soft hover:text-ink-deep">
-                  View dashboard
+                  {c.deskCtaSecondary}
                 </a>
               </div>
             </div>
@@ -519,18 +852,18 @@ export default function Home() {
                 {/* Mock masthead */}
                 <div className="mb-5 flex items-baseline justify-between border-b-2 border-ink-deep pb-3">
                   <div>
-                    <p className="font-serif text-[10px] italic text-saffron">The Desk · cv-with-ai.com/dashboard</p>
-                    <p className="font-serif text-2xl text-ink-deep">Welcome back, Aykut.</p>
+                    <p className="font-serif text-[10px] italic text-saffron">{c.mockUrl}</p>
+                    <p className="font-serif text-2xl text-ink-deep">{c.mockGreeting}</p>
                   </div>
-                  <p className="smallcaps text-ink-soft">Mon · Today</p>
+                  <p className="smallcaps text-ink-soft">{c.mockToday}</p>
                 </div>
 
                 {/* Stat row */}
                 <div className="mb-5 grid grid-cols-3 divide-x divide-ink-deep/20 border border-ink-deep">
                   {[
-                    { label: "Résumés", value: "3" },
-                    { label: "Letters", value: "2" },
-                    { label: "ATS score", value: "92" },
+                    { label: c.mockStatLabels[0], value: "3" },
+                    { label: c.mockStatLabels[1], value: "2" },
+                    { label: c.mockStatLabels[2], value: "92" },
                   ].map((s) => (
                     <div key={s.label} className="px-4 py-3">
                       <p className="smallcaps text-ink-soft">{s.label}</p>
@@ -542,26 +875,22 @@ export default function Home() {
                 {/* Document table */}
                 <div className="border border-ink-deep">
                   <div className="grid grid-cols-[1.6fr_1fr_auto] gap-4 border-b-2 border-ink-deep bg-paper-warm px-4 py-2">
-                    <p className="smallcaps text-ink-soft">Title</p>
-                    <p className="smallcaps text-ink-soft">Modified</p>
-                    <p className="smallcaps text-ink-soft">Score</p>
+                    <p className="smallcaps text-ink-soft">{c.mockTableHeads[0]}</p>
+                    <p className="smallcaps text-ink-soft">{c.mockTableHeads[1]}</p>
+                    <p className="smallcaps text-ink-soft">{c.mockTableHeads[2]}</p>
                   </div>
-                  {[
-                    { title: "Product Manager CV", date: "Updated today", score: 92 },
-                    { title: "SaaS Founder Résumé", date: "Two days ago", score: 88 },
-                    { title: "Consulting Cover Letter", date: "Draft", score: null },
-                  ].map((doc, i, arr) => (
+                  {c.mockDocs.map((doc, i, arr) => (
                     <div key={doc.title} className={`grid grid-cols-[1.6fr_1fr_auto] items-center gap-4 px-4 py-3 ${i < arr.length - 1 ? "border-b border-ink-deep/20" : ""}`}>
                       <p className="font-serif text-[17px] italic text-ink-deep">{doc.title}</p>
                       <p className="font-serif text-sm italic text-ink-soft">{doc.date}</p>
                       <p className="font-serif text-lg text-ink-deep">
-                        {doc.score !== null ? <><em className="text-saffron not-italic">{doc.score}</em>/100</> : <span className="italic text-ink-soft">in progress</span>}
+                        {doc.score !== null ? <><em className="text-saffron not-italic">{doc.score}</em>/100</> : <span className="italic text-ink-soft">{c.mockInProgress}</span>}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <p className="byline mt-4">— A daily edition of you. —</p>
+                <p className="byline mt-4">{c.mockFooter}</p>
               </div>
             </div>
           </div>
@@ -573,15 +902,12 @@ export default function Home() {
         <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
           <div className="mb-12 grid gap-6 md:grid-cols-[1.6fr_2.4fr] md:items-end">
             <div>
-              <p className="font-serif text-sm italic text-saffron">No. 06 — Letters to the Editor</p>
+              <p className="font-serif text-sm italic text-saffron">{c.lettersEyebrow}</p>
               <h2 className="headline-editorial mt-3 text-[44px] sm:text-[60px] md:text-[76px]">
-                Loved by <em>readers</em><br />in 92 countries.
+                {c.lettersTitleParts[0]}<em>{c.lettersTitleParts[1]}</em>{c.lettersTitleParts[2]}
               </h2>
             </div>
-            <p className="font-serif text-lg italic leading-snug text-ink-soft md:pl-12">
-              Postmarked from the people who used the press, signed off, and landed the job. Names redacted only where
-              the recruiter is still being polite.
-            </p>
+            <p className="font-serif text-lg italic leading-snug text-ink-soft md:pl-12">{c.lettersLead}</p>
           </div>
 
           {/* Magazine grid */}
@@ -650,7 +976,7 @@ export default function Home() {
           <div className="mt-10 flex items-center justify-center gap-4">
             <div className="h-px flex-1 bg-ink-deep/40" />
             <p className="font-serif text-lg italic text-ink-deep">
-              ★ ★ ★ ★ ★ &nbsp; <em className="not-italic text-saffron">4.9</em> from 1,240 verified subscribers
+              {c.starsLead}&nbsp; <em className="not-italic text-saffron">{c.starsValue}</em>{c.starsFrom}
             </p>
             <div className="h-px flex-1 bg-ink-deep/40" />
           </div>
@@ -658,59 +984,58 @@ export default function Home() {
       </section>
 
       {/* ─────────── SUBSCRIBE (Pricing) ─────────── */}
-      <PricingSection />
+      <PricingSection c={c} />
 
       {/* ─────────── COLOPHON (Footer) ─────────── */}
       <footer className="border-t-[3px] border-ink-deep bg-paper noise-paper">
         <div className="mx-auto max-w-[1400px] px-6 py-14 md:px-12 md:py-20">
           <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
             <div>
-              <p className="font-serif text-[11px] italic text-ink-soft">The Resumé Press, est. 2026</p>
+              <p className="font-serif text-[11px] italic text-ink-soft">{c.pressLabel}, {c.estLine.split(" · ")[0]}</p>
               <p className="font-serif text-[44px] leading-none text-ink-deep md:text-[60px]">
                 CV <em className="text-saffron">with</em> AI
               </p>
-              <p className="font-serif mt-4 max-w-sm text-[15px] italic leading-snug text-ink-soft">
-                A typeset newsroom for ambitious careers. Set in Fraunces &amp; Geist, printed on a press of cream &amp; ink.
-              </p>
+              <p className="font-serif mt-4 max-w-sm text-[15px] italic leading-snug text-ink-soft">{c.colophonAbout}</p>
               <div className="mt-6 flex flex-wrap gap-2">
                 <a href="/signup" className="btn-editorial">
-                  Subscribe — start free
+                  {c.footerSubscribeFree}
                 </a>
                 <a href="/signin" className="btn-editorial btn-editorial-ghost">
-                  Sign in
+                  {c.signIn}
                 </a>
               </div>
             </div>
 
-            <FooterCol title="The Paper" links={[
-              { label: "Builder", href: "/resume" },
-              { label: "Templates", href: "/templates" },
-              { label: "Cover letters", href: "/cover-letter" },
-              { label: "Dashboard", href: "/dashboard" },
-            ]} />
-            <FooterCol title="Subscription" links={[
-              { label: "Pricing", href: "/pricing" },
-              { label: "Sign in", href: "/signin" },
-              { label: "Subscribe", href: "/signup" },
-            ]} />
-            <FooterCol title="Imprint" links={[
-              { label: "Privacy policy", href: "/privacy" },
-              { label: "Terms of service", href: "/terms" },
-              { label: "Refund policy", href: "/refund" },
-            ]} />
+            <FooterCol title={c.col1} links={[...c.col1Links]} />
+            <FooterCol title={c.col2} links={[...c.col2Links]} />
+            <FooterCol title={c.col3} links={[...c.col3Links]} />
           </div>
 
           <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-ink-deep/30 pt-6 md:flex-row">
-            <p className="font-serif text-xs italic text-ink-soft">
-              © {new Date().getFullYear()} CV with AI. All rights reserved. Hand-set with care.
-            </p>
-            <p className="font-serif text-xs italic text-ink-soft">
-              {ISSUE_DATE} · Worldwide circulation
-            </p>
+            <p className="font-serif text-xs italic text-ink-soft">{c.rights(new Date().getFullYear())}</p>
+            <p className="font-serif text-xs italic text-ink-soft">{c.issueLine}</p>
           </div>
         </div>
       </footer>
     </main>
+  );
+}
+
+function ThemeToggle({ dark, toggle, label, className = "", withText = false, text = "" }: { dark: boolean; toggle: () => void; label: string; className?: string; withText?: boolean; text?: string }) {
+  return (
+    <button onClick={toggle} aria-label={label} title={label} className={className} type="button">
+      {dark ? (
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.2v2.2M12 19.6v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.2 12h2.2M19.6 12h2.2M4.4 19.6l1.6-1.6M18 6l1.6-1.6" />
+        </svg>
+      ) : (
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+      )}
+      {withText && <span>{text}</span>}
+    </button>
   );
 }
 
@@ -733,7 +1058,7 @@ function FooterCol({ title, links }: { title: string; links: { label: string; hr
 }
 
 /* ─────────── Templates marquee (editorial style) ─────────── */
-function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: TemplateCard[]; onSelect: (t: TemplateCard) => void; totalCount: number }) {
+function LazyTemplateMarquee({ templates, onSelect, totalCount, c }: { templates: TemplateCard[]; onSelect: (t: TemplateCard) => void; totalCount: number; c: (typeof copy)["en"] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -754,16 +1079,14 @@ function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: T
       <div className="relative mx-auto max-w-[1400px] px-6 md:px-12">
         <div className="mb-12 flex flex-col items-end gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="font-serif text-sm italic text-saffron-bright">No. 02 — The Anthology</p>
+            <p className="font-serif text-sm italic text-saffron-bright">{c.anthologyEyebrow}</p>
             <h2 className="headline-editorial mt-3 text-[44px] text-paper-soft sm:text-[60px] md:text-[76px]" style={{ color: "var(--paper-soft)" }}>
-              Designed for <em style={{ color: "var(--saffron-bright)" }}>every</em><br />career stage.
+              {c.anthologyTitleParts[0]}<em style={{ color: "var(--saffron-bright)" }}>{c.anthologyTitleParts[1]}</em>{c.anthologyTitleParts[2]}
             </h2>
-            <p className="font-serif mt-4 text-lg italic text-paper-soft/65">
-              {totalCount} typeset templates, anthology-grade — from entry-level to executive.
-            </p>
+            <p className="font-serif mt-4 text-lg italic text-paper-soft/65">{c.anthologyLead(totalCount)}</p>
           </div>
           <a href="/templates" className="group inline-flex items-center gap-2 border border-paper-soft/40 px-5 py-3 font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-paper-soft hover:text-ink-deep">
-            View all {totalCount} templates
+            {c.viewAll(totalCount)}
             <span className="font-serif text-base italic">→</span>
           </a>
         </div>
@@ -783,10 +1106,10 @@ function LazyTemplateMarquee({ templates, onSelect, totalCount }: { templates: T
                     </div>
                     <div className="absolute inset-x-0 bottom-0 translate-y-full bg-ink-deep/90 px-3 py-2 transition-transform duration-300 group-hover:translate-y-0">
                       <p className="font-serif text-sm italic text-paper-soft">{tmpl.name}</p>
-                      <p className="font-serif text-[10px] italic text-saffron-bright">Set this template →</p>
+                      <p className="font-serif text-[10px] italic text-saffron-bright">{c.setTemplate}</p>
                     </div>
                   </div>
-                  <p className="mt-2 font-serif text-[11px] italic text-paper-soft/55">Plate {(i % 99 + 1).toString().padStart(2, "0")} · {tmpl.category}</p>
+                  <p className="mt-2 font-serif text-[11px] italic text-paper-soft/55">{c.plate} {(i % 99 + 1).toString().padStart(2, "0")} · {tmpl.category}</p>
                 </div>
               ))}
             </div>
@@ -866,18 +1189,18 @@ function HeroPreview() {
 }
 
 /* ─────────── Pricing (editorial style) ─────────── */
-function PricingSection() {
+function PricingSection({ c }: { c: (typeof copy)["en"] }) {
   const [yearly, setYearly] = useState(false);
 
   return (
     <section id="pricing" className="noise-paper">
       <div className="mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-28">
         <div className="mb-12 text-center">
-          <p className="font-serif text-sm italic text-saffron">No. 07 — Subscription</p>
+          <p className="font-serif text-sm italic text-saffron">{c.pricingEyebrow}</p>
           <h2 className="headline-editorial mt-3 text-[44px] sm:text-[60px] md:text-[76px]">
-            Simple, <em>honest</em><br />pricing.
+            {c.pricingTitleParts[0]}<em>{c.pricingTitleParts[1]}</em>{c.pricingTitleParts[2]}
           </h2>
-          <p className="byline mt-4">Start free. Upgrade only when you need the press behind you.</p>
+          <p className="byline mt-4">{c.pricingLead}</p>
 
           <div className="mt-8 inline-flex items-center gap-0 border-2 border-ink-deep">
             <button
@@ -885,7 +1208,7 @@ function PricingSection() {
               onClick={() => setYearly(false)}
               type="button"
             >
-              Monthly
+              {c.monthly}
             </button>
             <div className="h-8 w-px bg-ink-deep" />
             <button
@@ -893,56 +1216,49 @@ function PricingSection() {
               onClick={() => setYearly(true)}
               type="button"
             >
-              Yearly
-              <span className="ml-2 bg-saffron px-1.5 py-0.5 text-[9px] text-paper-soft">Save 30%</span>
+              {c.yearly}
+              <span className="ml-2 bg-saffron px-1.5 py-0.5 text-[9px] text-paper-soft">{c.save}</span>
             </button>
           </div>
         </div>
 
         <div className="mx-auto grid max-w-5xl gap-0 border-2 border-ink-deep md:grid-cols-2">
           <PricingCard
-            cta="Start free"
+            cta={c.startFree}
             href="/signup"
-            features={["1 CV + 1 cover letter", "All standard templates", "Live preview", "PDF export"]}
-            name="Basic"
-            tagline="The cub reporter."
+            features={[...c.basicFeatures]}
+            name={c.basic}
+            tagline={c.basicTagline}
             price="€0"
-            period="forever"
+            period={c.basicPeriod}
+            recommended={c.recommended}
           />
           <PricingCard
-            cta="Subscribe to Pro"
+            cta={c.subscribePro}
             href="/signup?plan=pro"
             featured
-            features={[
-              "Unlimited CVs & cover letters",
-              "AI Editor — rewrite & optimise",
-              "AI cover letter generator",
-              "Résumé scoring (ATS)",
-              "High-res PDF exports",
-              "Priority editorial support",
-            ]}
-            name="Pro"
-            tagline="The full press."
+            features={[...c.proFeatures]}
+            name={c.pro}
+            tagline={c.proTagline}
             price={yearly ? "€2.10" : "€3"}
             originalPrice={yearly ? "€4.20" : "€6"}
-            period={yearly ? "/mo · billed €25.20/year" : "/month"}
+            period={yearly ? c.perMonthBilled : c.perMonth}
+            recommended={c.recommended}
           />
         </div>
 
-        <p className="mt-8 text-center font-serif text-xs italic text-ink-soft">
-          All prices in EUR. Cancel anytime. The free plan stays free, no card required.
-        </p>
+        <p className="mt-8 text-center font-serif text-xs italic text-ink-soft">{c.pricingFineprint}</p>
       </div>
     </section>
   );
 }
 
-function PricingCard({ cta, featured = false, features, href, name, tagline, price, originalPrice, period }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; tagline: string; price: string; originalPrice?: string; period: string }) {
+function PricingCard({ cta, featured = false, features, href, name, tagline, price, originalPrice, period, recommended }: { cta: string; featured?: boolean; features: string[]; href: string; name: string; tagline: string; price: string; originalPrice?: string; period: string; recommended: string }) {
   return (
     <article className={`relative flex flex-col p-8 md:p-10 ${featured ? "bg-ink-deep text-paper-soft md:border-l-2 md:border-ink-deep" : "bg-paper-soft text-ink-deep border-b-2 border-ink-deep md:border-b-0 md:border-r-2"}`}>
       {featured && (
         <div className="absolute -top-px right-6 bg-saffron px-3 py-1 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft">
-          Recommended
+          {recommended}
         </div>
       )}
       <p className={`font-serif text-sm italic ${featured ? "text-saffron-bright" : "text-saffron"}`}>{tagline}</p>

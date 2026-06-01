@@ -40,7 +40,7 @@ const copy = {
     badge: "No. 07 — Abonelik",
     title: "Basit, dürüst fiyatlandırma.",
     subtitle:
-      "Ücretsiz başlayın, sadece basını arkanıza almak istediğinizde yükseltin. Gizli ücret yok, istediğiniz zaman iptal edin.",
+      "Ücretsiz başlayın; yalnızca matbaanın tüm gücüne ihtiyaç duyduğunuzda yükseltin. Gizli ücret yok, istediğiniz zaman iptal edebilirsiniz.",
     monthly: "Aylık",
     yearly: "Yıllık",
     save: "%30 indirim",
@@ -49,18 +49,18 @@ const copy = {
     free: "Basic",
     pro: "Pro",
     freeTagline: "Çırak muhabir.",
-    proTagline: "Tam matbaa.",
+    proTagline: "Matbaanın tamamı.",
     recommended: "Önerilen",
     startFree: "Ücretsiz başla",
     getPro: "Pro'ya abone ol",
-    everythingBasic: "Basic'teki her şey, artı",
+    everythingBasic: "Basic'teki her şey ve daha fazlası",
     home: "Ana sayfa",
     compareTitle: "Planları karşılaştırın",
     compareSub: "Her özellik yan yana — neyin dahil olduğunu tam olarak görün.",
     faqTitle: "Editöre mektuplar",
-    faqSub: "Sık sorulanlar, açık cevaplar.",
-    ctaTitle: "Mülakata çağrılan bir CV oluşturmaya hazır mısınız?",
-    ctaSub: "Halihazırda The Desk'te 50.000+ profesyonele katılın.",
+    faqSub: "Sık sorulan sorular, açık yanıtlar.",
+    ctaTitle: "Mülakata çağrılan bir CV hazırlamaya hazır mısınız?",
+    ctaSub: "The Desk'teki 50.000+ profesyonele siz de katılın.",
     ctaButton: "Hemen başla — ücretsiz",
     discountBadge: "%50 İNDİRİM · SINIRLI",
   },
@@ -72,20 +72,20 @@ const freeFeatures: PlanFeature[] = [
   { en: "1 résumé + 1 cover letter", tr: "1 CV + 1 ön yazı" },
   { en: "70+ standard templates", tr: "70+ standart şablon" },
   { en: "Live preview while editing", tr: "Düzenlerken canlı önizleme" },
-  { en: "Standard PDF export (A4)", tr: "Standart PDF dışa aktarma (A4)" },
+  { en: "Standard PDF export (A4)", tr: "Standart PDF çıktısı (A4)" },
   { en: "LinkedIn & PDF import", tr: "LinkedIn ve PDF içe aktarma" },
-  { en: "Local autosave", tr: "Yerel otomatik kayıt" },
+  { en: "Local autosave", tr: "Tarayıcıda otomatik kayıt" },
 ];
 
 const proFeatures: PlanFeature[] = [
   { en: "Unlimited résumés & cover letters", tr: "Sınırsız CV ve ön yazı" },
-  { en: "All 100 templates — executive & creative tiers", tr: "100 şablonun tümü — executive ve creative" },
-  { en: "AI Editor — rewrite summaries & bullets", tr: "AI Editor — özet ve madde işaretleri için yeniden yazım" },
-  { en: "AI cover letter generator", tr: "Yapay zekâ ile ön yazı oluşturucu" },
+  { en: "All 100 templates — executive & creative tiers", tr: "100 şablonun tümü — yönetici ve yaratıcı kademeler" },
+  { en: "AI Editor — rewrite summaries & bullets", tr: "Yapay zekâ editör — özet ve maddeleri yeniden yazar" },
+  { en: "AI cover letter generator", tr: "Yapay zekâ ile ön yazı oluşturma" },
   { en: "Résumé scoring (ATS)", tr: "CV puanlaması (ATS)" },
-  { en: "High-resolution PDF export (300 DPI)", tr: "Yüksek çözünürlüklü PDF dışa aktarma (300 DPI)" },
+  { en: "High-resolution PDF export (300 DPI)", tr: "Yüksek çözünürlüklü PDF çıktısı (300 DPI)" },
   { en: "Cloud sync across devices", tr: "Cihazlar arası bulut senkronizasyonu" },
-  { en: "Priority editorial support", tr: "Öncelikli editöryel destek" },
+  { en: "Priority editorial support", tr: "Öncelikli editör desteği" },
 ];
 
 type ComparisonRow = {
@@ -95,10 +95,10 @@ type ComparisonRow = {
 };
 
 const comparison: ComparisonRow[] = [
-  { label: { en: "Résumés", tr: "CV sayısı" }, free: { en: "1 export", tr: "1 dışa aktarma" }, pro: { en: "Unlimited", tr: "Sınırsız" } },
-  { label: { en: "Cover letters", tr: "Ön yazı" }, free: { en: "1 export", tr: "1 dışa aktarma" }, pro: { en: "Unlimited", tr: "Sınırsız" } },
-  { label: { en: "Standard templates", tr: "Standart şablonlar" }, free: { en: "70+", tr: "70+" }, pro: { en: "All 100", tr: "Tümü 100" } },
-  { label: { en: "Executive & creative templates", tr: "Executive & creative şablonlar" }, free: false, pro: true },
+  { label: { en: "Résumés", tr: "CV sayısı" }, free: { en: "1 export", tr: "1 çıktı" }, pro: { en: "Unlimited", tr: "Sınırsız" } },
+  { label: { en: "Cover letters", tr: "Ön yazı" }, free: { en: "1 export", tr: "1 çıktı" }, pro: { en: "Unlimited", tr: "Sınırsız" } },
+  { label: { en: "Standard templates", tr: "Standart şablonlar" }, free: { en: "70+", tr: "70+" }, pro: { en: "All 100", tr: "Tümü (100)" } },
+  { label: { en: "Executive & creative templates", tr: "Yönetici ve yaratıcı şablonlar" }, free: false, pro: true },
   { label: { en: "AI rewrite (summary & bullets)", tr: "Yapay zekâ ile yeniden yazım" }, free: false, pro: true },
   { label: { en: "AI cover letter generator", tr: "Yapay zekâ ile ön yazı" }, free: false, pro: true },
   { label: { en: "ATS scoring & analysis", tr: "ATS puanlama ve analiz" }, free: false, pro: true },
@@ -114,42 +114,42 @@ const faqs: Faq[] = [
     q: { en: "Can I really start for free?", tr: "Gerçekten ücretsiz başlayabilir miyim?" },
     a: {
       en: "Yes — no credit card required. The Basic plan lets you build and export one résumé and one cover letter using 70+ standard templates. You only need Pro if you want unlimited exports, AI rewrites, or premium templates.",
-      tr: "Evet — kredi kartı gerekmez. Basic plan, 70+ standart şablon kullanarak bir CV ve bir ön yazı oluşturup dışa aktarmanıza olanak tanır. Sınırsız dışa aktarma, AI yeniden yazım veya premium şablonlar istiyorsanız Pro'ya ihtiyacınız var.",
+      tr: "Evet — kredi kartı gerekmez. Basic plan, 70+ standart şablonla bir CV ve bir ön yazı hazırlayıp dışa aktarmanıza olanak tanır. Sınırsız çıktı, yapay zekâ ile yeniden yazım veya premium şablonlar istiyorsanız Pro'ya geçmeniz gerekir.",
     },
   },
   {
-    q: { en: "When am I charged? Can I cancel?", tr: "Ne zaman ücretlendirilirim? İptal edebilir miyim?" },
+    q: { en: "When am I charged? Can I cancel?", tr: "Ne zaman ücret alınır? İptal edebilir miyim?" },
     a: {
-      en: "Pro is billed monthly or yearly, starting the day you subscribe. You can cancel anytime from your dashboard — Pro features stay active until the end of the period you've already paid for.",
-      tr: "Pro, abone olduğunuz gün başlamak üzere aylık veya yıllık faturalandırılır. İstediğiniz zaman panonuzdan iptal edebilirsiniz — Pro özellikleriniz ödediğiniz dönem sonuna kadar aktif kalır.",
+      en: "Pro is billed monthly or yearly on the day you subscribe and renews automatically until you cancel. You can cancel anytime from your dashboard or the Stripe customer portal — Pro features stay active until the end of the period you've already paid for, and no charge is made for the next period.",
+      tr: "Pro, abone olduğunuz günden itibaren aylık veya yıllık olarak faturalandırılır ve siz iptal edene kadar otomatik olarak yenilenir. Panonuzdan veya Stripe müşteri portalından istediğiniz zaman iptal edebilirsiniz — Pro özellikleri ödediğiniz dönemin sonuna kadar açık kalır ve bir sonraki dönem için ücret tahsil edilmez.",
     },
   },
   {
     q: { en: "What's the difference between standard and premium templates?", tr: "Standart ve premium şablonlar arasındaki fark nedir?" },
     a: {
       en: "Standard templates (70 designs) cover modern, classic and minimal styles — fully ATS-friendly. Premium templates (30 designs) add executive layouts for senior leadership and creative layouts for designers.",
-      tr: "Standart şablonlar (70 tasarım) modern, klasik ve minimal stilleri kapsar — tamamen ATS uyumlu. Premium şablonlar (30 tasarım) üst düzey liderlik için executive ve tasarımcılar için creative düzenler ekler.",
+      tr: "Standart şablonlar (70 tasarım) modern, klasik ve minimal stilleri kapsar — tamamen ATS uyumludur. Premium şablonlar (30 tasarım) üst düzey yöneticiler için yönetici düzenleri ve tasarımcılar için yaratıcı düzenler sunar.",
     },
   },
   {
     q: { en: "Are my drafts safe if I don't sign up?", tr: "Kayıt olmazsam taslaklarım güvende mi?" },
     a: {
       en: "Drafts autosave locally in your browser, so you can come back later without losing work. To sync across devices and back up to the cloud, create a free account.",
-      tr: "Taslaklar tarayıcınızda yerel olarak otomatik kaydedilir, böylece çalışmanızı kaybetmeden geri dönebilirsiniz. Cihazlar arası senkronize etmek ve buluta yedeklemek için ücretsiz hesap oluşturun.",
+      tr: "Taslaklar tarayıcınızda otomatik olarak kaydedilir; çalışmanızı kaybetmeden daha sonra kaldığınız yerden devam edebilirsiniz. Cihazlar arası senkronizasyon ve bulut yedeklemesi için ücretsiz bir hesap oluşturun.",
     },
   },
   {
     q: { en: "Do you offer refunds?", tr: "İade yapıyor musunuz?" },
     a: {
       en: "Pro is a digital service with immediate access, so refunds aren't offered after purchase. Cancel anytime to stop future billing. Full details on the Refund Policy page.",
-      tr: "Pro anında erişim sağlanan dijital bir hizmettir, satın alma sonrası iade yapılmaz. Gelecekteki faturalandırmayı durdurmak için istediğiniz zaman iptal edebilirsiniz. Detaylar İade Politikası sayfasında.",
+      tr: "Pro, anında erişim sağlanan dijital bir hizmettir; bu nedenle satın alma sonrası iade yapılmaz. Sonraki dönem faturalandırmasını durdurmak için istediğiniz zaman iptal edebilirsiniz. Detaylar İade Politikası sayfasında.",
     },
   },
   {
     q: { en: "Will my data be used to train AI?", tr: "Verilerim yapay zekâ eğitimi için kullanılır mı?" },
     a: {
       en: "No. Your résumé content is processed only to deliver the features you request (AI rewrite, cover letter generation, ATS scoring). It is never used to train external models.",
-      tr: "Hayır. CV içeriğiniz yalnızca talep ettiğiniz özellikleri (AI yeniden yazım, ön yazı, ATS puanlama) sağlamak için işlenir. Dış modelleri eğitmek için asla kullanılmaz.",
+      tr: "Hayır. CV içeriğiniz yalnızca talep ettiğiniz özellikleri (yapay zekâ ile yeniden yazım, ön yazı oluşturma, ATS puanlama) sunmak için işlenir. Hiçbir zaman dış modellerin eğitimi için kullanılmaz.",
     },
   },
 ];
@@ -232,7 +232,7 @@ export default function PricingPage() {
             </div>
 
             <p className="font-serif mt-4 text-sm italic text-ink-soft">
-              {l === "tr" ? "Standart şablonlarla ilk CV'nizi oluşturmak için ideal." : "Perfect for getting your first résumé out using standard templates."}
+              {l === "tr" ? "Standart şablonlarla ilk CV'nizi hazırlamak için ideal." : "Perfect for getting your first résumé out using standard templates."}
             </p>
 
             <ul className="my-8 flex-1 space-y-2 text-ink-soft">
@@ -274,7 +274,7 @@ export default function PricingPage() {
             </div>
 
             <p className="font-serif mt-4 text-sm italic text-paper-soft/65">
-              {l === "tr" ? "Mülakatları kazanmak için yapay zekâ ve sınırsız dışa aktarma." : "Unlimited exports plus the AI editor — to actually win interviews."}
+              {l === "tr" ? "Sınırsız çıktı ve yapay zekâ editörü — mülakatı gerçekten kazanmak için." : "Unlimited exports plus the AI editor — to actually win interviews."}
             </p>
 
             <p className="mt-5 font-edit text-[10px] font-bold uppercase tracking-[0.22em] text-saffron-bright">

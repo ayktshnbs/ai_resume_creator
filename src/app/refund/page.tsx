@@ -94,18 +94,27 @@ const sectionsTr = [
       </p>
     </>
   )},
-  { title: "Otomatik yenileme yoktur", body: (
-    <p>
-      CV with AI abonelikleri <em className="not-italic font-semibold text-ink-deep">otomatik olarak yenilenmez.</em> Abonelik süreniz dolduğunda Pro
-      planınız sona erer ve hesabınız otomatik olarak ücretsiz plana geçer. Bir sonraki dönem için ücret tahsil
-      edilmez. Pro özelliklere tekrar erişmek isterseniz yeni bir satın alma işlemi yapmanız gerekmektedir.
-    </p>
+  { title: "Otomatik yenileme", body: (
+    <>
+      <p>
+        Pro abonelikler, seçtiğiniz fatura dönemi sonunda (aylık veya yıllık) kayıtlı ödeme yönteminiz
+        üzerinden <em className="not-italic font-semibold text-ink-deep">otomatik olarak yenilenir.</em> Yenileme,
+        o anda geçerli olan fiyat üzerinden gerçekleştirilir. Yenileme öncesinde e-posta ile hatırlatma
+        gönderilir.
+      </p>
+      <p className="mt-3">
+        Otomatik yenilemeyi durdurmak için, mevcut fatura döneminin bitiminden önce hesap ayarlarınızdan veya
+        Stripe müşteri portalı üzerinden aboneliğinizi iptal etmeniz yeterlidir. İptal sonrası Pro özellikleri,
+        ödediğiniz dönemin sonuna kadar açık kalır.
+      </p>
+    </>
   )},
-  { title: "Süre dolduğunda ne olur?", body: bulletList([
-    "Hesabınız ücretsiz plana düşürülür",
+  { title: "İptal sonrası ne olur?", body: bulletList([
+    "Mevcut dönemin sonuna kadar Pro özellikleri kullanılabilir kalır",
+    "Bir sonraki dönem için ücret tahsil edilmez",
+    "Dönem sonunda hesabınız ücretsiz plana düşürülür",
     "Daha önce oluşturduğunuz CV'ler ve ön yazılar silinmez",
-    "Ücretsiz plan limitleri dahilinde erişiminiz devam eder",
-    "Yapay zeka özellikleri ve PDF dışa aktarma gibi Pro özellikler devre dışı kalır",
+    "Yapay zekâ özellikleri ve yüksek çözünürlüklü PDF gibi Pro özellikler devre dışı kalır",
   ])},
   { title: "Teknik sorunlar", body: (
     <p>
@@ -148,18 +157,26 @@ const sectionsEn = [
       </p>
     </>
   )},
-  { title: "No auto-renewal", body: (
-    <p>
-      CV with AI subscriptions <em className="not-italic font-semibold text-ink-deep">do not auto-renew.</em> When your subscription period ends, your
-      Pro plan expires and your account automatically reverts to the free tier. No charges are made for the next
-      period. If you wish to regain access to Pro features, you will need to make a new purchase.
-    </p>
+  { title: "Auto-renewal", body: (
+    <>
+      <p>
+        Pro subscriptions <em className="not-italic font-semibold text-ink-deep">renew automatically</em> at the
+        end of your billing period (monthly or annually) using the payment method on file. Renewal occurs at
+        the then-current price. A reminder email is sent before each renewal.
+      </p>
+      <p className="mt-3">
+        To stop auto-renewal, cancel your subscription from your account settings or through the Stripe
+        customer portal before the end of your current billing period. After cancellation, Pro features remain
+        active until the end of the period you have already paid for.
+      </p>
+    </>
   )},
-  { title: "What happens when your plan expires?", body: bulletList([
-    "Your account is downgraded to the free plan",
+  { title: "What happens after cancellation?", body: bulletList([
+    "Pro features stay active until the end of the current period",
+    "No charge is made for the next period",
+    "At the end of the period, your account is downgraded to the free plan",
     "Previously created CVs and cover letters are not deleted",
-    "You retain access within free plan limits (1 CV and 1 cover letter, standard templates)",
-    "Pro features such as AI tools and PDF export are disabled",
+    "Pro features such as AI tools and high-resolution PDF export are disabled",
   ])},
   { title: "Technical issues", body: (
     <p>

@@ -7,7 +7,6 @@ import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
-import { PaymentButton } from "@/components/payment-button";
 import type { ResumeData, SelectedTemplate } from "@/types/resume";
 
 type RecentResume = {
@@ -533,12 +532,12 @@ function PlanCell({ isPro, loaded, totalDocs, c }: { isPro: boolean; loaded: boo
           <p className="font-serif text-sm italic text-ink-soft">{c.freeUsed(totalDocs)}</p>
         </div>
       </div>
-      <PaymentButton
-        price="3"
+      <Link
+        href="/pricing"
         className="self-start bg-ink-deep px-4 py-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-saffron"
       >
         {c.upgradeBtn}
-      </PaymentButton>
+      </Link>
     </div>
   );
 }
@@ -573,12 +572,12 @@ function UpgradeBanner({ totalDocs, resumeCount, coverLetterCount, c }: { totalD
           <p className="font-serif text-right text-xs italic text-paper-soft/60">
             <span className="line-through decoration-saffron-bright">{c.bannerPriceLine.strike}</span> · <em className="not-italic text-paper-soft">{c.bannerPriceLine.current}</em>{c.bannerPriceLine.suffix}
           </p>
-          <PaymentButton
-            price="3"
+          <Link
+            href="/pricing"
             className="bg-saffron px-6 py-3.5 font-edit text-xs font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-paper-soft hover:text-ink-deep"
           >
             {c.bannerCta}
-          </PaymentButton>
+          </Link>
           <p className="text-right font-serif text-[11px] italic text-paper-soft/55">{c.bannerFine}</p>
         </div>
       </div>

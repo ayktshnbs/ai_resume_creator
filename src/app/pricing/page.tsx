@@ -397,6 +397,7 @@ export default function PricingPage() {
             <Link className="hover:text-saffron" href="/privacy">{l === "tr" ? "Gizlilik" : "Privacy"}</Link>
             <Link className="hover:text-saffron" href="/terms">{l === "tr" ? "Şartlar" : "Terms"}</Link>
             <Link className="hover:text-saffron" href="/refund">{l === "tr" ? "İade" : "Refund"}</Link>
+            <a className="hover:text-saffron" href="mailto:cvwithai.support@gmail.com">{l === "tr" ? "İletişim" : "Contact"}</a>
           </div>
         </div>
       </footer>

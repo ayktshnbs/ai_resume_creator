@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Icon } from "@/components/icon";
-import { PaymentButton } from "@/components/payment-button";
 import type { ConsumeFailureReason, QuotaKind } from "@/lib/use-usage-quota";
 
 type PaywallModalProps = {
@@ -138,12 +137,13 @@ export function PaywallModal({ open, onClose, reason, kind, returnPath }: Paywal
               >
                 Maybe later
               </button>
-              <PaymentButton
-                price="3"
-                className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white"
+              <Link
+                href="/pricing"
+                className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white text-center"
+                onClick={onClose}
               >
                 Upgrade to Pro
-              </PaymentButton>
+              </Link>
             </>
           ) : (
             <button

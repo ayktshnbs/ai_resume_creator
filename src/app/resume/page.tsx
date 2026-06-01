@@ -3,11 +3,11 @@
 import type { DragEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
-import { PaymentButton } from "@/components/payment-button";
 import {
   clearResumeData,
   createId,
@@ -1378,13 +1378,13 @@ function SummaryStep({
             {aiBusy ? t("resume.refining") : t("resume.aiRefineSummary")}
           </button>
         ) : (
-          <PaymentButton
-            price="3"
+          <Link
+            href="/pricing"
             className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-bold text-primary"
           >
             <Icon name="sparkle" className="text-[14px]" />
             Refine with AI
-          </PaymentButton>
+          </Link>
         )
       }
       onPrev={onPrev}
@@ -1863,12 +1863,12 @@ function ReviewStep({
             AI tools
           </h3>
           {!isPro && (
-            <PaymentButton
-              price="3"
+            <Link
+              href="/pricing"
               className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary"
             >
               Pro
-            </PaymentButton>
+            </Link>
           )}
         </div>
         <div className="grid gap-2 md:grid-cols-3">

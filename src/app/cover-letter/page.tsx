@@ -6,7 +6,6 @@ import { AppShell } from "@/components/app-sidebar";
 import { Icon } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
-import { PaymentButton } from "@/components/payment-button";
 import { loadResumeData } from "@/lib/resume-storage";
 import { exportToPdf } from "@/lib/export-utils";
 import Link from "next/link";
@@ -393,12 +392,12 @@ export default function CoverLetterPage() {
                 >
                   Maybe later
                 </button>
-                <PaymentButton
-                  price="3"
-                  className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white"
+                <Link
+                  href="/pricing"
+                  className="btn-glow badge-shimmer flex-1 primary-gradient rounded-xl px-4 py-3 text-sm font-bold text-white text-center"
                 >
                   {t("coverLetter.upgradePro")}
-                </PaymentButton>
+                </Link>
               </div>
             </div>
           </div>

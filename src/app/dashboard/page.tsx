@@ -7,6 +7,7 @@ import { AppShell } from "@/components/app-sidebar";
 import { Icon, type IconName } from "@/components/icon";
 import { useProStatus } from "@/lib/use-pro-status";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/components/toast";
 import type { ResumeData, SelectedTemplate } from "@/types/resume";
 
 type RecentResume = {
@@ -40,6 +41,9 @@ const copy = {
     proValue: "Pro",
     proSubLine: "All features unlocked",
     proHint: "★ Subscriber benefits active",
+    manageBtn: "Manage subscription",
+    manageOpening: "Opening billing portal…",
+    manageError: "Couldn't open billing portal. Please try again.",
     freeValue: "Free",
     freeUsed: (n: number) => `${n}/2 used`,
     unlimited: "Unlimited",
@@ -126,6 +130,9 @@ const copy = {
     proValue: "Pro",
     proSubLine: "Tüm özellikler açık",
     proHint: "★ Abone avantajları aktif",
+    manageBtn: "Aboneliği yönet",
+    manageOpening: "Fatura portalı açılıyor…",
+    manageError: "Fatura portalı açılamadı. Lütfen tekrar deneyin.",
     freeValue: "Ücretsiz",
     freeUsed: (n: number) => `${n}/2 kullanıldı`,
     unlimited: "Sınırsız",
@@ -519,6 +526,7 @@ function PlanCell({ isPro, loaded, totalDocs, c }: { isPro: boolean; loaded: boo
           <p className="font-serif text-sm italic text-paper-soft/65">{c.proSubLine}</p>
         </div>
         <p className="font-serif text-xs italic text-paper-soft/55">{c.proHint}</p>
+        <ManageSubscriptionButton c={c} />
       </div>
     );
   }
@@ -539,6 +547,41 @@ function PlanCell({ isPro, loaded, totalDocs, c }: { isPro: boolean; loaded: boo
         {c.upgradeBtn}
       </Link>
     </div>
+  );
+}
+
+/* ── Manage Subscription (opens Creem customer portal) ─── */
+function ManageSubscriptionButton({ c }: { c: (typeof copy)["en"] }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  async function openPortal() {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/payment/portal", { method: "POST" });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      toast(data.error || c.manageError, "error");
+    } catch {
+      toast(c.manageError, "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={openPortal}
+      disabled={loading}
+      className="self-start mt-1 border border-paper-soft/40 px-4 py-2 font-edit text-[10px] font-bold uppercase tracking-[0.18em] text-paper-soft transition hover:bg-paper-soft hover:text-ink-deep disabled:opacity-60 disabled:cursor-not-allowed"
+    >
+      {loading ? c.manageOpening : c.manageBtn}
+    </button>
   );
 }
 

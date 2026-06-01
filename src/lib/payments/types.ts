@@ -47,5 +47,8 @@ export type VerifyPaymentResult = {
   userId?: string;
   /** Plan key from the event metadata — lets the callback grant the right expiry. */
   plan?: BillingPlan;
+  /** Provider's customer identifier (e.g. Creem cust_xxx) so we can later
+   * mint a customer-portal link for the user to manage / cancel. */
+  customerId?: string;
   error?: string;
 };

@@ -16,6 +16,10 @@ model User {
   password      String?
   plan          String    @default("free")
   planExpiresAt DateTime?
+  // Creem customer id captured from the first successful subscription
+  // webhook. Used to mint the hosted customer-portal link where users can
+  // cancel / manage / update payment method.
+  creemCustomerId String?
   resumeExports      Int @default(0)
   coverLetterExports Int @default(0)
   createdAt     DateTime  @default(now())

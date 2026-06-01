@@ -38,10 +38,47 @@ export function getPlanGrantDays(plan: BillingPlan): number {
   return PLAN_CATALOG[plan].days;
 }
 
-const CREEM_API_URL = "https://api.creem.io/v1/checkouts";
+const CREEM_API_BASE = "https://api.creem.io";
+const CREEM_API_URL = `${CREEM_API_BASE}/v1/checkouts`;
+
+/**
+ * Mint a Creem customer-portal link for the given customer id. The portal
+ * is hosted by Creem and lets the customer cancel, change payment method,
+ * or download invoices — satisfying the "users must be able to cancel
+ * subscriptions directly from your product" requirement.
+ */
+export async function createCustomerPortalLink(customerId: string): Promise<{ url?: string; error?: string }> {
+  try {
+    const apiKey = requiredEnv("CREEM_API_KEY");
+    const response = await fetch(`${CREEM_API_BASE}/v1/customers/billing`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ customer_id: customerId }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      return { error: `Creem portal failed (${response.status}): ${errorText.slice(0, 240)}` };
+    }
+
+    const data = (await response.json()) as { customer_portal_link?: string };
+    if (!data.customer_portal_link) {
+      return { error: "Creem did not return a portal link" };
+    }
+    return { url: data.customer_portal_link };
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Creem portal request failed" };
+  }
+}
 
 type CreemEventObject = {
   id?: string;
+  // In webhooks the customer is usually a nested object, but in some API
+  // responses it's a plain id string. Handle both shapes.
+  customer?: string | { id?: string; email?: string };
   metadata?: { user_id?: string; plan?: BillingPlan };
 };
 
@@ -49,6 +86,13 @@ type CreemEvent = {
   eventType?: string;
   object?: CreemEventObject;
 };
+
+function extractCustomerId(obj: CreemEventObject): string | undefined {
+  const c = obj.customer;
+  if (typeof c === "string") return c;
+  if (c && typeof c === "object" && typeof c.id === "string") return c.id;
+  return undefined;
+}
 
 export class CreemProvider implements PaymentProvider {
   name = "creem";
@@ -180,6 +224,7 @@ export class CreemProvider implements PaymentProvider {
     const obj = event.object || {};
     const userId = obj.metadata?.user_id;
     const plan = obj.metadata?.plan;
+    const customerId = extractCustomerId(obj);
 
     // Events that grant or extend Pro:
     //   • checkout.completed     — first payment after checkout
@@ -196,6 +241,7 @@ export class CreemProvider implements PaymentProvider {
         status: "paid",
         userId,
         plan,
+        customerId,
         error: userId ? undefined : "Could not resolve user_id from event metadata",
       };
     }

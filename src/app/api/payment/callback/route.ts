@@ -34,12 +34,24 @@ export async function POST(req: Request) {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + days);
 
+      // Persist the Creem customer id the first time we see it. On renewal
+      // webhooks the id might be missing or the same — only write if we
+      // have one, and don't overwrite an existing value with null.
+      const updateData: {
+        plan: string;
+        planExpiresAt: Date;
+        creemCustomerId?: string;
+      } = {
+        plan: "pro",
+        planExpiresAt: expiresAt,
+      };
+      if (verification.customerId) {
+        updateData.creemCustomerId = verification.customerId;
+      }
+
       await prisma.user.update({
         where: { id: verification.userId },
-        data: {
-          plan: "pro",
-          planExpiresAt: expiresAt,
-        },
+        data: updateData,
       });
     }
 

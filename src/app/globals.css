@@ -147,6 +147,12 @@
 
 html {
   scroll-behavior: smooth;
+  /* Belt-and-braces: stop any rogue child element (long Turkish word,
+     wide template preview, etc.) from making the whole document
+     horizontally scrollable on mobile. The <main> already has
+     overflow-x:hidden but that only clips its own children — the
+     document body can still scroll if any descendant escapes. */
+  overflow-x: hidden;
 }
 
 body {
@@ -154,6 +160,7 @@ body {
   background: var(--body-bg);
   color: var(--ink);
   font-family: Inter, Arial, sans-serif;
+  overflow-x: hidden;
 }
 
 button,

@@ -38,8 +38,16 @@ export function getPlanGrantDays(plan: BillingPlan): number {
   return PLAN_CATALOG[plan].days;
 }
 
-const CREEM_API_BASE = "https://api.creem.io";
-const CREEM_API_URL = `${CREEM_API_BASE}/v1/checkouts`;
+// Creem ships separate environments. Production keys start with `creem_`,
+// test keys with `creem_test_`. We auto-route to the right base URL based
+// on the key prefix so the same code works for both — no extra env var to
+// keep in sync.
+const CREEM_API_BASE_PROD = "https://api.creem.io";
+const CREEM_API_BASE_TEST = "https://test-api.creem.io";
+
+function getCreemBaseUrl(apiKey: string): string {
+  return apiKey.startsWith("creem_test_") ? CREEM_API_BASE_TEST : CREEM_API_BASE_PROD;
+}
 
 /**
  * Mint a Creem customer-portal link for the given customer id. The portal
@@ -50,7 +58,8 @@ const CREEM_API_URL = `${CREEM_API_BASE}/v1/checkouts`;
 export async function createCustomerPortalLink(customerId: string): Promise<{ url?: string; error?: string }> {
   try {
     const apiKey = requiredEnv("CREEM_API_KEY");
-    const response = await fetch(`${CREEM_API_BASE}/v1/customers/billing`, {
+    const baseUrl = getCreemBaseUrl(apiKey);
+    const response = await fetch(`${baseUrl}/v1/customers/billing`, {
       method: "POST",
       headers: {
         "x-api-key": apiKey,
@@ -106,8 +115,9 @@ export class CreemProvider implements PaymentProvider {
 
       const apiKey = requiredEnv("CREEM_API_KEY");
       const productId = requiredEnv(planSpec.productEnvVar);
+      const baseUrl = getCreemBaseUrl(apiKey);
 
-      const response = await fetch(CREEM_API_URL, {
+      const response = await fetch(`${baseUrl}/v1/checkouts`, {
         method: "POST",
         headers: {
           "x-api-key": apiKey,

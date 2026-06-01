@@ -1061,7 +1061,7 @@ function LazyTemplateMarquee({ templates, onSelect, totalCount, c }: { templates
         </div>
       </div>
 
-      <div className="relative mt-6" style={{ minHeight: 340 }}>
+      <div className="relative mt-6 overflow-hidden" style={{ minHeight: 340 }}>
         {visible ? (
           <>
             <div className="flex editorial-marquee gap-6 px-6 md:px-12" style={{ width: "max-content" }}>

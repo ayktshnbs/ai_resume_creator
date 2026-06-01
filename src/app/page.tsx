@@ -79,8 +79,8 @@ const copy = {
     ctaPrimary: "Start a new manuscript",
     ctaSecondary: "Browse the anthology",
     stats: [
-      { num: "50K+", label: "subscribers writing" },
-      { num: "4.9", label: "average reader rating" },
+      { num: "EN · TR", label: "languages typeset" },
+      { num: "A4", label: "print-ready format" },
     ],
     statsTemplatesLabel: "templates in press",
     byline: (year: number) => `Reported and typeset for ambitious professionals — Worldwide · ${year}.`,
@@ -88,12 +88,12 @@ const copy = {
     plateNumber: "No. 01",
     handsetExample: "— Hand-set example —",
     sheetSize: "A4 · 210 × 297 mm",
-    marginalia: "Marginalia",
-    marginaliaQuote: '"Edited my CV during a coffee — landed three callbacks the next week."',
-    marginaliaSig: "— S. Mitchell, Spotify",
-    pressNotes: "Press notes",
-    pressNotesQuote: '"Finally, a builder that doesn\'t look generic. The press aesthetic just hits."',
-    pressNotesSig: "— D. Chen, Amazon",
+    marginalia: "On craft",
+    marginaliaQuote: '"Hand-set in Fraunces and Geist. Every line spaced like editorial copy, not a corporate slide."',
+    marginaliaSig: "— From the editor",
+    pressNotes: "On the press",
+    pressNotesQuote: '"No generic gradients. No SaaS clichés. The press aesthetic is a deliberate choice — every page set the way you\'d set a magazine."',
+    pressNotesSig: "— From the editor",
     // Anthology
     anthologyEyebrow: "No. 02 — The Anthology",
     anthologyTitleParts: ["Designed for ", "every", " career stage."],
@@ -174,13 +174,19 @@ const copy = {
     ],
     mockInProgress: "in progress",
     mockFooter: "— A daily edition of you. —",
-    // Letters
-    lettersEyebrow: "No. 06 — Letters to the Editor",
-    lettersTitleParts: ["Loved by ", "readers", " in 92 countries."],
-    lettersLead: "Postmarked from the people who used the press, signed off, and landed the job. Names redacted only where the recruiter is still being polite.",
-    starsLead: "★ ★ ★ ★ ★ ",
-    starsValue: "4.9",
-    starsFrom: " from 1,240 verified subscribers",
+    // Principles (replaces fake testimonials)
+    lettersEyebrow: "No. 06 — The Principles",
+    lettersTitleParts: ["Built on a handful of ", "stubborn", " beliefs."],
+    lettersLead: "Six principles that shaped every page of the press. None borrowed, none diluted.",
+    principles: [
+      { topic: "On typography", body: "Typography is the voice of a résumé. Fraunces and Geist Mono — each line spaced like editorial prose, not a corporate slide.", numeral: "I", col: "col-span-12 md:col-span-6 lg:col-span-5" },
+      { topic: "On the AI", body: "AI should rewrite, not write. The editor refines what you meant — keeping your voice, sharpening the result.", numeral: "II", col: "col-span-12 md:col-span-6 lg:col-span-4" },
+      { topic: "On templates", body: "100 templates, not a thousand variants of three. Each one a deliberate design choice, set with the same care as a magazine spread.", numeral: "III", col: "col-span-12 md:col-span-6 lg:col-span-3" },
+      { topic: "On honesty", body: "ATS scoring without smoke. We tell you what's working, what's missing, and what we can't see — no green checkmark you didn't earn.", numeral: "IV", col: "col-span-12 md:col-span-6 lg:col-span-4" },
+      { topic: "On craft", body: "Print-grade typesetting in the browser. Every kern, every ligature, exported at 300 dpi — a résumé deserves to look typeset.", numeral: "V", col: "col-span-12 md:col-span-6 lg:col-span-5" },
+      { topic: "On focus", body: "One thing, done well. No tracking, no data resale, no diluting the press with features you didn't ask for.", numeral: "VI", col: "col-span-12 md:col-span-12 lg:col-span-3" },
+    ],
+    principlesFooter: "— Set in Fraunces & Geist · Built for ambitious careers —",
     // Footer / colophon
     colophonAbout: "A typeset newsroom for ambitious careers. Set in Fraunces & Geist, printed on a press of cream & ink.",
     footerSubscribeFree: "Subscribe — start free",
@@ -261,8 +267,8 @@ const copy = {
     ctaPrimary: "Yeni özgeçmiş hazırla",
     ctaSecondary: "Şablonları keşfet",
     stats: [
-      { num: "50K+", label: "aktif abone" },
-      { num: "4.9", label: "ortalama okur puanı" },
+      { num: "EN · TR", label: "dizilmiş diller" },
+      { num: "A4", label: "baskıya hazır boyut" },
     ],
     statsTemplatesLabel: "baskıdaki şablon",
     byline: (year: number) => `İddialı profesyoneller için hazırlandı ve özenle dizildi — Dünya geneli · ${year}.`,
@@ -270,12 +276,12 @@ const copy = {
     plateNumber: "No. 01",
     handsetExample: "— Elde dizilmiş örnek —",
     sheetSize: "A4 · 210 × 297 mm",
-    marginalia: "Kenar notu",
-    marginaliaQuote: '"Bir kahve molasında özgeçmişimi düzenledim, ertesi hafta üç geri dönüş aldım."',
-    marginaliaSig: "— S. Mitchell, Spotify",
-    pressNotes: "Baskı notu",
-    pressNotesQuote: '"Sonunda tek tip görünmeyen bir araç. Bu matbaa estetiği çok yakışmış."',
-    pressNotesSig: "— D. Chen, Amazon",
+    marginalia: "Tasarım üzerine",
+    marginaliaQuote: '"Fraunces ve Geist ile elde dizildi. Her satır, kurumsal bir slayt gibi değil, gazete metni gibi ölçülendi."',
+    marginaliaSig: "— Editörden",
+    pressNotes: "Matbaa üzerine",
+    pressNotesQuote: '"Standart degradeler yok, SaaS klişeleri yok. Matbaa estetiği bilinçli bir tercih — her sayfa, bir dergi gibi dizildi."',
+    pressNotesSig: "— Editörden",
     anthologyEyebrow: "No. 02 — Antoloji",
     anthologyTitleParts: ["Her ", "kariyer", " aşamasına göre tasarlandı."],
     anthologyLead: (n: number) => `${n} özenle dizilmiş şablon — yeni mezundan üst düzey yöneticiye kadar herkese.`,
@@ -352,12 +358,18 @@ const copy = {
     ],
     mockInProgress: "hazırlanıyor",
     mockFooter: "— Sizin günlük baskınız. —",
-    lettersEyebrow: "No. 06 — Okur Mektupları",
-    lettersTitleParts: ["92 ülkede ", "okurların", " gözdesi."],
-    lettersLead: "Matbaayı kullanıp işi kapan okurlardan gelen mektuplar. Bazı isimler yalnızca nezaketen gizlendi.",
-    starsLead: "★ ★ ★ ★ ★ ",
-    starsValue: "4.9",
-    starsFrom: " · 1.240 doğrulanmış aboneden",
+    lettersEyebrow: "No. 06 — İlkeler",
+    lettersTitleParts: ["Birkaç ", "inatçı", " ilke üzerine kuruldu."],
+    lettersLead: "Matbaanın her sayfasını şekillendiren altı ilke. Ödünç alınmadı, sulandırılmadı.",
+    principles: [
+      { topic: "Tipografi üzerine", body: "Tipografi, bir özgeçmişin sesidir. Fraunces ve Geist Mono — her satır, kurumsal bir slayt gibi değil, gazete metni gibi ölçülendi.", numeral: "I", col: "col-span-12 md:col-span-6 lg:col-span-5" },
+      { topic: "Yapay zekâ üzerine", body: "Yapay zekâ yazmamalı, yeniden yazmalı. Editör, demek istediğinizi inceltir — sesinizi korur, sonucu keskinleştirir.", numeral: "II", col: "col-span-12 md:col-span-6 lg:col-span-4" },
+      { topic: "Şablonlar üzerine", body: "100 şablon; üçünün bin çeşidi değil. Her biri, bir dergi sayfası gibi özenle dizilmiş bilinçli bir tasarım kararı.", numeral: "III", col: "col-span-12 md:col-span-6 lg:col-span-3" },
+      { topic: "Dürüstlük üzerine", body: "Dumansız ATS puanlama. Neyin işe yaradığını, neyin eksik olduğunu ve göremediklerimizi açıkça söyleriz — hak etmediğiniz yeşil bir tik yok.", numeral: "IV", col: "col-span-12 md:col-span-6 lg:col-span-4" },
+      { topic: "Zanaat üzerine", body: "Tarayıcıda baskı kalitesinde dizgi. Her kerning, her bağ harfi, 300 dpi'da dışa aktarılır — bir özgeçmiş dizilmiş görünmeyi hak eder.", numeral: "V", col: "col-span-12 md:col-span-6 lg:col-span-5" },
+      { topic: "Odak üzerine", body: "Tek bir şey, iyi yapılmış. Takip yok, veri satışı yok, istemediğiniz özelliklerle sulandırılmış bir matbaa yok.", numeral: "VI", col: "col-span-12 md:col-span-12 lg:col-span-3" },
+    ],
+    principlesFooter: "— Fraunces & Geist ile dizildi · İddialı kariyerler için —",
     colophonAbout: "İddialı kariyerler için dizilmiş bir haber odası. Fraunces & Geist ile, krem kâğıt ve mürekkep matbaasında basıldı.",
     footerSubscribeFree: "Abone ol — ücretsiz başla",
     col1: "Gazete",
@@ -910,74 +922,29 @@ export default function Home() {
             <p className="font-serif text-lg italic leading-snug text-ink-soft md:pl-12">{c.lettersLead}</p>
           </div>
 
-          {/* Magazine grid */}
+          {/* Magazine grid — editor's principles */}
           <div className="grid grid-cols-12 gap-px bg-ink-deep border-2 border-ink-deep">
-            {[
-              {
-                name: "Sarah Mitchell",
-                role: "Product Manager · Spotify",
-                quote: "I went from zero callbacks to five interviews in two weeks. The AI rewrite turned my bullets from boring to impressive.",
-                initials: "SM",
-                col: "col-span-12 md:col-span-6 lg:col-span-5",
-              },
-              {
-                name: "James Park",
-                role: "Software Engineer · Google",
-                quote: "The ATS scorer was a game-changer. I had no idea my résumé was getting filtered. After editing, I finally heard back.",
-                initials: "JP",
-                col: "col-span-12 md:col-span-6 lg:col-span-4",
-              },
-              {
-                name: "Elena Rodriguez",
-                role: "Marketing Director · Shopify",
-                quote: "The cover letter generator saved me hours. It matched the job posting and highlighted exactly the right experience.",
-                initials: "ER",
-                col: "col-span-12 md:col-span-6 lg:col-span-3",
-              },
-              {
-                name: "David Chen",
-                role: "Data Analyst · Amazon",
-                quote: "I tried four other CV builders. Templates here actually look like a magazine, not a corporate slide deck.",
-                initials: "DC",
-                col: "col-span-12 md:col-span-6 lg:col-span-4",
-              },
-              {
-                name: "Aisha Okonkwo",
-                role: "UX Designer · Meta",
-                quote: "As a career changer, presenting my experience was hard. The AI helped me frame transferable skills perfectly.",
-                initials: "AO",
-                col: "col-span-12 md:col-span-6 lg:col-span-5",
-              },
-              {
-                name: "Marcus Weber",
-                role: "Finance Analyst · JPMorgan",
-                quote: "Clean, professional, fast. I built my résumé over lunch and sent it the same afternoon.",
-                initials: "MW",
-                col: "col-span-12 md:col-span-12 lg:col-span-3",
-              },
-            ].map((t) => (
-              <article key={t.name} className={`${t.col} noise-paper p-7 md:p-9 flex flex-col`}>
-                <p className="font-serif text-[60px] leading-none text-saffron">"</p>
+            {c.principles.map((p, i) => (
+              <article key={p.topic} className={`${p.col} noise-paper p-7 md:p-9 flex flex-col`}>
+                <p className="font-serif text-[60px] leading-none text-saffron">§</p>
                 <p className="font-serif mt-1 flex-1 text-[18px] italic leading-[1.35] text-ink-deep md:text-[20px]">
-                  {t.quote}
+                  {p.body}
                 </p>
                 <div className="mt-6 flex items-center gap-3 border-t border-ink-deep pt-4">
-                  <div className="flex h-10 w-10 items-center justify-center bg-ink-deep font-serif text-sm italic text-paper-soft">{t.initials}</div>
+                  <div className="flex h-10 w-10 items-center justify-center bg-ink-deep font-serif text-sm italic text-paper-soft">{p.numeral}</div>
                   <div>
-                    <p className="font-serif text-[15px] text-ink-deep">{t.name}</p>
-                    <p className="font-serif text-xs italic text-ink-soft">{t.role}</p>
+                    <p className="font-serif text-[15px] text-ink-deep">{p.topic}</p>
+                    <p className="font-serif text-xs italic text-ink-soft">No. {(i + 1).toString().padStart(2, "0")} — Editorial principle</p>
                   </div>
                 </div>
               </article>
             ))}
           </div>
 
-          {/* Stars summary */}
+          {/* Closing editorial mark (replaces fake stars summary) */}
           <div className="mt-10 flex items-center justify-center gap-4">
             <div className="h-px flex-1 bg-ink-deep/40" />
-            <p className="font-serif text-lg italic text-ink-deep">
-              {c.starsLead}&nbsp; <em className="not-italic text-saffron">{c.starsValue}</em>{c.starsFrom}
-            </p>
+            <p className="font-serif text-lg italic text-ink-deep">{c.principlesFooter}</p>
             <div className="h-px flex-1 bg-ink-deep/40" />
           </div>
         </div>

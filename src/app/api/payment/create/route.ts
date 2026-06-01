@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getPaymentProvider } from "@/lib/payments/provider";
 import type { BillingPlan } from "@/lib/payments/types";
-import { getPlanAmountEuros } from "@/lib/payments/stripe-provider";
+import { getPlanAmountEuros } from "@/lib/payments/creem-provider";
 
 const ALLOWED_PLANS: BillingPlan[] = ["monthly", "yearly"];
 

@@ -1,5 +1,5 @@
 import type { CreatePaymentInput, CreatePaymentResult, VerifyPaymentInput, VerifyPaymentResult } from "./types";
-import { StripeProvider } from "./stripe-provider";
+import { CreemProvider } from "./creem-provider";
 
 export interface PaymentProvider {
   name: string;
@@ -8,5 +8,5 @@ export interface PaymentProvider {
 }
 
 export function getPaymentProvider(): PaymentProvider {
-  return new StripeProvider();
+  return new CreemProvider();
 }

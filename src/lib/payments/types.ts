@@ -45,5 +45,7 @@ export type VerifyPaymentResult = {
   paymentId: string;
   status: "paid" | "failed";
   userId?: string;
+  /** Plan key from the event metadata — lets the callback grant the right expiry. */
+  plan?: BillingPlan;
   error?: string;
 };

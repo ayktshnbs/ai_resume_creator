@@ -175,7 +175,7 @@ const sectionsTr = [
   { title: "İletişim", body: (
     <p>
       Gizlilik politikamız hakkında sorularınız veya KVKK kapsamındaki talepleriniz için
-      bizimle <em className="not-italic font-semibold text-saffron">cvwithai.support@gmail.com</em> adresinden iletişime geçebilirsiniz.
+      bizimle <em className="not-italic font-semibold text-saffron">support@cv-with-ai.com</em> adresinden iletişime geçebilirsiniz.
     </p>
   )},
 ];
@@ -272,7 +272,7 @@ const sectionsEn = [
   { title: "Contact", body: (
     <p>
       For questions about our privacy policy or to exercise your data rights, contact us
-      at <em className="not-italic font-semibold text-saffron">cvwithai.support@gmail.com</em>.
+      at <em className="not-italic font-semibold text-saffron">support@cv-with-ai.com</em>.
     </p>
   )},
 ];

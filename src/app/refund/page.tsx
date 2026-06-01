@@ -119,14 +119,14 @@ const sectionsTr = [
   { title: "Teknik sorunlar", body: (
     <p>
       Ödeme işlemi sırasında teknik bir sorun yaşanması (çift ödeme, işlem hatası vb.) durumunda,
-      durumu <em className="not-italic font-semibold text-saffron">cvwithai.support@gmail.com</em> adresine bildirmeniz
+      durumu <em className="not-italic font-semibold text-saffron">support@cv-with-ai.com</em> adresine bildirmeniz
       halinde sorun en kısa sürede incelenip çözülecektir. Teknik kaynaklı mükerrer ödemeler iade edilir.
     </p>
   )},
   { title: "İletişim", body: (
     <p>
       Aboneliğiniz ve ödeme işlemleriniz hakkında sorularınız için
-      <em className="not-italic font-semibold text-saffron"> cvwithai.support@gmail.com</em> adresinden bizimle iletişime geçebilirsiniz.
+      <em className="not-italic font-semibold text-saffron"> support@cv-with-ai.com</em> adresinden bizimle iletişime geçebilirsiniz.
     </p>
   )},
 ];
@@ -181,14 +181,14 @@ const sectionsEn = [
   { title: "Technical issues", body: (
     <p>
       If a technical issue occurs during payment (duplicate charge, transaction error, etc.), please contact us
-      at <em className="not-italic font-semibold text-saffron">cvwithai.support@gmail.com</em> and the issue will be
+      at <em className="not-italic font-semibold text-saffron">support@cv-with-ai.com</em> and the issue will be
       resolved promptly. Duplicate charges caused by technical errors will be refunded.
     </p>
   )},
   { title: "Contact", body: (
     <p>
       For questions about your subscription and payments, contact us at
-      <em className="not-italic font-semibold text-saffron"> cvwithai.support@gmail.com</em>.
+      <em className="not-italic font-semibold text-saffron"> support@cv-with-ai.com</em>.
     </p>
   )},
 ];

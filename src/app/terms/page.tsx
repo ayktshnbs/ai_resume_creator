@@ -183,7 +183,7 @@ const sectionsTr = [
       {bulletList([
         "Doğru, güncel ve eksiksiz kayıt bilgileri sağlamak",
         "Şifrenizi gizli tutmak ve başkalarıyla paylaşmamak",
-        "Hesabınızda yetkisiz erişim fark ettiğinizde derhâl bizimle iletişime geçmek (cvwithai.support@gmail.com)",
+        "Hesabınızda yetkisiz erişim fark ettiğinizde derhâl bizimle iletişime geçmek (support@cv-with-ai.com)",
         "Hesabınız altında yapılan tüm işlemlerden sorumlu olmak",
         "Bir kişinin en fazla bir hesap açması",
         "Yalnızca kendi adınıza hesap oluşturmak (başkası adına yetki almadan hesap açmamak)",
@@ -315,7 +315,7 @@ const sectionsTr = [
       </p>
       <p className="mt-3">
         Mükerrer ödeme, ödeme hatası veya tarafımıza atfedilebilir bir teknik sorun nedeniyle yapılan
-        haksız tahsilatlar talep üzerine iade edilir. İade taleplerinizi cvwithai.support@gmail.com adresine
+        haksız tahsilatlar talep üzerine iade edilir. İade taleplerinizi support@cv-with-ai.com adresine
         iletebilirsiniz.
       </p>
     </>
@@ -442,7 +442,7 @@ const sectionsTr = [
       </p>
       <p className="mt-3">
         <em className="not-italic font-semibold text-ink-deep">a) Resmi olmayan çözüm.</em> Bir uyuşmazlık veya
-        talep iletmek isterseniz, önce cvwithai.support@gmail.com adresine yazılı bildirim göndererek meseleyi 60 gün
+        talep iletmek isterseniz, önce support@cv-with-ai.com adresine yazılı bildirim göndererek meseleyi 60 gün
         içinde dostane şekilde çözmeye çalışmamızı kabul edersiniz. Tahkim veya dava başlatmadan önce bu
         bildirimi göndermek zorunludur.
       </p>
@@ -468,7 +468,7 @@ const sectionsTr = [
       <p className="mt-3">
         <em className="not-italic font-semibold text-ink-deep">e) Tahkimden vazgeçme hakkı.</em> Bu maddenin
         ilk kabulünden itibaren 30 gün içinde, yazılı bildirim göndererek tahkim ve toplu dava feragati
-        hükümlerine bağlı kalmamayı tercih edebilirsiniz. Vazgeçme bildirimi cvwithai.support@gmail.com adresine
+        hükümlerine bağlı kalmamayı tercih edebilirsiniz. Vazgeçme bildirimi support@cv-with-ai.com adresine
         gönderilmelidir.
       </p>
       <p className="mt-3">
@@ -523,7 +523,7 @@ const sectionsTr = [
   { title: "İletişim", body: (
     <p>
       Bu Kullanım Şartları hakkında sorularınız, talepleriniz veya yasal bildirimler için
-      bizimle <em className="not-italic font-semibold text-saffron">cvwithai.support@gmail.com</em> adresinden
+      bizimle <em className="not-italic font-semibold text-saffron">support@cv-with-ai.com</em> adresinden
       iletişime geçebilirsiniz. Önceki Şartlar sürümünün bir kopyasını istemek için aynı adrese yazabilirsiniz.
     </p>
   )},
@@ -632,7 +632,7 @@ const sectionsEn = [
       {bulletList([
         "Provide accurate, current, and complete registration information",
         "Keep your password confidential and not share it",
-        "Notify us immediately of any unauthorized access at cvwithai.support@gmail.com",
+        "Notify us immediately of any unauthorized access at support@cv-with-ai.com",
         "Take responsibility for all activity under your account",
         "Maintain only one account per person",
         "Register only for yourself (not on behalf of another person without authorization)",
@@ -765,7 +765,7 @@ const sectionsEn = [
       </p>
       <p className="mt-3">
         Duplicate charges, payment errors, or technical issues attributable to us will be refunded upon request.
-        Contact cvwithai.support@gmail.com for refund inquiries.
+        Contact support@cv-with-ai.com for refund inquiries.
       </p>
     </>
   )},
@@ -891,7 +891,7 @@ const sectionsEn = [
       <p className="mt-3">
         <em className="not-italic font-semibold text-ink-deep">a) Informal resolution.</em> Before initiating
         arbitration or litigation, you agree to send a written notice describing the dispute to
-        cvwithai.support@gmail.com and to attempt to resolve the matter in good faith over a 60-day period. This
+        support@cv-with-ai.com and to attempt to resolve the matter in good faith over a 60-day period. This
         informal resolution process is a condition precedent to any formal proceeding.
       </p>
       <p className="mt-3">
@@ -916,7 +916,7 @@ const sectionsEn = [
       </p>
       <p className="mt-3">
         <em className="not-italic font-semibold text-ink-deep">e) Right to opt out.</em> You may opt out of the
-        arbitration and class-action waiver by sending written notice to cvwithai.support@gmail.com within 30 days of
+        arbitration and class-action waiver by sending written notice to support@cv-with-ai.com within 30 days of
         first accepting these Terms.
       </p>
       <p className="mt-3">
@@ -972,7 +972,7 @@ const sectionsEn = [
   { title: "Contact", body: (
     <p>
       For questions about these Terms, requests, or legal notices, contact us at{" "}
-      <em className="not-italic font-semibold text-saffron">cvwithai.support@gmail.com</em>. To request a copy of a
+      <em className="not-italic font-semibold text-saffron">support@cv-with-ai.com</em>. To request a copy of a
       previous version of the Terms, write to the same address.
     </p>
   )},

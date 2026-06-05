@@ -1,7 +1,6 @@
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import type { ResumeData } from "@/types/resume";
-import { throttle } from "@/lib/usage/throttle";
+import { checkProStatus } from "@/lib/pro/check-pro";
 
 type ResumeHelperAction =
   | "improve_summary"
@@ -25,214 +24,50 @@ type RequestBody = {
   text?: string;
   targetRole?: string;
   jobDescription?: string;
-  userApiKey?: string;
 };
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
-/** Caps on free-text inputs so one request can't run up an unbounded token bill. */
-const MAX_TEXT_CHARS = 40_000;
-const MAX_JOB_DESC_CHARS = 12_000;
-const MAX_RESUME_CHARS = 80_000;
+/**
+ * `extract_from_reference` powers the PDF / LinkedIn import flow — which is a
+ * free-tier feature per the pricing page — so it must stay open. Every other
+ * action is a paid AI helper and requires Pro.
+ */
+const PRO_ONLY_ACTIONS: ReadonlySet<ResumeHelperAction> = new Set([
+  "improve_summary",
+  "improve_bullet",
+  "suggest_skills",
+  "generate_cover_letter",
+  "analyze_resume",
+]);
 
+// AI is intentionally NOT wired to a live model right now — Pro users get the
+// deterministic mock-improve so they see the button do something, but we pay
+// zero tokens. To enable real Anthropic calls later, restore the import + call
+// path from src/lib/ai/anthropic.ts (kept dormant in the repo).
 export async function POST(request: Request) {
-  let body: RequestBody | null = null;
   try {
-    body = (await request.json()) as RequestBody;
+    const body = (await request.json()) as RequestBody;
     const action = body.action;
 
     if (!action) {
       return NextResponse.json({ error: "Missing action." }, { status: 400 });
     }
 
-    const effectiveKey = body.userApiKey || process.env.OPENAI_API_KEY;
-
-    if (!effectiveKey) {
-      return NextResponse.json(mockResponse(action, body));
-    }
-
-    // Bound input size regardless of whose key pays.
-    if (
-      (body.text?.length ?? 0) > MAX_TEXT_CHARS ||
-      (body.jobDescription?.length ?? 0) > MAX_JOB_DESC_CHARS ||
-      (body.resumeData ? JSON.stringify(body.resumeData).length : 0) > MAX_RESUME_CHARS
-    ) {
-      return NextResponse.json({ error: "Input is too large to process." }, { status: 413 });
-    }
-
-    // Only rate-limit when the request would spend OUR OpenAI budget. If the
-    // user supplied their own key, it's their cost — let them through.
-    if (!body.userApiKey) {
-      const gate = await throttle("ai");
-      if (!gate.ok) {
+    if (PRO_ONLY_ACTIONS.has(action)) {
+      const pro = await checkProStatus();
+      if (!pro.isPro) {
         return NextResponse.json(
-          { error: "Too many AI requests. Please wait a minute and try again." },
-          { status: 429, headers: { "Retry-After": String(gate.retryAfterSec) } }
+          { error: "Pro subscription required to use AI helpers." },
+          { status: 403 },
         );
       }
     }
 
-    const client = new OpenAI({ apiKey: effectiveKey });
-    const prompt = buildPrompt(action, body);
-
-    const response = await client.responses.create({
-      model: MODEL,
-      input: prompt,
-      temperature: 0.35
-    });
-
-    const output = response.output_text?.trim() || "";
-    const parsed = parseJson(output);
-
-    if (parsed) {
-      return NextResponse.json(parsed);
-    }
-
-    return NextResponse.json({ resultText: output });
+    return NextResponse.json(mockResponse(action, body));
   } catch (error) {
-    console.error("[AI] API call failed, falling back to mock:", error instanceof Error ? error.message : error);
-    // Fall back to mock response so the feature still works
-    if (body?.action) {
-      return NextResponse.json(mockResponse(body.action, body));
-    }
+    console.error("[AI] resume-helper failed:", error instanceof Error ? error.message : error);
     const message = error instanceof Error ? error.message : "Unknown AI error.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-function buildPrompt(action: ResumeHelperAction, body: RequestBody) {
-  const resume = safeResume(body.resumeData);
-  const text = body.text || "";
-  const targetRole = body.targetRole || resume.title || "the target role";
-
-  const base = `You are a world-class resume strategist and career coach who has helped thousands of professionals land roles at top companies like Google, McKinsey, Goldman Sachs, and leading startups.
-Return ONLY valid JSON. No markdown, no explanation, no extra text.
-Target role: ${targetRole}
-Candidate: ${resume.firstName} ${resume.lastName}
-
-Resume data:
-${JSON.stringify(resume, null, 2)}
-`;
-
-  if (action === "improve_summary") {
-    return `${base}
-Rewrite this professional summary into an elite, ATS-optimized executive summary.
-
-REQUIREMENTS:
-- 2-4 powerful sentences, no fluff
-- Open with years of experience + domain expertise (infer from the resume timeline)
-- Weave in 2-3 high-value keywords that recruiters and ATS systems search for in "${targetRole}" roles
-- Highlight the candidate's unique differentiator — what sets them apart
-- End with a forward-looking value proposition
-- Never use clichés like "passionate", "team player", "hard-working" — be specific and compelling
-- Keep it truthful — do not invent facts
-
-Current summary to improve:
-${text}
-
-Return:
-{"resultText":"...improved summary..."}`;
-  }
-
-  if (action === "improve_bullet") {
-    return `${base}
-Transform this experience bullet into a high-impact, recruiter-ready achievement statement.
-
-REQUIREMENTS:
-- Start with a powerful, specific action verb (Led, Architected, Spearheaded, Delivered, Optimized, Orchestrated, Streamlined, Pioneered)
-- Follow the CAR method: Challenge → Action → Result
-- If the original mentions any metrics, preserve and amplify them
-- If no metrics exist, add qualitative impact language: "resulting in improved...", "enabling..."
-- Keep it to 1-2 concise lines — dense with value
-- Make it ATS-friendly with relevant keywords for "${targetRole}"
-- NEVER fabricate exact numbers or percentages — only enhance what's implied
-
-Original bullet:
-${text}
-
-Return:
-{"resultText":"...improved bullet..."}`;
-  }
-
-  if (action === "suggest_skills") {
-    return `${base}
-Suggest 12-16 highly relevant skills for this candidate targeting "${targetRole}" roles.
-
-REQUIREMENTS:
-- Prioritize hard/technical skills that ATS systems scan for — list them first
-- Include industry-standard tools, frameworks, and methodologies relevant to "${targetRole}"
-- Add 3-4 transferable soft skills that hiring managers value (e.g., "Cross-functional Leadership", not "teamwork")
-- Look at the candidate's experience and infer skills they likely have but didn't list
-- Avoid generic filler skills (e.g., "Microsoft Office", "Communication" unless highly specific)
-- Use professional terminology — "Agile/Scrum" not "agile methodology"
-- No duplicates with existing skills: ${JSON.stringify(resume.skills)}
-
-Return:
-{"skills":["skill 1","skill 2",...]}`;
-  }
-
-  if (action === "generate_cover_letter") {
-    const jobDesc = body.jobDescription?.trim() || "";
-    const jobContext = jobDesc
-      ? `\n\nJOB DESCRIPTION PROVIDED BY THE USER:\n${jobDesc}\n\nIMPORTANT: Carefully analyze the job description above. Match the candidate's experience and skills to the specific requirements, responsibilities, and qualifications listed. Reference specific keywords, technologies, and values from the job posting.`
-      : "";
-
-    return `${base}
-Write a compelling, professional cover letter for this candidate applying to a "${targetRole}" position.${jobContext}
-
-REQUIREMENTS:
-- Return ONLY the body paragraphs (usually 3-4 paragraphs).
-- DO NOT include a date, salutation (e.g., "Dear..."), or signature/closing (e.g., "Sincerely..."). The template will handle these.
-- Each paragraph should have a clear purpose:
-  1. HOOK: Open with a confident, specific statement about why this role excites them. No generic "I am writing to apply..."
-  2. VALUE PROOF: Highlight 2-3 concrete achievements from their resume that map to the role.
-  3. CULTURAL FIT: Connect the candidate's approach/philosophy to the company's or role's values.
-  4. CLOSE: Confident but not arrogant. Express enthusiasm for discussing further.
-- Tone: Professional yet human — avoid corporate robot language.
-- Length: 200-300 words total.
-- Never fabricate experiences — only reference what's in the resume.
-
-Return:
-{"resultText":"...body paragraphs only..."}`;
-  }
-
-  if (action === "analyze_resume") {
-    return `${base}
-Perform a comprehensive professional audit of this resume as if you were a senior recruiter at a top-tier company reviewing it for a "${targetRole}" position.
-
-SCORING CRITERIA (score 0-100):
-- ATS Compatibility (keywords, formatting, standard sections): 25 points
-- Impact & Achievement Quality (quantified results, CAR method): 25 points
-- Relevance to Target Role (skill alignment, experience match): 25 points
-- Professional Polish (summary strength, consistency, clarity): 25 points
-
-ANALYSIS REQUIREMENTS:
-- strengths: List 3-5 specific things this resume does well (be precise, reference actual content)
-- gaps: List 3-5 specific weaknesses or missing elements (actionable, not vague)
-- recommendations: List 4-6 concrete, prioritized steps to improve (most impactful first)
-- summary: 2-3 sentence overall assessment — be honest but constructive
-
-Return:
-{"analysis":{"score":0,"strengths":["..."],"gaps":["..."],"recommendations":["..."],"summary":"..."}}`;
-  }
-
-  const refText = body.text || "";
-  return `You are an expert resume data extractor with deep experience parsing CVs, LinkedIn profiles, and career documents.
-
-Given the following text from a reference document, extract ALL resume-relevant information into structured JSON.
-
-EXTRACTION RULES:
-- Extract every piece of information you can find — names, titles, contact info, experiences, education, skills
-- For experience bullets, split compound sentences into individual achievement statements
-- Infer job dates from context clues if not explicitly stated
-- Clean up formatting: fix capitalization, remove extra whitespace, standardize date formats
-- Generate unique IDs for each entry (e.g., "exp_1", "edu_1")
-- Use empty strings for fields you truly cannot determine
-
-Reference text:
-${refText}
-
-Return ONLY valid JSON in this exact format:
-{"resumeData":{"firstName":"","lastName":"","title":"","email":"","phone":"","location":"","website":"","summary":"","skills":["skill1","skill2"],"languages":["lang1"],"experiences":[{"id":"exp_1","role":"","company":"","location":"","startDate":"","endDate":"","current":false,"bullets":["bullet1"]}],"education":[{"id":"edu_1","school":"","degree":"","location":"","startDate":"","endDate":""}]}}`;
 }
 
 function safeResume(resume?: ResumeData): ResumeData {
@@ -249,23 +84,9 @@ function safeResume(resume?: ResumeData): ResumeData {
     education: resume?.education || [],
     skills: resume?.skills || [],
     languages: resume?.languages || [],
+    certificates: resume?.certificates || [],
     references: []
   };
-}
-
-function parseJson(text: string) {
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return null;
-
-    try {
-      return JSON.parse(match[0]) as unknown;
-    } catch {
-      return null;
-    }
-  }
 }
 
 function mockResponse(action: ResumeHelperAction, body: RequestBody): { resultText?: string; skills?: string[]; analysis?: ResumeAnalysis; resumeData?: Partial<ResumeData> } {
@@ -332,6 +153,22 @@ I would welcome the opportunity to discuss how my experience can contribute to y
   };
 }
 
+/**
+ * Fold accents AND the Turkish dotted/dotless I to ASCII for case-insensitive
+ * matching. JS lowercases "DENEYİM" to "deneyi̇m" (with a combining dot), so a
+ * plain /deneyim/i never matches — which meant Turkish section headers
+ * (DENEYİM, EĞİTİM, DİLLER) and language names (İngilizce) silently failed and
+ * Turkish CVs imported as completely empty. We only fold for *matching*; the
+ * original text is still used for the extracted values.
+ */
+function asciiFold(s: string): string {
+  return s
+    .replace(/İ/g, "I")
+    .replace(/ı/g, "i")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
 function mockExtract(text: string): Partial<ResumeData> {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   const result: Partial<ResumeData> = {};
@@ -366,15 +203,24 @@ function mockExtract(text: string): Partial<ResumeData> {
 
   // --- Detect sections by header patterns ---
   type Section = "title" | "summary" | "experience" | "education" | "skills" | "languages" | "unknown";
+  // NOTE: patterns are matched against asciiFold(line), so Turkish words are
+  // written in their ASCII-folded form (ozet, is deneyim, egitim, diller).
   const sectionHeaders: { pattern: RegExp; section: Section }[] = [
-    { pattern: /^(professional\s+)?summary|^profile|^about\s*me|^about$|^objective|^özet|^profil|^personal\s+(statement|profile)/i, section: "summary" },
-    { pattern: /^(work\s+)?experience|^employment|^career|^professional\s+(history|experience)|^iş\s+deneyim|^deneyim|^work\s+history|^relevant\s+experience/i, section: "experience" },
-    { pattern: /^education|^academic|^eğitim|^qualifications|^certific/i, section: "education" },
-    { pattern: /^(technical\s+|core\s+)?skills?|^competenc|^technologies|^tech\s*\.?\s*stack|^beceriler|^areas?\s+of\s+expertise|^tools?\s*(and|&)|^expertise/i, section: "skills" },
-    { pattern: /^languages?|^diller/i, section: "languages" },
+    { pattern: /^(professional\s+)?summary|^profile|^about\s*me|^about$|^objective|^ozet|^profil|^hakkimda|^personal\s+(statement|profile)/i, section: "summary" },
+    { pattern: /^(work\s+)?experience|^employment|^career|^professional\s+(history|experience)|^is\s+deneyim|^deneyim|^tecrube|^work\s+history|^relevant\s+experience/i, section: "experience" },
+    { pattern: /^education|^academic|^egitim|^ogrenim|^qualifications|^certific/i, section: "education" },
+    { pattern: /^(technical\s+|core\s+)?skills?|^competenc|^technologies|^tech\s*\.?\s*stack|^beceriler|^yetenekler|^yetkinlikler|^areas?\s+of\s+expertise|^tools?\s*(and|&)|^expertise/i, section: "skills" },
+    { pattern: /^languages?|^diller|^yabanci\s+dil/i, section: "languages" },
   ];
 
   const datePattern = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|present|current|ongoing|devam|halen|\d{4})\b/i;
+
+  // Known language names — shared by the section guard and the languages
+  // extractor so a long, comma-separated "English, Spanish, French" line is
+  // recognised as a language line instead of being kicked to "unknown".
+  // Matched against asciiFold(...), so Turkish names are in ASCII-folded form
+  // (turkce, fransizca, ingilizce, …).
+  const LANG_NAMES = /\b(english|turkish|german|french|spanish|italian|arabic|russian|chinese|mandarin|cantonese|japanese|korean|portuguese|dutch|swedish|norwegian|danish|finnish|polish|czech|greek|hindi|urdu|persian|farsi|hebrew|hungarian|romanian|bulgarian|croatian|serbian|slovak|slovenian|ukrainian|indonesian|malay|thai|vietnamese|bengali|swahili|tamil|telugu|marathi|gujarati|punjabi|azerbaijani|kazakh|georgian|armenian|turkce|almanca|fransizca|ispanyolca|ingilizce|arapca|rusca|cince|japonca|korece|lehce|fince|danca|azerice)\b/i;
 
   // Gather lines per section
   const sectionLines: Record<Section, string[]> = { title: [], summary: [], experience: [], education: [], skills: [], languages: [], unknown: [] };
@@ -383,9 +229,10 @@ function mockExtract(text: string): Partial<ResumeData> {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    const foldedLine = asciiFold(line);
     let matched = false;
     for (const { pattern, section } of sectionHeaders) {
-      if (pattern.test(line) && line.length < 60) {
+      if (pattern.test(foldedLine) && line.length < 60) {
         currentSection = section;
         matched = true;
         headerCount++;
@@ -397,7 +244,12 @@ function mockExtract(text: string): Partial<ResumeData> {
       // it means a new section started without a recognized header — push to "unknown"
       // so it doesn't pollute languages.
       if (currentSection === "languages") {
-        const looksLikeLang = line.length < 50 && !/\d{4}|city:|country:|activities|responsibilities|managed|handled|coordinated/i.test(line);
+        // Keep the line in the languages section if it names a known language
+        // (covers long comma-separated lists), otherwise fall back to the
+        // length/keyword heuristic so a new unlabelled section doesn't leak in.
+        const looksLikeLang =
+          LANG_NAMES.test(foldedLine) ||
+          (line.length < 50 && !/\d{4}|city:|country:|activities|responsibilities|managed|handled|coordinated/i.test(line));
         if (!looksLikeLang) {
           currentSection = "unknown";
         }
@@ -453,25 +305,44 @@ function mockExtract(text: string): Partial<ResumeData> {
 
   // --- Languages ---
   if (sectionLines.languages.length > 0) {
-    const knownLangs = /\b(english|turkish|german|french|spanish|italian|arabic|russian|chinese|japanese|korean|portuguese|dutch|swedish|norwegian|danish|finnish|polish|czech|greek|hindi|urdu|persian|hebrew|hungarian|romanian|bulgarian|croatian|serbian|slovak|slovenian|ukrainian|indonesian|malay|thai|vietnamese|bengali|swahili|tamil|telugu|marathi|gujarati|punjabi|türkçe|almanca|fransızca|ispanyolca|ingilizce|arapça|rusça|çince|japonca|korece|lehçe|fince|danca)\b/i;
-    const profLevels = /\b(native|fluent|advanced|intermediate|beginner|basic|proficient|conversational|mother\s*tongue|elementary|a1|a2|b1|b2|c1|c2)\b/i;
+    // EN + TR proficiency levels (matched against asciiFold(seg)).
+    const profLevels = /\b(native|fluent|advanced|intermediate|beginner|basic|proficient|conversational|mother\s*tongue|elementary|a1|a2|b1|b2|c1|c2|anadil|ileri|orta|baslangic|akici|temel|cok\s*iyi|iyi)\b/i;
 
+    const titleCase = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    // Restore proper native spelling for Turkish names/levels that asciiFold
+    // flattened (so a TR user sees "İngilizce (İleri)", not "Ingilizce (Ileri)").
+    const DISPLAY: Record<string, string> = {
+      ingilizce: "İngilizce", turkce: "Türkçe", fransizca: "Fransızca", ispanyolca: "İspanyolca",
+      arapca: "Arapça", rusca: "Rusça", cince: "Çince", lehce: "Lehçe",
+      ileri: "İleri", anadil: "Anadil", orta: "Orta", baslangic: "Başlangıç", akici: "Akıcı",
+    };
+    const display = (folded: string) => DISPLAY[folded.toLowerCase()] || titleCase(folded);
     const langs: string[] = [];
     for (const line of sectionLines.languages) {
-      // First try: extract "Language (Level)" or "Language - Level" patterns
-      const langMatch = line.match(knownLangs);
-      if (langMatch) {
-        const langName = langMatch[1];
-        // Try to find level nearby
-        const levelMatch = line.match(profLevels);
-        if (levelMatch) {
-          langs.push(`${langName} (${levelMatch[1]})`);
-        } else {
-          langs.push(langName);
-        }
+      // Split comma / semicolon / pipe / bullet separated lists so every
+      // language on a single line is captured — e.g.
+      // "English (Native), Spanish (Fluent), French (Intermediate)".
+      const segments = line.split(/[,;|•·]/).map((s) => s.trim()).filter(Boolean);
+      const parts = segments.length > 0 ? segments : [line];
+      for (const seg of parts) {
+        const folded = asciiFold(seg);
+        const langMatch = folded.match(LANG_NAMES);
+        if (!langMatch) continue;
+        const langName = display(langMatch[1]);
+        const levelMatch = folded.match(profLevels);
+        langs.push(levelMatch ? `${langName} (${display(levelMatch[1])})` : langName);
       }
     }
-    if (langs.length > 0) result.languages = [...new Set(langs)];
+    if (langs.length > 0) {
+      // De-dupe case-insensitively, preserving first occurrence/order.
+      const seen = new Set<string>();
+      result.languages = langs.filter((l) => {
+        const key = l.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
   }
 
   // --- Experience: smarter parsing ---
@@ -509,10 +380,33 @@ function mockExtract(text: string): Partial<ResumeData> {
     // Strip date portion from line (all formats)
     const stripDates = (l: string) => {
       let s = normDash(l);
+      // Europass DD/MM/YYYY – DD/MM/YYYY
       s = s.replace(/\[?\s*\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}\s*-+\s*(?:\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}|present|current|ongoing|devam|halen)\s*\]?/i, "");
+      // "Mon YYYY - Mon YYYY" / "Mon YYYY - present"
       s = s.replace(/\(?\s*\w{3,9}\.?\s+\d{4}\s*-+\s*(?:\w{3,9}\.?\s+\d{4}|\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "");
+      // "YYYY - YYYY" / "YYYY - present" (bare year range, often parenthesised).
+      // Previously unhandled, so year-only ranges leaked into the company name.
+      s = s.replace(/\(?\s*\d{4}\s*-+\s*(?:\d{4}|present|current|ongoing|devam|halen)\s*\)?/i, "");
+      // single "(YYYY)"
       s = s.replace(/\(\d{4}\)/, "");
       return s.replace(/\s{2,}/g, " ").trim();
+    };
+
+    const tidy = (s: string) => s.replace(/[|·]/g, " ").replace(/\s{2,}/g, " ").trim();
+
+    // "Senior Engineer - Acme Corp" / "Designer | Studio X" / "PM at Google"
+    // → { role, company }. A blank role with everything crammed into company
+    // is the single most common bad import, so split on a clear separator when
+    // one exists; otherwise keep the whole string as the company. Both sides
+    // must contain a letter so a stray dash inside a leftover date range
+    // (e.g. "Acme 2018 - 2020") can never be mistaken for a role separator.
+    const hasLetter = /[a-zA-ZçğıöşüÇĞİÖŞÜ]/;
+    const splitRoleCompany = (s: string): { role: string; company: string } => {
+      const m = s.match(/^(.{2,60}?)\s+(?:[-–—|·@]|at)\s+(.{2,})$/i);
+      if (m && hasLetter.test(m[1]) && hasLetter.test(m[2]) && !/^\d/.test(m[2].trim())) {
+        return { role: tidy(m[1]), company: tidy(m[2]) };
+      }
+      return { role: "", company: tidy(s) };
     };
 
     for (const line of sectionLines.experience) {
@@ -535,15 +429,19 @@ function mockExtract(text: string): Partial<ResumeData> {
       const isShort = line.length < 100;
 
       if (hasDate && isShort) {
-        const cleaned = stripDates(line).replace(/[|·]/g, " ").replace(/\s{2,}/g, " ").trim();
+        const cleanedRaw = stripDates(line);
+        const cleaned = tidy(cleanedRaw);
 
         if (!cur || cur.bullets.length > 0 || cur.company) {
-          // Start new entry — this line is likely "COMPANY (dates)"
+          // Start new entry — this line is "ROLE - COMPANY (dates)" or just
+          // "COMPANY (dates)". Split a clear "Role <sep> Company" so the role
+          // field isn't left blank with everything dumped into company.
           if (cur) experiences.push(cur);
+          const { role: splitRole, company: splitCompany } = splitRoleCompany(cleanedRaw);
           cur = {
             id: `exp_${experiences.length + 1}`,
-            role: "",
-            company: cleaned || "",
+            role: splitRole,
+            company: splitCompany || cleaned || "",
             location: "",
             startDate: dates.start,
             endDate: dates.end,

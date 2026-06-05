@@ -1,9 +1,9 @@
-import type { ResumeData, SelectedTemplate } from "@/types/resume";
+import type { CertificateItem, ResumeData, SelectedTemplate } from "@/types/resume";
 import type { CvLabels } from "@/lib/cv-labels";
-import { formatDateRange, getFullName } from "./sample-data";
+import { formatDateRange, formatResumeDate, getFullName } from "./sample-data";
 import type { ComponentType } from "react";
 
-const defaultLabels: CvLabels = { summary: "Summary", experience: "Experience", education: "Education", skills: "Skills", languages: "Languages", references: "References", profile: "Profile", contact: "Contact", present: "Present" };
+const defaultLabels: CvLabels = { summary: "Summary", experience: "Experience", education: "Education", skills: "Skills", languages: "Languages", certificates: "Certificates", references: "References", profile: "Profile", contact: "Contact", present: "Present" };
 
 export type ParametricStyle =
   | "clean"
@@ -186,6 +186,32 @@ function Langs({ languages }: { languages: string[] }) {
   );
 }
 
+function Certs({ items, color, sidebar }: { items: CertificateItem[]; color?: string; sidebar?: boolean }) {
+  if (!items || !items.length) return null;
+  return (
+    <div className="space-y-2">
+      {items.map((cert) => {
+        const dates = [formatResumeDate(cert.issueDate), formatResumeDate(cert.expiryDate)]
+          .filter(Boolean)
+          .join(" – ");
+        const nameColor = sidebar ? "#fff" : "#1e293b";
+        const subColor = sidebar ? "rgba(255,255,255,0.7)" : "#64748b";
+        return (
+          <div key={cert.id}>
+            <p className="text-[10px] font-semibold" style={{ color: nameColor }}>{cert.name}</p>
+            <p className="text-[9px]" style={{ color: subColor }}>
+              {[cert.issuer, dates].filter(Boolean).join(" · ")}
+            </p>
+            {cert.credentialUrl && !sidebar && (
+              <p className="text-[8.5px] italic" style={{ color: color || "#64748b" }}>{cert.credentialUrl}</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── Photo / Initials ── */
 function PhotoOrInitials({ photoUrl, name, size = 68, radius = 8, color }: {
   photoUrl?: string; name: string; size?: number; radius?: number; color: string;
@@ -232,6 +258,7 @@ function CleanLayout({ resume: r, config: c, labels: L }: LP) {
       {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
       {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
       {r.languages.length > 0 && <section className="mt-5"><SH title={L.languages} color={c.color} /><Langs languages={r.languages} /></section>}
+      {r.certificates && r.certificates.length > 0 && <section className="mt-5"><SH title={L.certificates} color={c.color} /><Certs items={r.certificates} color={c.color} /></section>}
     </Sheet>
   );
 }
@@ -255,9 +282,9 @@ function SidebarDarkLayout({ resume: r, config: c, labels: L }: LP) {
           )}
         </div>
         <div className="mb-6">
-          <h1 className="text-[24px] font-extrabold leading-[1.05] tracking-tight text-white">{fn(r)}</h1>
+          <h1 className="text-[24px] font-extrabold leading-[1.05] tracking-tight text-white" style={{ overflowWrap: "break-word", wordBreak: "break-word", hyphens: "auto" }}>{fn(r)}</h1>
           <div className="mt-2 h-[3px] w-10" style={{ backgroundColor: c.color }} />
-          <p className="mt-3 text-[10.5px] font-medium uppercase tracking-[0.14em]" style={{ color: c.color + "cc" }}>{r.title || "Professional Title"}</p>
+          <p className="mt-3 text-[10.5px] font-medium uppercase tracking-[0.14em]" style={{ color: c.color + "cc", overflowWrap: "break-word", wordBreak: "break-word" }}>{r.title || "Professional Title"}</p>
         </div>
         {contact.length > 0 && (
           <div className="mb-6">
@@ -287,6 +314,13 @@ function SidebarDarkLayout({ resume: r, config: c, labels: L }: LP) {
             <div className="space-y-1">{r.languages.map((l) => <p key={l} className="text-[9px] text-white/70">{l}</p>)}</div>
           </div>
         )}
+        {r.certificates && r.certificates.length > 0 && (
+          <div className="mt-6">
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em] text-white/50">{L.certificates}</p>
+            <div className="h-px w-full bg-white/10 mb-2" />
+            <Certs items={r.certificates} sidebar />
+          </div>
+        )}
       </aside>
       <main style={{ flex: 1, padding: "20mm 18mm" }}>
         {r.summary && <section className="mb-6"><SH title={L.profile} color={c.color} /><div className="mb-3 h-[2px] w-8" style={{ backgroundColor: c.color }} /><p className="text-[10px] leading-[1.65] text-[#1e293b]">{r.summary}</p></section>}
@@ -310,9 +344,9 @@ function SidebarLightLayout({ resume: r, config: c, labels: L }: LP) {
     <div className={fc(c.font)} style={{ width: "210mm", minHeight: "297mm", backgroundColor: "#fff", display: "flex", overflow: "hidden" }}>
       <aside style={{ width: "72mm", backgroundColor: bg, padding: "20mm 12mm" }}>
         <div className="mb-6">
-          <h1 className="text-[22px] font-extrabold leading-[1.05] tracking-tight text-[#0f172a]">{fn(r)}</h1>
+          <h1 className="text-[22px] font-extrabold leading-[1.05] tracking-tight text-[#0f172a]" style={{ overflowWrap: "break-word", wordBreak: "break-word", hyphens: "auto" }}>{fn(r)}</h1>
           <div className="mt-2 h-[2px] w-10" style={{ backgroundColor: c.color }} />
-          <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: c.color }}>{r.title || "Professional Title"}</p>
+          <p className="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: c.color, overflowWrap: "break-word", wordBreak: "break-word" }}>{r.title || "Professional Title"}</p>
         </div>
         {contact.length > 0 && (
           <div className="mb-5">
@@ -336,6 +370,12 @@ function SidebarLightLayout({ resume: r, config: c, labels: L }: LP) {
           <div>
             <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>{L.languages}</p>
             <div className="space-y-1">{r.languages.map((l) => <p key={l} className="text-[9px] text-[#64748b]">{l}</p>)}</div>
+          </div>
+        )}
+        {r.certificates && r.certificates.length > 0 && (
+          <div className="mt-5">
+            <p className="mb-2 text-[8px] font-bold uppercase tracking-[0.16em]" style={{ color: c.color }}>{L.certificates}</p>
+            <Certs items={r.certificates} color={c.color} />
           </div>
         )}
       </aside>
@@ -504,6 +544,7 @@ function SplitHeaderLayout({ resume: r, config: c, labels: L }: LP) {
       {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
       {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
       {r.languages.length > 0 && <section className="mt-5"><SH title={L.languages} color={c.color} /><Langs languages={r.languages} /></section>}
+      {r.certificates && r.certificates.length > 0 && <section className="mt-5"><SH title={L.certificates} color={c.color} /><Certs items={r.certificates} color={c.color} /></section>}
     </Sheet>
   );
 }
@@ -562,6 +603,7 @@ function CardHeaderLayout({ resume: r, config: c, labels: L }: LP) {
       {r.education.length > 0 && <section className="mt-5"><SH title={L.education} color={c.color} /><Edu education={r.education} /></section>}
       {r.skills.length > 0 && <section className="mt-5"><SH title={L.skills} color={c.color} /><Skills skills={r.skills} color={c.color} /></section>}
       {r.languages.length > 0 && <section className="mt-5"><SH title={L.languages} color={c.color} /><Langs languages={r.languages} /></section>}
+      {r.certificates && r.certificates.length > 0 && <section className="mt-5"><SH title={L.certificates} color={c.color} /><Certs items={r.certificates} color={c.color} /></section>}
     </div>
   );
 }

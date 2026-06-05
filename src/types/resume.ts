@@ -52,6 +52,18 @@ export type EducationItem = {
   endDate: string;
 };
 
+export type CertificateItem = {
+  id: string;
+  name: string;
+  issuer: string;
+  /** ISO month (YYYY-MM) preferred; legacy free-text accepted for backward compat. */
+  issueDate: string;
+  /** Optional. Empty string when the certificate doesn't expire. */
+  expiryDate: string;
+  /** Optional verification link, e.g. Credly badge URL or issuer's credential page. */
+  credentialUrl: string;
+};
+
 export type ResumeReferenceKind = "image" | "pdf" | "text" | "json" | "other";
 
 export type ResumeReference = {
@@ -83,6 +95,7 @@ export type ResumeData = {
   education: EducationItem[];
   skills: string[];
   languages: string[];
+  certificates: CertificateItem[];
   references: ResumeReference[];
 };
 
@@ -133,5 +146,6 @@ export const emptyResumeData: ResumeData = {
   education: [],
   skills: [],
   languages: [],
+  certificates: [],
   references: []
 };

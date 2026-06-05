@@ -91,12 +91,56 @@ export const sampleResume: ResumeData = {
     "Jira & Linear"
   ],
   languages: ["English (Native)", "Mandarin (Conversational)"],
+  certificates: [
+    {
+      id: "cert-1",
+      name: "Certified Scrum Product Owner (CSPO)",
+      issuer: "Scrum Alliance",
+      issueDate: "2023-02",
+      expiryDate: "2025-02",
+      credentialUrl: "https://www.scrumalliance.org/community/profile/amitchell",
+    },
+    {
+      id: "cert-2",
+      name: "Google Project Management Certificate",
+      issuer: "Google · Coursera",
+      issueDate: "2022-08",
+      expiryDate: "",
+      credentialUrl: "",
+    },
+  ],
   references: []
 };
 
+/**
+ * Format a single date string for display in a résumé.
+ * - "YYYY-MM"     → "Mar 2024"           (from the month picker)
+ * - "YYYY-MM-DD"  → "Mar 2024"           (from the date picker)
+ * - anything else → returned as-is        (legacy free-text dates like "Mar 2022")
+ *
+ * Empty input returns an empty string so callers can decide how to label it.
+ */
+export function formatResumeDate(value: string): string {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const match = trimmed.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
+  if (!match) return trimmed;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (Number.isNaN(year) || Number.isNaN(month) || month < 1 || month > 12) {
+    return trimmed;
+  }
+  // Use a stable English locale here so the rendered CV PDF is consistent
+  // across users regardless of their browser locale. Templates that need
+  // localised month names should call Intl directly with their own locale.
+  const date = new Date(Date.UTC(year, month - 1, 1));
+  return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" }).format(date);
+}
+
 export function formatDateRange(start: string, end: string, current: boolean) {
-  const startLabel = start.trim() || "Start";
-  const endLabel = current ? "Present" : end.trim() || "End";
+  const startLabel = formatResumeDate(start) || "Start";
+  const endLabel = current ? "Present" : formatResumeDate(end) || "End";
   return `${startLabel} — ${endLabel}`;
 }
 

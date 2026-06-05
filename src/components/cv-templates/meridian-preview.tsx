@@ -2,7 +2,7 @@ import type { ResumeData, SelectedTemplate } from "@/types/resume";
 import type { CvLabels } from "@/lib/cv-labels";
 import { formatDateRange, getFullName } from "./sample-data";
 
-const defaultLabels: CvLabels = { summary: "Summary", experience: "Experience", education: "Education", skills: "Skills", languages: "Languages", references: "References", profile: "Profile", contact: "Contact", present: "Present" };
+const defaultLabels: CvLabels = { summary: "Summary", experience: "Experience", education: "Education", skills: "Skills", languages: "Languages", certificates: "Certificates", references: "References", profile: "Profile", contact: "Contact", present: "Present" };
 
 // Meridian — ultra-minimal monochrome, generous white space.
 export function MeridianPreview({ resume, labels }: { resume: ResumeData; settings?: SelectedTemplate; labels?: CvLabels }) {

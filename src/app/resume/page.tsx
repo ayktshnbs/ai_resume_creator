@@ -1,7 +1,7 @@
 "use client";
 
 import type { DragEvent, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-sidebar";
@@ -13,11 +13,13 @@ import {
   createId,
   loadResumeData,
   loadSelectedTemplate,
-  saveResumeData
+  saveResumeData,
+  stripReferenceBlobs
 } from "@/lib/resume-storage";
 import { useAutoSaveToDb, loadFromDb } from "@/lib/use-db-sync";
 import {
   emptyResumeData,
+  type CertificateItem,
   type EducationItem,
   type ExperienceItem,
   type ResumeData,
@@ -88,6 +90,7 @@ type StepId =
   | "education"
   | "skills"
   | "languages"
+  | "certificates"
   | "review";
 
 const initialAiState: AiState = { full: false, summary: false, bullets: {}, error: "" };
@@ -175,7 +178,11 @@ export default function ResumeBuilderPage() {
     }
   }, [loaded, resume, uid, session]);
 
-  useAutoSaveToDb("/api/user/resumes", resume, loaded, resumeDocId);
+  // Sync a slimmed copy (no base64 source blobs) so an imported PDF/image
+  // can't bloat the request past the serverless body limit and silently
+  // break autosave. Memoised so the debounce dependency stays stable.
+  const syncResume = useMemo(() => stripReferenceBlobs(resume), [resume]);
+  useAutoSaveToDb("/api/user/resumes", syncResume, loaded, resumeDocId);
 
   /* ── Loading gate ─────────────────────────────────────────── */
   if (status === "loading") {
@@ -298,6 +305,32 @@ export default function ResumeBuilderPage() {
 
   function removeLanguage(lang: string) {
     setResume((current) => ({ ...current, languages: current.languages.filter((l) => l !== lang) }));
+  }
+
+  function addCertificate() {
+    const item: CertificateItem = {
+      id: createId("cert"),
+      name: "",
+      issuer: "",
+      issueDate: "",
+      expiryDate: "",
+      credentialUrl: "",
+    };
+    setResume((current) => ({ ...current, certificates: [...(current.certificates ?? []), item] }));
+  }
+
+  function updateCertificate(id: string, patch: Partial<CertificateItem>) {
+    setResume((current) => ({
+      ...current,
+      certificates: (current.certificates ?? []).map((c) => (c.id === id ? { ...c, ...patch } : c)),
+    }));
+  }
+
+  function deleteCertificate(id: string) {
+    setResume((current) => ({
+      ...current,
+      certificates: (current.certificates ?? []).filter((c) => c.id !== id),
+    }));
   }
 
   function removeReference(id: string) {
@@ -481,11 +514,26 @@ export default function ResumeBuilderPage() {
     const importedReferences: ResumeReference[] = [];
     let importedResume: Partial<ResumeData> | null = null;
     const textsToExtract: string[] = [];
+    // Track files we can't read so the closing message is honest rather than a
+    // misleading "attached" when nothing could actually be imported.
+    const unreadableNames: string[] = []; // images / unknown binaries (no OCR)
+    const emptyPdfNames: string[] = []; // PDFs with no selectable text (scanned)
+    const oversizeNames: string[] = []; // files too big to keep as a reference
     setReferenceMessage("");
+
+    // Skip absurdly large files outright — a 20MB+ base64 blob can blow the
+    // localStorage quota and stall the autosave on mobile. 12MB is generous
+    // for any real résumé PDF.
+    const MAX_FILE_BYTES = 12 * 1024 * 1024;
 
     for (const file of Array.from(files)) {
       const kind = getReferenceKind(file);
       const addedAt = new Date().toISOString();
+
+      if (file.size > MAX_FILE_BYTES) {
+        oversizeNames.push(file.name);
+        continue;
+      }
 
       if (kind === "json" || kind === "text") {
         const text = await file.text();
@@ -514,7 +562,12 @@ export default function ResumeBuilderPage() {
       if (kind === "pdf") {
         const text = await extractPdfText(file);
         const dataUrl = await readFileAsDataUrl(file);
-        if (text && text.trim().length > 20) textsToExtract.push(text);
+        if (text && text.trim().length > 20) {
+          textsToExtract.push(text);
+        } else {
+          // No text layer — almost always a scanned/photographed PDF.
+          emptyPdfNames.push(file.name);
+        }
         importedReferences.push({
           id: createId("ref"),
           name: file.name,
@@ -528,7 +581,10 @@ export default function ResumeBuilderPage() {
         continue;
       }
 
+      // Images and unknown binaries: we can store them as a reference but there
+      // is no OCR, so no data can be pulled out of them.
       const dataUrl = await readFileAsDataUrl(file);
+      if (kind === "image" || kind === "other") unreadableNames.push(file.name);
       importedReferences.push({
         id: createId("ref"),
         name: file.name,
@@ -547,6 +603,17 @@ export default function ResumeBuilderPage() {
       }));
     }
 
+    // Reusable hint for files that can't be auto-read on any device.
+    const unreadable = [...unreadableNames, ...emptyPdfNames];
+    const cantReadHint =
+      unreadable.length > 0
+        ? ` We couldn't read text from ${unreadable.length === 1 ? unreadable[0] : `${unreadable.length} file(s)`} — image and scanned files can't be auto-imported. Paste your details with “Paste from LinkedIn”, or upload a PDF/TXT that has selectable text.`
+        : "";
+    const oversizeHint =
+      oversizeNames.length > 0
+        ? ` ${oversizeNames.length === 1 ? `${oversizeNames[0]} is` : `${oversizeNames.length} files are`} larger than 12MB and ${oversizeNames.length === 1 ? "was" : "were"} skipped.`
+        : "";
+
     if (textsToExtract.length > 0 && !importedResume) {
       setExtracting(true);
       setReferenceMessage("Extracting resume data from uploaded files...");
@@ -557,25 +624,26 @@ export default function ResumeBuilderPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "extract_from_reference", text: combined })
         });
+        if (!response.ok) {
+          throw new Error(`API ${response.status}`);
+        }
         const data = (await response.json()) as { resumeData?: Partial<ResumeData> };
-        if (data.resumeData) {
-          const extracted = extractResumeObject(data.resumeData);
-          if (extracted) {
-            setResume((current) => mergeImportedResume(current, extracted));
-            setReferenceMessage("Resume data extracted and applied. Continue to the next step.");
-          } else {
-            setReferenceMessage("Files attached but no structured data could be extracted.");
-          }
+        const extracted = data.resumeData ? extractResumeObject(data.resumeData) : null;
+        if (extracted) {
+          setResume((current) => mergeImportedResume(current, extracted));
+          setReferenceMessage(`Resume data extracted and applied. Review each step and fill any gaps.${oversizeHint}`);
         } else {
-          setReferenceMessage("Files attached but no resume data could be extracted.");
+          setReferenceMessage(`Files attached, but no structured data could be read. Fill the form manually or try a cleaner file.${cantReadHint}${oversizeHint}`);
         }
       } catch {
-        setReferenceMessage("Files attached. AI extraction failed — fill in the form manually.");
+        setReferenceMessage(`Files attached, but automatic extraction failed — please fill in the form manually.${oversizeHint}`);
       } finally {
         setExtracting(false);
       }
     } else if (importedResume) {
-      setReferenceMessage("Files attached and resume data was used to populate the form.");
+      setReferenceMessage(`Resume data imported and applied to the form.${oversizeHint}`);
+    } else if (unreadable.length > 0 || oversizeNames.length > 0) {
+      setReferenceMessage(`${cantReadHint.trim()}${oversizeHint}`.trim());
     } else {
       setReferenceMessage("Files attached to this draft.");
     }
@@ -701,6 +769,7 @@ export default function ResumeBuilderPage() {
     { id: "education", label: t("step.education"), icon: "education" },
     { id: "skills", label: t("step.skills"), icon: "sparkle" },
     { id: "languages", label: t("step.languages"), icon: "language" },
+    { id: "certificates", label: t("step.certificates"), icon: "subject" },
     { id: "review", label: t("step.review"), icon: "check" }
   ];
 
@@ -712,6 +781,7 @@ export default function ResumeBuilderPage() {
     education: educationStatus(resume),
     skills: resume.skills.length === 0 ? "empty" : resume.skills.length < 5 ? "partial" : "complete",
     languages: resume.languages.length === 0 ? "empty" : "complete",
+    certificates: resume.certificates.length === 0 ? "empty" : "complete",
     review: "empty"
   };
 
@@ -750,8 +820,10 @@ export default function ResumeBuilderPage() {
           </div>
         </div>
 
-        {/* Editor middle pane */}
-        <div className="relative flex min-w-0 flex-1 flex-col bg-paper-soft lg:max-w-[640px] lg:border-r-2 lg:border-ink-deep">
+        {/* Editor middle pane — min-h-0 lets it shrink so SectionShell's
+           internal overflow-y-auto can engage instead of pushing the
+           sticky footer off-screen on mobile. */}
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-paper-soft lg:max-w-[640px] lg:border-r-2 lg:border-ink-deep">
           {/* Mobile step tabs */}
           <div className="border-b-2 border-ink-deep lg:hidden">
             <StepTabs
@@ -895,6 +967,20 @@ export default function ResumeBuilderPage() {
             />
           )}
 
+          {activeStep === "certificates" && (
+            <CertificatesStep
+              resume={resume}
+              step={stepIndex + 1}
+              total={steps.length}
+              onAdd={addCertificate}
+              onUpdate={updateCertificate}
+              onDelete={deleteCertificate}
+              t={t}
+              onPrev={goPrev}
+              onNext={goNext}
+            />
+          )}
+
           {activeStep === "review" && (
             <ReviewStep
               resume={resume}
@@ -933,14 +1019,14 @@ export default function ResumeBuilderPage() {
           />
         </div>
 
-        {/* Mobile preview FAB */}
+        {/* Mobile preview FAB — sits above the sticky Prev/Next footer */}
         <button
           type="button"
           onClick={() => setPreviewOpen(true)}
-          className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full primary-gradient px-5 py-3 text-sm font-bold text-white shadow-panel lg:hidden"
+          className="fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-full primary-gradient px-4 py-2.5 text-xs font-bold text-white shadow-panel lg:hidden"
           aria-label={t("builder.viewPreview")}
         >
-          <Icon name="visibility" className="text-[18px]" />
+          <Icon name="visibility" className="text-[16px]" />
           {t("builder.preview")}
         </button>
       </div>
@@ -1462,11 +1548,12 @@ function ExperienceStep({
           experience={experience}
           index={idx}
           isImproving={(i) => Boolean(ai.bullets[`${experience.id}-${i}`])}
+          isPro={isPro}
           key={experience.id}
           onAddBullet={() => onAddBullet(experience.id)}
           onDelete={() => onDelete(experience.id)}
           onDeleteBullet={(i) => onDeleteBullet(experience.id, i)}
-          onImproveBullet={isPro ? (i, text) => onImproveBullet(experience.id, i, text) : undefined}
+          onImproveBullet={(i, text) => onImproveBullet(experience.id, i, text)}
           onUpdate={(patch) => onUpdate(experience.id, patch)}
           onUpdateBullet={(i, v) => onUpdateBullet(experience.id, i, v)}
         />
@@ -1590,7 +1677,16 @@ function SkillsStep({
             <Icon className="text-[14px]" name="sparkle" />
             {helper.action === "suggest_skills" ? "Optimizing…" : "Suggest skills"}
           </button>
-        ) : null
+        ) : (
+          <Link
+            href="/pricing"
+            className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-bold text-primary"
+            title="Upgrade to Pro to get AI-suggested skills"
+          >
+            <Icon className="text-[14px]" name="sparkle" />
+            🔒 Suggest skills
+          </Link>
+        )
       }
       onPrev={onPrev}
       onNext={onNext}
@@ -1697,7 +1793,7 @@ function LanguagesStep({
       onPrev={onPrev}
       onNext={onNext}
       prevLabel={t("common.previous")}
-      nextLabel={t("common.finish")}
+      nextLabel={t("common.next")}
     >
       <div className="flex gap-2">
         <input
@@ -2017,10 +2113,44 @@ function Field({
   );
 }
 
+/**
+ * Normalise a stored date to the "YYYY-MM" shape that an HTML <input type="month">
+ * accepts. Already-iso values pass through; legacy free-text values
+ * ("Mar 2022", "March 2022", "Mar. 2022") are parsed best-effort; anything
+ * we can't recognise becomes "" so the picker shows empty rather than
+ * silently keeping the wrong value.
+ */
+const MONTH_NAMES: Record<string, number> = {
+  jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3, apr: 4, april: 4,
+  may: 5, jun: 6, june: 6, jul: 7, july: 7, aug: 8, august: 8,
+  sep: 9, sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11,
+  dec: 12, december: 12,
+};
+
+function isoMonth(value: string): string {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  // Already YYYY-MM or YYYY-MM-DD — extract the YYYY-MM.
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})(?:-\d{2})?$/);
+  if (isoMatch) {
+    const m = Number(isoMatch[2]);
+    if (m >= 1 && m <= 12) return `${isoMatch[1]}-${isoMatch[2]}`;
+  }
+  // "Mar 2022", "March 2022", "Mar. 2022", "Mar, 2022", etc.
+  const textMatch = trimmed.match(/^([A-Za-z]+)[.,]?\s+(\d{4})$/);
+  if (textMatch) {
+    const monthNum = MONTH_NAMES[textMatch[1].toLowerCase()];
+    if (monthNum) return `${textMatch[2]}-${monthNum.toString().padStart(2, "0")}`;
+  }
+  return "";
+}
+
 function ExperienceEditor({
   experience,
   index,
   isImproving,
+  isPro,
   onAddBullet,
   onDelete,
   onDeleteBullet,
@@ -2031,10 +2161,11 @@ function ExperienceEditor({
   experience: ExperienceItem;
   index: number;
   isImproving: (i: number) => boolean;
+  isPro: boolean;
   onAddBullet: () => void;
   onDelete: () => void;
   onDeleteBullet: (i: number) => void;
-  onImproveBullet?: (i: number, text: string) => void;
+  onImproveBullet: (i: number, text: string) => void;
   onUpdate: (patch: Partial<ExperienceItem>) => void;
   onUpdateBullet: (i: number, value: string) => void;
 }) {
@@ -2057,8 +2188,8 @@ function ExperienceEditor({
         <Field label="Role Title" onChange={(v) => onUpdate({ role: v })} value={experience.role} />
         <Field label="Company" onChange={(v) => onUpdate({ company: v })} value={experience.company} />
         <Field label="Location" onChange={(v) => onUpdate({ location: v })} value={experience.location} />
-        <Field label="Start Date" onChange={(v) => onUpdate({ startDate: v })} value={experience.startDate} />
-        <Field label="End Date" onChange={(v) => onUpdate({ endDate: v })} value={experience.endDate} />
+        <Field type="month" label="Start Date" onChange={(v) => onUpdate({ startDate: v })} value={isoMonth(experience.startDate)} />
+        <Field type="month" label="End Date" onChange={(v) => onUpdate({ endDate: v })} value={isoMonth(experience.endDate)} />
         <label className="flex items-center gap-2 pt-7 text-sm font-semibold text-muted">
           <input
             checked={experience.current}
@@ -2083,7 +2214,7 @@ function ExperienceEditor({
               placeholder="Led, built, improved, reduced..."
               value={bullet}
             />
-            {onImproveBullet && (
+            {isPro ? (
               <button
                 className="rounded-xl bg-primary/10 px-3 py-2 text-xs font-bold text-primary disabled:opacity-60"
                 disabled={isImproving(index) || !bullet.trim()}
@@ -2092,6 +2223,14 @@ function ExperienceEditor({
               >
                 {isImproving(index) ? "Refining…" : "AI refine"}
               </button>
+            ) : (
+              <Link
+                href="/pricing"
+                className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-bold text-primary"
+                title="Upgrade to Pro to refine bullets with AI"
+              >
+                🔒 AI refine
+              </Link>
             )}
             <button
               className="rounded-xl border border-outline/70 bg-surface px-3 py-2 text-xs font-bold text-ink"
@@ -2140,8 +2279,8 @@ function EducationEditor({
         <Field label="School" onChange={(v) => onUpdate({ school: v })} value={education.school} />
         <Field label="Degree" onChange={(v) => onUpdate({ degree: v })} value={education.degree} />
         <Field label="Location" onChange={(v) => onUpdate({ location: v })} value={education.location} />
-        <Field label="Start Date" onChange={(v) => onUpdate({ startDate: v })} value={education.startDate} />
-        <Field label="End Date" onChange={(v) => onUpdate({ endDate: v })} value={education.endDate} />
+        <Field type="month" label="Start Date" onChange={(v) => onUpdate({ startDate: v })} value={isoMonth(education.startDate)} />
+        <Field type="month" label="End Date" onChange={(v) => onUpdate({ endDate: v })} value={isoMonth(education.endDate)} />
       </div>
     </div>
   );
@@ -2149,6 +2288,135 @@ function EducationEditor({
 
 function EmptyHint({ text }: { text: string }) {
   return <p className="rounded-xl bg-surface-soft px-4 py-3 text-sm text-muted">{text}</p>;
+}
+
+function CertificatesStep({
+  resume,
+  step,
+  total,
+  onAdd,
+  onUpdate,
+  onDelete,
+  t,
+  onPrev,
+  onNext,
+}: {
+  resume: ResumeData;
+  step: number;
+  total: number;
+  onAdd: () => void;
+  onUpdate: (id: string, patch: Partial<CertificateItem>) => void;
+  onDelete: (id: string) => void;
+  t: TFn;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const items = resume.certificates ?? [];
+  return (
+    <SectionShell
+      icon="subject"
+      step={step}
+      total={total}
+      title={t("step.certificates.title")}
+      description={t("step.certificates.desc")}
+      tip={t("step.certificates.tip")}
+      onPrev={onPrev}
+      onNext={onNext}
+      prevLabel={t("common.previous")}
+      nextLabel={t("common.finish")}
+    >
+      {items.length === 0 && (
+        <EmptyHint text={t("common.optional") + " — " + t("step.certificates.desc")} />
+      )}
+      {items.map((cert) => (
+        <CertificateEditor
+          key={cert.id}
+          certificate={cert}
+          onDelete={() => onDelete(cert.id)}
+          onUpdate={(patch) => onUpdate(cert.id, patch)}
+          t={t}
+        />
+      ))}
+      <button
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 py-3 text-sm font-bold text-primary hover:bg-primary/5"
+        onClick={onAdd}
+        type="button"
+      >
+        <Icon name="add" />
+        {t("resume.addCertificate")}
+      </button>
+    </SectionShell>
+  );
+}
+
+function CertificateEditor({
+  certificate,
+  onDelete,
+  onUpdate,
+  t,
+}: {
+  certificate: CertificateItem;
+  onDelete: () => void;
+  onUpdate: (patch: Partial<CertificateItem>) => void;
+  t: TFn;
+}) {
+  const noExpiry = !certificate.expiryDate;
+  return (
+    <div className="rounded-2xl border border-outline/40 bg-surface p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-muted">{t("resume.certificates")}</h3>
+        <button
+          className="flex items-center gap-1 text-xs font-bold text-error hover:underline"
+          onClick={onDelete}
+          type="button"
+        >
+          <Icon className="text-[14px]" name="delete" />
+          {t("resume.delete")}
+        </button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field
+          className="md:col-span-2"
+          label={t("resume.certName")}
+          onChange={(v) => onUpdate({ name: v })}
+          value={certificate.name}
+        />
+        <Field
+          label={t("resume.certIssuer")}
+          onChange={(v) => onUpdate({ issuer: v })}
+          value={certificate.issuer}
+        />
+        <Field
+          label={t("resume.certCredentialUrl")}
+          onChange={(v) => onUpdate({ credentialUrl: v })}
+          type="url"
+          value={certificate.credentialUrl}
+        />
+        <Field
+          type="month"
+          label={t("resume.certIssueDate")}
+          onChange={(v) => onUpdate({ issueDate: v })}
+          value={isoMonth(certificate.issueDate)}
+        />
+        <div>
+          <Field
+            type="month"
+            label={t("resume.certExpiryDate")}
+            onChange={(v) => onUpdate({ expiryDate: v })}
+            value={isoMonth(certificate.expiryDate)}
+          />
+          <label className="mt-2 flex items-center gap-2 text-xs font-bold text-muted">
+            <input
+              type="checkbox"
+              checked={noExpiry}
+              onChange={(event) => onUpdate({ expiryDate: event.target.checked ? "" : certificate.expiryDate })}
+            />
+            {t("resume.certNoExpiry")}
+          </label>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function HelperList({ items, title }: { items: string[]; title: string }) {

@@ -37,6 +37,30 @@ export function loadResumeData(userId?: string): ResumeData {
   }
 }
 
+/**
+ * Strip heavy base64 dataURLs from references before syncing to the DB.
+ *
+ * Uploaded source files (PDFs/images) are only needed locally to re-extract
+ * text on "Apply". The DB never reads references back — the load path keeps
+ * `local.references` and discards whatever the server returns — so shipping
+ * the blobs on every 3s autosave is pure waste AND can push the request body
+ * past the serverless limit (Vercel caps at ~4.5MB), which silently fails the
+ * save. A single imported PDF base64-encodes to several MB, so one import was
+ * enough to break autosave for signed-in users. Keep the lightweight metadata
+ * (name/size/extracted text) so the UI's reference list still round-trips.
+ */
+export function stripReferenceBlobs(data: ResumeData): ResumeData {
+  const references: ResumeReference[] = data.references.map((ref) => {
+    if ("dataUrl" in ref && ref.dataUrl) {
+      const { dataUrl: _dataUrl, ...rest } = ref;
+      void _dataUrl;
+      return rest;
+    }
+    return ref;
+  });
+  return { ...data, references };
+}
+
 function makePersistable(data: ResumeData): ResumeData {
   const slim: ResumeReference[] = data.references.map((ref) => {
     if (ref.kind === "image" || ref.kind === "pdf" || ref.kind === "other") {

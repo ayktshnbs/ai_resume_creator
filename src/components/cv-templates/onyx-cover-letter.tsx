@@ -4,7 +4,7 @@ export function OnyxCoverLetter({ resume, coverLetter }: { resume: ResumeData, c
   const fullName = `${resume.firstName} ${resume.lastName}`.trim() || "Your Name";
 
   return (
-    <div className="font-sans text-[#0f172a] bg-white p-[20mm]" style={{ width: "210mm", minHeight: "297mm" }}>
+    <div className="font-sans text-[#0f172a] bg-white p-[20mm]" style={{ width: "210mm", height: "297mm", overflow: "hidden" }}>
       <header className="mb-12 border-b border-outline/40 pb-8">
         <h1 className="text-[32px] font-extrabold tracking-tight text-[#0f172a]">{fullName}</h1>
         <p className="mt-1 text-[13px] font-bold uppercase tracking-[0.16em] text-[#0058bc]">

@@ -555,7 +555,7 @@ export default function CoverLetterPage() {
                     />
                   </label>
                 </div>
-                <ScaledLetterPreview exportRef={letterRef}>
+                <ScaledLetterPreview exportRef={letterRef} overflowing={letterBody.length > 2800}>
                   <LetterLayout
                     template={activeTemplate}
                     name={userName}
@@ -622,7 +622,7 @@ function LetterLayout(props: LetterLayoutProps) {
 
 function ModernLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div style={{ width: 794, minHeight: 1123, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
+    <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
       <div style={{ background: template.accentColor + "12", padding: "60px 72px 48px" }}>
         <div style={{ fontSize: 32, fontWeight: 700, color: "#0f172a" }}>{name}</div>
         <div style={{ fontSize: 16, fontWeight: 600, color: template.accentColor, marginTop: 6, textTransform: "uppercase", letterSpacing: 1.5 }}>{title}</div>
@@ -653,7 +653,7 @@ function ModernLetter({ template, name, title, email, phone, date, recipientName
 
 function ClassicLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div style={{ width: 794, minHeight: 1123, background: "#fff", fontFamily: "Georgia, 'Times New Roman', serif" }}>
+    <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Georgia, 'Times New Roman', serif" }}>
       <div style={{ textAlign: "center", padding: "64px 84px 44px", borderBottom: "1px solid #f1f5f9" }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: "#0f172a", letterSpacing: 0.5 }}>{name}</div>
         <div style={{ fontSize: 16, color: "#475569", marginTop: 10 }}>{title}</div>
@@ -681,7 +681,7 @@ function ClassicLetter({ template, name, title, email, phone, date, recipientNam
 
 function CreativeLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div style={{ width: 794, minHeight: 1123, background: "#fff", fontFamily: "Inter, Arial, sans-serif", display: "flex" }}>
+    <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif", display: "flex" }}>
       <div style={{ width: 14, background: template.accentColor, flexShrink: 0 }} />
       <div style={{ flex: 1, padding: "64px 72px 72px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 48 }}>
@@ -717,7 +717,7 @@ function CreativeLetter({ template, name, title, email, phone, date, recipientNa
 
 function MinimalLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div style={{ width: 794, minHeight: 1123, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
+    <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
       <div style={{ padding: "72px 84px 0" }}>
         <div style={{ fontSize: 40, fontWeight: 700, color: "#0f172a", letterSpacing: -0.5 }}>{name}</div>
         <div style={{ fontSize: 16, color: "#64748b", marginTop: 12 }}>{email} · {phone}</div>
@@ -745,7 +745,7 @@ function MinimalLetter({ template, name, title, email, phone, date, recipientNam
 
 function BoldLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
   return (
-    <div style={{ width: 794, minHeight: 1123, background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
+    <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
       <div style={{ background: template.accentColor, padding: "60px 72px 48px", color: "#fff" }}>
         <div style={{ fontSize: 36, fontWeight: 800 }}>{name}</div>
         <div style={{ fontSize: 18, opacity: 0.9, marginTop: 6 }}>{title}</div>
@@ -804,7 +804,8 @@ function LetterCardPreview({ children }: { children: React.ReactNode }) {
         <div
           style={{
             width: LETTER_W,
-            minHeight: LETTER_H,
+            height: LETTER_H,
+            overflow: "hidden",
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
@@ -818,15 +819,16 @@ function LetterCardPreview({ children }: { children: React.ReactNode }) {
 
 function ScaledLetterPreview({
   exportRef,
-  children
+  children,
+  overflowing = false,
 }: {
   exportRef: React.RefObject<HTMLDivElement | null>;
   children: React.ReactNode;
+  overflowing?: boolean;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.75);
-  const [innerH, setInnerH] = useState(LETTER_H);
 
   // Keep exportRef pointing at the unscaled A4 element so the PDF export
   // can capture it at native size.
@@ -841,27 +843,33 @@ function ScaledLetterPreview({
       if (wrapRef.current) {
         setScale(Math.min(1, wrapRef.current.clientWidth / LETTER_W));
       }
-      if (innerRef.current) {
-        setInnerH(Math.max(LETTER_H, innerRef.current.scrollHeight));
-      }
     };
     measure();
     const ro = new ResizeObserver(measure);
     if (wrapRef.current) ro.observe(wrapRef.current);
-    if (innerRef.current) ro.observe(innerRef.current);
     return () => ro.disconnect();
   }, []);
 
   return (
     <div ref={wrapRef} className="mx-auto w-full max-w-[595px]">
+      {overflowing && (
+        <div className="mb-3 flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning">
+          <span aria-hidden className="mt-0.5 shrink-0 text-sm leading-none">⚠</span>
+          <span>
+            Your letter is longer than one A4 page. Anything past the bottom edge will be clipped in the PDF — trim a sentence or two from the body to fit.
+          </span>
+        </div>
+      )}
       <div
         className="relative overflow-hidden rounded-2xl border border-outline/40 bg-white shadow-panel"
-        style={{ width: LETTER_W * scale, height: innerH * scale }}
+        style={{ width: LETTER_W * scale, height: LETTER_H * scale }}
       >
         <div
           ref={innerRef}
           style={{
             width: LETTER_W,
+            height: LETTER_H,
+            overflow: "hidden",
             transform: `scale(${scale})`,
             transformOrigin: "top left",
             background: "#ffffff"

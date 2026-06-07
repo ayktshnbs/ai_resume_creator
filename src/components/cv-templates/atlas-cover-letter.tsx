@@ -6,16 +6,16 @@ export function AtlasCoverLetter({ resume, coverLetter }: { resume: ResumeData, 
   return (
     <div 
       className="font-sans text-[#0f172a] bg-white flex" 
-      style={{ width: "210mm", minHeight: "297mm" }}
+      style={{ width: "210mm", height: "297mm", overflow: "hidden" }}
     >
       {/* Sidebar matching Atlas Resume */}
       <aside 
         style={{ width: "65mm", backgroundColor: "#0f172a", color: "#ffffff", padding: "20mm 10mm" }}
       >
         <div className="mb-10">
-          <h1 className="text-[24px] font-extrabold leading-[1.05] tracking-tight">{fullName}</h1>
+          <h1 className="text-[24px] font-extrabold leading-[1.05] tracking-tight" style={{ overflowWrap: "break-word", wordBreak: "break-word", hyphens: "auto" }}>{fullName}</h1>
           <div className="mt-2 h-[3px] w-10 bg-[#2563eb]" />
-          <p className="mt-3 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#93c5fd]">
+          <p className="mt-3 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#93c5fd]" style={{ overflowWrap: "break-word", wordBreak: "break-word" }}>
             {resume.title || "Professional Title"}
           </p>
         </div>

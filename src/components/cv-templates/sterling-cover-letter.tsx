@@ -7,8 +7,9 @@ export function SterlingCoverLetter({ resume, coverLetter }: { resume: ResumeDat
     <div 
       className="text-[#0f172a] bg-white p-[25mm]" 
       style={{ 
-        width: "210mm", 
-        minHeight: "297mm",
+        width: "210mm",
+        height: "297mm",
+        overflow: "hidden",
         fontFamily: "'Garamond', 'Georgia', 'Times New Roman', serif"
       }}
     >

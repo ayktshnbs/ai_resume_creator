@@ -13,7 +13,7 @@ export function BeaconCoverLetter({
   const fullName = `${resume.firstName} ${resume.lastName}`.trim() || "Your Name";
 
   return (
-    <div className="font-sans bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+    <div className="font-sans bg-white" style={{ width: "210mm", height: "297mm", overflow: "hidden" }}>
       {/* Bold color block header */}
       <header style={{ backgroundColor: "#0b3d5a", color: "#ffffff", padding: "20mm 22mm 16mm 22mm" }}>
         <h1 className="text-[36px] font-extrabold leading-none tracking-tight text-white">{fullName}</h1>

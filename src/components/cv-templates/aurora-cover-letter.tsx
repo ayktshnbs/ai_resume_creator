@@ -13,7 +13,7 @@ export function AuroraCoverLetter({
   const fullName = `${resume.firstName} ${resume.lastName}`.trim() || "Your Name";
 
   return (
-    <div className="font-sans text-[#1e293b] bg-white" style={{ width: "210mm", minHeight: "297mm" }}>
+    <div className="font-sans text-[#1e293b] bg-white" style={{ width: "210mm", height: "297mm", overflow: "hidden" }}>
       {/* Tinted band header */}
       <header
         style={{

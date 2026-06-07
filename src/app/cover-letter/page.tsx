@@ -109,12 +109,15 @@ export default function CoverLetterPage() {
   const [recipientCompany, setRecipientCompany] = useState(sampleContent.company);
   const [letterBody, setLetterBody] = useState(sampleContent.body.join("\n\n"));
 
-  // Load user's resume data to populate cover letter fields
+  // Load user's resume data to populate cover letter fields. Empty defaults
+  // so a brand-new visitor sees blank inputs instead of the "Alexandra Chen"
+  // sample. The useEffect below pre-fills from the saved résumé when
+  // available; the user can still edit or clear any of these freely.
   const uid = session?.user?.id;
-  const [userName, setUserName] = useState(sampleContent.name);
-  const [userTitle, setUserTitle] = useState(sampleContent.title);
-  const [userEmail, setUserEmail] = useState(sampleContent.email);
-  const [userPhone, setUserPhone] = useState(sampleContent.phone);
+  const [userName, setUserName] = useState("");
+  const [userTitle, setUserTitle] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhone, setUserPhone] = useState("");
 
   useEffect(() => {
     if (!uid) return;
@@ -291,37 +294,28 @@ export default function CoverLetterPage() {
           {templates.map((template) => (
             <article
               key={template.id}
-              className={`card-tilt soft-card group cursor-pointer overflow-hidden rounded-3xl ${
+              className={`card-tilt soft-card group min-w-0 cursor-pointer overflow-hidden rounded-3xl ${
                 selected === template.id
                   ? "border-primary ring-2 ring-primary/20"
                   : ""
               }`}
               onClick={() => selectTemplate(template.id)}
             >
-              <div className="relative aspect-[1/1.38] overflow-hidden bg-white">
-                <div className="absolute inset-0 overflow-hidden">
-                  <div
-                    style={{
-                      width: 794,
-                      minHeight: 1123,
-                      transform: "scale(0.48)",
-                      transformOrigin: "top left",
-                    }}
-                  >
-                    <LetterLayout
-                      template={template}
-                      name={userName}
-                      title={userTitle}
-                      email={userEmail}
-                      phone={userPhone}
-                      date={sampleContent.date}
-                      recipientName={sampleContent.recipientName}
-                      recipientTitle={sampleContent.recipientTitle}
-                      company={sampleContent.company}
-                      body={sampleContent.body}
-                    />
-                  </div>
-                </div>
+              <div className="relative aspect-[1/1.38] w-full min-w-0 overflow-hidden bg-white">
+                <LetterCardPreview>
+                  <LetterLayout
+                    template={template}
+                    name={userName}
+                    title={userTitle}
+                    email={userEmail}
+                    phone={userPhone}
+                    date={sampleContent.date}
+                    recipientName={sampleContent.recipientName}
+                    recipientTitle={sampleContent.recipientTitle}
+                    company={sampleContent.company}
+                    body={sampleContent.body}
+                  />
+                </LetterCardPreview>
                 <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
                   <button
                     className="btn-glow primary-gradient flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-panel"
@@ -405,7 +399,7 @@ export default function CoverLetterPage() {
 
         {/* Guest sign-in modal */}
         {showSignIn && !session && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink/40 backdrop-blur-sm" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }} onClick={() => setShowSignIn(false)}>
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ink-deep/40 backdrop-blur-sm" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }} onClick={() => setShowSignIn(false)}>
             <div className="mx-4 w-full max-w-md rounded-3xl border border-outline/30 bg-surface p-8 shadow-panel" onClick={(e) => e.stopPropagation()}>
               <div className="mb-6 flex justify-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -508,25 +502,49 @@ export default function CoverLetterPage() {
                 <div className="h-3 w-2/3 animate-pulse rounded bg-outline/20" />
               </div>
             ) : (
-              <div className="grid gap-8 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
-                <div className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Date</span>
-                      <input className="field" onChange={(e) => setLetterDate(e.target.value)} value={letterDate} />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient</span>
-                      <input className="field" onChange={(e) => setRecipientName(e.target.value)} value={recipientName} />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient Title</span>
-                      <input className="field" onChange={(e) => setRecipientTitle(e.target.value)} value={recipientTitle} />
-                    </label>
-                    <label className="block">
-                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Company</span>
-                      <input className="field" onChange={(e) => setRecipientCompany(e.target.value)} value={recipientCompany} />
-                    </label>
+              <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+                <div className="min-w-0 space-y-4">
+                  <div>
+                    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted">From you</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Your Name</span>
+                        <input className="field" onChange={(e) => setUserName(e.target.value)} placeholder="Leave blank to hide" value={userName} />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Your Title</span>
+                        <input className="field" onChange={(e) => setUserTitle(e.target.value)} placeholder="Leave blank to hide" value={userTitle} />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Email</span>
+                        <input className="field" onChange={(e) => setUserEmail(e.target.value)} placeholder="Leave blank to hide" type="email" value={userEmail} />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Phone</span>
+                        <input className="field" onChange={(e) => setUserPhone(e.target.value)} placeholder="Leave blank to hide" type="tel" value={userPhone} />
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted">To</p>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Date</span>
+                        <input className="field" onChange={(e) => setLetterDate(e.target.value)} value={letterDate} />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient</span>
+                        <input className="field" onChange={(e) => setRecipientName(e.target.value)} value={recipientName} />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient Title</span>
+                        <input className="field" onChange={(e) => setRecipientTitle(e.target.value)} value={recipientTitle} />
+                      </label>
+                      <label className="block">
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Company</span>
+                        <input className="field" onChange={(e) => setRecipientCompany(e.target.value)} value={recipientCompany} />
+                      </label>
+                    </div>
                   </div>
                   <label className="block">
                     <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Letter Body</span>
@@ -760,6 +778,43 @@ function BoldLetter({ template, name, title, email, phone, date, recipientName, 
 
 const LETTER_W = 794;
 const LETTER_H = 1123;
+
+/**
+ * Responsive A4 card preview. Measures container width and scales the
+ * 794-wide letter to fit exactly — replaces the previous hard-coded
+ * `scale(0.48)` which clipped on narrow mobile cards.
+ */
+function LetterCardPreview({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setScale(el.clientWidth / LETTER_W);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="absolute inset-0 overflow-hidden">
+      {scale > 0 && (
+        <div
+          style={{
+            width: LETTER_W,
+            minHeight: LETTER_H,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ScaledLetterPreview({
   exportRef,

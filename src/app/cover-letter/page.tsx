@@ -533,16 +533,8 @@ export default function CoverLetterPage() {
                         <input className="field" onChange={(e) => setLetterDate(e.target.value)} value={letterDate} />
                       </label>
                       <label className="block">
-                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient</span>
-                        <input className="field" onChange={(e) => setRecipientName(e.target.value)} value={recipientName} />
-                      </label>
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient Title</span>
-                        <input className="field" onChange={(e) => setRecipientTitle(e.target.value)} value={recipientTitle} />
-                      </label>
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Company</span>
-                        <input className="field" onChange={(e) => setRecipientCompany(e.target.value)} value={recipientCompany} />
+                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient Name</span>
+                        <input className="field" onChange={(e) => setRecipientName(e.target.value)} placeholder='e.g. "Sarah Williams" or leave blank for "Hiring Manager"' value={recipientName} />
                       </label>
                     </div>
                   </div>
@@ -632,11 +624,9 @@ function ModernLetter({ template, name, title, email, phone, date, recipientName
         </div>
       </div>
       <div style={{ padding: "60px 72px 72px" }}>
-        <div style={{ fontSize: 13, color: "#64748b", marginBottom: 10 }}>{date}</div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
-        <div style={{ fontSize: 14, color: "#64748b", marginBottom: 48 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#64748b", marginBottom: 48 }}>{date}</div>
         <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 24 }}>
-          Dear {recipientName},
+          Dear {recipientName || "Hiring Manager"},
         </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.7, marginBottom: 24, textAlign: "justify" }}>{p}</div>
@@ -661,11 +651,9 @@ function ClassicLetter({ template, name, title, email, phone, date, recipientNam
         <div style={{ height: 3, width: 80, background: template.accentColor, borderRadius: 1, margin: "32px auto 0" }} />
       </div>
       <div style={{ padding: "60px 84px 84px" }}>
-        <div style={{ textAlign: "right", fontSize: 13, color: "#64748b", marginBottom: 44 }}>{date}</div>
-        <div style={{ fontSize: 16, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
-        <div style={{ fontSize: 14, color: "#64748b", marginBottom: 52 }}>{recipientTitle}, {company}</div>
+        <div style={{ textAlign: "right", fontSize: 13, color: "#64748b", marginBottom: 52 }}>{date}</div>
         <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.8, marginBottom: 32 }}>
-          Dear {recipientName},
+          Dear {recipientName || "Hiring Manager"},
         </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.8, marginBottom: 24, textIndent: 36, textAlign: "justify" }}>{p}</div>
@@ -695,10 +683,8 @@ function CreativeLetter({ template, name, title, email, phone, date, recipientNa
           </div>
         </div>
         <div style={{ height: 1, background: "#f1f5f9", marginBottom: 48 }} />
-        <div style={{ fontSize: 16, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
-        <div style={{ fontSize: 14, color: "#64748b", marginBottom: 48 }}>{recipientTitle}, {company}</div>
         <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 24 }}>
-          Dear {recipientName},
+          Dear {recipientName || "Hiring Manager"},
         </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.7, marginBottom: 24, textAlign: "justify" }}>{p}</div>
@@ -724,11 +710,9 @@ function MinimalLetter({ template, name, title, email, phone, date, recipientNam
         <div style={{ height: 1, background: template.accentColor + "40", marginTop: 36 }} />
       </div>
       <div style={{ padding: "52px 84px 84px" }}>
-        <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 36 }}>{date}</div>
-        <div style={{ fontSize: 16, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
-        <div style={{ fontSize: 14, color: "#64748b", marginBottom: 52 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 52 }}>{date}</div>
         <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.8, marginBottom: 32 }}>
-          Dear {recipientName},
+          Dear {recipientName || "Hiring Manager"},
         </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.8, marginBottom: 24, textAlign: "justify" }}>{p}</div>
@@ -755,11 +739,9 @@ function BoldLetter({ template, name, title, email, phone, date, recipientName, 
         </div>
       </div>
       <div style={{ padding: "60px 72px 72px" }}>
-        <div style={{ fontSize: 13, color: "#64748b", marginBottom: 10 }}>{date}</div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#0f172a" }}>{recipientName}</div>
-        <div style={{ fontSize: 14, color: "#64748b", marginBottom: 48 }}>{recipientTitle}, {company}</div>
+        <div style={{ fontSize: 13, color: "#64748b", marginBottom: 48 }}>{date}</div>
         <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 24 }}>
-          Dear {recipientName},
+          Dear {recipientName || "Hiring Manager"},
         </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.7, marginBottom: 24, textAlign: "justify" }}>{p}</div>

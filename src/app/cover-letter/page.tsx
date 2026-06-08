@@ -67,16 +67,10 @@ const templates: CoverLetterTemplate[] = [
 ];
 
 const sampleContent = {
-  name: "Alexandra Chen",
-  title: "Senior Product Manager",
-  email: "alex.chen@email.com",
-  phone: "+1 (555) 234-5678",
   date: "May 20, 2026",
-  company: "Acme Corp",
-  recipientName: "Sarah Williams",
-  recipientTitle: "VP of Product",
   role: "Head of Product",
   body: [
+    "Dear Sarah,",
     "I am writing to express my strong interest in the Head of Product position at Acme Corp. With seven years of experience leading cross-functional teams and shipping products used by millions, I am excited by the opportunity to scale your platform.",
     "In my current role at TechVenture Inc., I led a team of 12 that delivered a 38% increase in user retention and drove $4M in net new ARR through targeted feature launches. I spearheaded the migration to a modular architecture that cut release cycles by 60%, enabling the team to ship weekly instead of monthly.",
     "I would welcome the opportunity to discuss how my experience in product strategy, data-driven decision making, and team leadership aligns with your roadmap. Thank you for considering my application.",
@@ -104,9 +98,6 @@ export default function CoverLetterPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [showJobInput, setShowJobInput] = useState(false);
   const [letterDate, setLetterDate] = useState(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
-  const [recipientName, setRecipientName] = useState(sampleContent.recipientName);
-  const [recipientTitle, setRecipientTitle] = useState(sampleContent.recipientTitle);
-  const [recipientCompany, setRecipientCompany] = useState(sampleContent.company);
   const [letterBody, setLetterBody] = useState(sampleContent.body.join("\n\n"));
 
   // Load user's resume data to populate cover letter fields. Empty defaults
@@ -310,9 +301,6 @@ export default function CoverLetterPage() {
                     email={userEmail}
                     phone={userPhone}
                     date={sampleContent.date}
-                    recipientName={sampleContent.recipientName}
-                    recipientTitle={sampleContent.recipientTitle}
-                    company={sampleContent.company}
                     body={sampleContent.body}
                   />
                 </LetterCardPreview>
@@ -526,17 +514,12 @@ export default function CoverLetterPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted">To</p>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Date</span>
-                        <input className="field" onChange={(e) => setLetterDate(e.target.value)} value={letterDate} />
-                      </label>
-                      <label className="block">
-                        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Recipient Name</span>
-                        <input className="field" onChange={(e) => setRecipientName(e.target.value)} placeholder='e.g. "Sarah Williams" or leave blank for "Hiring Manager"' value={recipientName} />
-                      </label>
-                    </div>
+                    <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted">Date</p>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Letter Date</span>
+                      <input className="field" onChange={(e) => setLetterDate(e.target.value)} value={letterDate} />
+                    </label>
+                    <p className="mt-2 text-xs italic text-muted">Start the body with your own salutation, e.g. <span className="font-semibold">Dear Sarah,</span> or <span className="font-semibold">Sayın Yetkili,</span></p>
                   </div>
                   <label className="block">
                     <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.08em] text-muted">Letter Body</span>
@@ -555,9 +538,6 @@ export default function CoverLetterPage() {
                     email={userEmail}
                     phone={userPhone}
                     date={letterDate}
-                    recipientName={recipientName}
-                    recipientTitle={recipientTitle}
-                    company={recipientCompany}
                     body={letterParagraphs.length > 0 ? letterParagraphs : sampleContent.body}
                   />
                 </ScaledLetterPreview>
@@ -596,9 +576,6 @@ type LetterLayoutProps = {
   email: string;
   phone: string;
   date: string;
-  recipientName: string;
-  recipientTitle: string;
-  company: string;
   body: string[];
 };
 
@@ -612,7 +589,7 @@ function LetterLayout(props: LetterLayoutProps) {
   }
 }
 
-function ModernLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
+function ModernLetter({ template, name, title, email, phone, date, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
       <div style={{ background: template.accentColor + "12", padding: "60px 72px 48px" }}>
@@ -625,9 +602,6 @@ function ModernLetter({ template, name, title, email, phone, date, recipientName
       </div>
       <div style={{ padding: "60px 72px 72px" }}>
         <div style={{ fontSize: 13, color: "#64748b", marginBottom: 48 }}>{date}</div>
-        <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 24 }}>
-          Dear {recipientName || "Hiring Manager"},
-        </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.7, marginBottom: 24, textAlign: "justify" }}>{p}</div>
         ))}
@@ -641,7 +615,7 @@ function ModernLetter({ template, name, title, email, phone, date, recipientName
   );
 }
 
-function ClassicLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
+function ClassicLetter({ template, name, title, email, phone, date, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Georgia, 'Times New Roman', serif" }}>
       <div style={{ textAlign: "center", padding: "64px 84px 44px", borderBottom: "1px solid #f1f5f9" }}>
@@ -652,9 +626,6 @@ function ClassicLetter({ template, name, title, email, phone, date, recipientNam
       </div>
       <div style={{ padding: "60px 84px 84px" }}>
         <div style={{ textAlign: "right", fontSize: 13, color: "#64748b", marginBottom: 52 }}>{date}</div>
-        <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.8, marginBottom: 32 }}>
-          Dear {recipientName || "Hiring Manager"},
-        </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.8, marginBottom: 24, textIndent: 36, textAlign: "justify" }}>{p}</div>
         ))}
@@ -667,7 +638,7 @@ function ClassicLetter({ template, name, title, email, phone, date, recipientNam
   );
 }
 
-function CreativeLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
+function CreativeLetter({ template, name, title, email, phone, date, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif", display: "flex" }}>
       <div style={{ width: 14, background: template.accentColor, flexShrink: 0 }} />
@@ -683,9 +654,6 @@ function CreativeLetter({ template, name, title, email, phone, date, recipientNa
           </div>
         </div>
         <div style={{ height: 1, background: "#f1f5f9", marginBottom: 48 }} />
-        <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 24 }}>
-          Dear {recipientName || "Hiring Manager"},
-        </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.7, marginBottom: 24, textAlign: "justify" }}>{p}</div>
         ))}
@@ -701,7 +669,7 @@ function CreativeLetter({ template, name, title, email, phone, date, recipientNa
   );
 }
 
-function MinimalLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
+function MinimalLetter({ template, name, title, email, phone, date, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
       <div style={{ padding: "72px 84px 0" }}>
@@ -711,9 +679,6 @@ function MinimalLetter({ template, name, title, email, phone, date, recipientNam
       </div>
       <div style={{ padding: "52px 84px 84px" }}>
         <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 52 }}>{date}</div>
-        <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.8, marginBottom: 32 }}>
-          Dear {recipientName || "Hiring Manager"},
-        </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.8, marginBottom: 24, textAlign: "justify" }}>{p}</div>
         ))}
@@ -727,7 +692,7 @@ function MinimalLetter({ template, name, title, email, phone, date, recipientNam
   );
 }
 
-function BoldLetter({ template, name, title, email, phone, date, recipientName, recipientTitle, company, body }: LetterLayoutProps) {
+function BoldLetter({ template, name, title, email, phone, date, body }: LetterLayoutProps) {
   return (
     <div style={{ width: 794, height: 1123, overflow: "hidden", background: "#fff", fontFamily: "Inter, Arial, sans-serif" }}>
       <div style={{ background: template.accentColor, padding: "60px 72px 48px", color: "#fff" }}>
@@ -740,9 +705,6 @@ function BoldLetter({ template, name, title, email, phone, date, recipientName, 
       </div>
       <div style={{ padding: "60px 72px 72px" }}>
         <div style={{ fontSize: 13, color: "#64748b", marginBottom: 48 }}>{date}</div>
-        <div style={{ fontSize: 16, color: "#0f172a", lineHeight: 1.7, fontWeight: 600, marginBottom: 24 }}>
-          Dear {recipientName || "Hiring Manager"},
-        </div>
         {body.map((p, i) => (
           <div key={i} style={{ fontSize: 16, color: "#1e293b", lineHeight: 1.7, marginBottom: 24, textAlign: "justify" }}>{p}</div>
         ))}
